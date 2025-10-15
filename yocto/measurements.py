@@ -4,13 +4,13 @@ import os
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from yocto.paths import BuildPaths
 
 logger = logging.getLogger(__name__)
 
-Measurements = Dict[str, Any]
+Measurements = dict[str, Any]
 
 
 def write_measurements_tmpfile(measurements: Measurements) -> Path:

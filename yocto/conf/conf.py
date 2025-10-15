@@ -1,12 +1,12 @@
 import argparse
 import subprocess
 from dataclasses import dataclass
-from typing import Dict, Optional, Any
+from pathlib import Path
+from typing import Any
 
 from yocto.artifact import parse_artifact
 from yocto.git import GitConfigs
 from yocto.parser import parse_args
-from pathlib import Path
 
 
 def get_host_ip() -> str:
@@ -32,7 +32,7 @@ class BuildConfigs:
             git=GitConfigs.default(),
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "git": self.git.to_dict(),
         }
@@ -98,7 +98,7 @@ class DomainConfig:
             name=args.domain_name,
         )
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         return {
             "url": f"https://{self.record}.{self.name}",
             "record": self.record,
@@ -111,7 +111,7 @@ class DomainConfig:
 class DeployConfigs:
     vm: VmConfigs
     domain: DomainConfig
-    artifact: Optional[str]
+    artifact: str | None
     email: str
     source_ip: str
     show_logs: bool = False
@@ -127,7 +127,7 @@ class DeployConfigs:
             show_logs=args.logs,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         kwargs = {}
         if self.artifact:
             kwargs["artifact"] = self.artifact
@@ -145,8 +145,8 @@ class DeployConfigs:
 class Mode:
     build: bool
     deploy: bool
-    delete_vm: Optional[str]
-    delete_artifact: Optional[str]
+    delete_vm: str | None
+    delete_artifact: str | None
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "Mode":
@@ -175,7 +175,7 @@ class Mode:
             delete_artifact=None,
         )
 
-    def to_dict(self) -> Dict[str, str | bool]:
+    def to_dict(self) -> dict[str, str | bool]:
         delete_kwargs = {}
         if self.delete_vm:
             delete_kwargs["vm"] = self.delete_vm
@@ -188,8 +188,8 @@ class Mode:
 @dataclass
 class Configs:
     mode: Mode
-    build: Optional[BuildConfigs]
-    deploy: Optional[DeployConfigs]
+    build: BuildConfigs | None
+    deploy: DeployConfigs | None
     show_logs: bool
     home: str
 
@@ -213,7 +213,7 @@ class Configs:
             home=Path.home() if not args.code_path else Path.home / args.code_path,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         kwargs = {}
         if self.build:
             kwargs["build"] = self.build.to_dict()

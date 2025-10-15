@@ -1,17 +1,15 @@
+import datetime
 import logging
 import subprocess
-import datetime
-from typing import Optional, Tuple
-
 from dataclasses import dataclass
 from pathlib import Path
 
+from yocto.artifact import artifact_timestamp
+from yocto.conf.conf import BuildConfigs, Configs
 from yocto.git import GitConfigs, update_git_bb
 from yocto.measurements import Measurements, generate_measurements
-from yocto.metadata import load_metadata, write_metadata, load_artifact_measurements
-from yocto.conf.conf import BuildConfigs, Configs
+from yocto.metadata import load_artifact_measurements, load_metadata, write_metadata
 from yocto.paths import BuildPaths
-from yocto.artifact import artifact_timestamp
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +124,7 @@ class Builder:
         )
 
 
-def maybe_build(configs: Configs) -> Optional[Tuple[Path, Measurements]]:
+def maybe_build(configs: Configs) -> tuple[Path, Measurements] | None:
     """
     if --build was passed in, build a fresh image
     if --deploy was passed in, return the path to the image to deploy

@@ -6,12 +6,12 @@ Shared components for Azure VM deployment scripts.
 
 import argparse
 import json
+import logging
 import os
 import subprocess
 import tempfile
-from typing import List, Optional
 from pathlib import Path
-import logging
+
 from yocto.conf.conf import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ class AzureCLI:
 
     @staticmethod
     def run_command(
-        cmd: List[str],
+        cmd: list[str],
         show_logs: bool = False,
     ) -> subprocess.CompletedProcess:
         """Execute an Azure CLI command."""
@@ -128,7 +128,7 @@ class AzureCLI:
         cls,
         name: str,
         resource_group: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Get existing IP address if it exists."""
         try:
             cmd = [
@@ -152,7 +152,7 @@ class AzureCLI:
             return None
 
     @classmethod
-    def get_existing_dns_ips(cls, config: DeployConfigs) -> List[str]:
+    def get_existing_dns_ips(cls, config: DeployConfigs) -> list[str]:
         """Get existing DNS A record IPs."""
         cmd = [
             "az",
@@ -451,7 +451,7 @@ class AzureCLI:
                 f.write(f'DOMAIN="{config.domain.name}"\n')
 
             logger.info(f"Created temporary user-data file: {temp_file}")
-            with open(temp_file, "r") as f:
+            with open(temp_file) as f:
                 logger.info(f.read())
 
             return temp_file

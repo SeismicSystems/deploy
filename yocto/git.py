@@ -3,7 +3,6 @@ import subprocess
 from argparse import Namespace
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional
 
 from yocto.paths import BuildPaths
 
@@ -12,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class GitConfig:
-    commit: Optional[str]
+    commit: str | None
     branch: str
 
     @staticmethod
@@ -22,7 +21,7 @@ class GitConfig:
             commit=values[f"{repo}_commit"], branch=values[f"{repo}_branch"]
         )
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self) -> dict[str, str]:
         if not self.commit:
             raise ValueError("Cannot call to_dict() on GitConfig without commit")
         return {
@@ -65,7 +64,7 @@ class GitConfigs:
         )
 
 
-def run_command(cmd: str, cwd: Optional[Path] = None) -> subprocess.CompletedProcess:
+def run_command(cmd: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=cwd)
 
     if result.returncode != 0:
@@ -101,7 +100,7 @@ def update_git_bb(
     bb_pathname: str,
     git_config: GitConfig,
     home: str,
-    commit_message: Optional[str] = None,
+    commit_message: str | None = None,
 ) -> GitConfig:
     """
     Update the git commit and branch for a given Yocto bb file

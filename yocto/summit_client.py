@@ -1,8 +1,9 @@
 import logging
 import tomllib
-import requests
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ class SummitClient:
             return f.read()
 
     @staticmethod
-    def validate_genesis_text(genesis: GenesisText) -> Dict[str, Any]:
+    def validate_genesis_text(genesis: GenesisText) -> dict[str, Any]:
         try:
             return tomllib.loads(genesis)
         except tomllib.TOMLDecodeError as e:
@@ -67,6 +68,6 @@ class SummitClient:
             raise e
 
     @classmethod
-    def load_genesis_toml(cls, path: Path) -> Dict[str, Any]:
+    def load_genesis_toml(cls, path: Path) -> dict[str, Any]:
         text = cls.load_genesis_file(path)
         return cls.validate_genesis_text(text)

@@ -1,17 +1,16 @@
 import json
-from typing import Dict, Tuple
 from pathlib import Path
 
-from yocto.paths import BuildPaths
 from yocto.measurements import Measurements
+from yocto.paths import BuildPaths
 
 
-def load_metadata(home: str) -> Dict[str, Dict]:
+def load_metadata(home: str) -> dict[str, dict]:
     with open(BuildPaths(home).deploy_metadata) as f:
         return json.load(f)
 
 
-def write_metadata(metadata: Dict[str, Dict], home: str):
+def write_metadata(metadata: dict[str, dict], home: str):
     with open(BuildPaths(home).deploy_metadata, "w+") as f:
         json.dump(metadata, f, indent=2)
 
@@ -36,7 +35,7 @@ def remove_artifact_from_metadata(name: str, home: str):
     write_metadata(metadata, home)
 
 
-def load_artifact_measurements(artifact: str, home: str) -> Tuple[Path, Measurements]:
+def load_artifact_measurements(artifact: str, home: str) -> tuple[Path, Measurements]:
     artifacts = load_metadata(home).get("artifacts", {})
     if artifact not in artifacts:
         raise ValueError(

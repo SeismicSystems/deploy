@@ -1,9 +1,9 @@
+import datetime
 import glob
 import logging
 import os
 import re
-from typing import Optional
-import datetime
+
 from yocto.metadata import load_metadata, remove_artifact_from_metadata
 from yocto.paths import BuildPaths
 
@@ -44,7 +44,7 @@ def _artifact_from_timestamp(timestamp: str) -> str:
     return f"cvm-image-azure-tdx.rootfs-{timestamp}.wic.vhd"
 
 
-def parse_artifact(artifact_arg: Optional[str]) -> Optional[str]:
+def parse_artifact(artifact_arg: str | None) -> str | None:
     if not artifact_arg:
         return None
 
@@ -81,7 +81,7 @@ def delete_artifact(artifact: str, home: str):
         files_deleted += 1
 
     if not files_deleted:
-        logger.warning(f"Found no files associated with this artifact")
+        logger.warning("Found no files associated with this artifact")
         return
 
     logger.info(f"Deleted {files_deleted} files associated with artifact {artifact}")

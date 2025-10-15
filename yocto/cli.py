@@ -5,9 +5,9 @@ import traceback
 
 from yocto.artifact import delete_artifact
 from yocto.build import maybe_build
-from yocto.deploy import Deployer, delete_vm
 from yocto.conf.conf import Configs
 from yocto.conf.logs import setup_logging
+from yocto.deploy import Deployer, delete_vm
 
 logger = logging.getLogger(__name__)
 

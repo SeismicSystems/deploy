@@ -1,17 +1,17 @@
 import argparse
-from dataclasses import dataclass
-from typing import Dict, Optional, Any
-from pathlib import Path
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
-from yocto.conf.conf import get_host_ip
 from yocto.artifact import parse_artifact
 from yocto.conf.conf import (
     Configs,
-    Mode,
     DeployConfigs,
-    VmConfigs,
     DomainConfig,
+    Mode,
+    VmConfigs,
+    get_host_ip,
 )
 
 logger = logging.getLogger(__name__)
@@ -42,13 +42,13 @@ class DeploymentConfig:
     record_name: str
     source_ip: str
     ip_only: bool
-    artifact: Optional[str]
+    artifact: str | None
     home: str
     domain_resource_group: str = DEFAULT_RESOURCE_GROUP
     domain_name: str = DEFAULT_DOMAIN_NAME
     certbot_email: str = DEFAULT_CERTBOT_EMAIL
-    resource_group: Optional[str] = None
-    nsg_name: Optional[str] = None
+    resource_group: str | None = None
+    nsg_name: str | None = None
     show_logs: bool = True
 
     def __post_init__(self):
@@ -85,10 +85,10 @@ class DeploymentConfig:
         )
 
     @classmethod
-    def parse_base_kwargs(cls, args: argparse.Namespace) -> Dict[str, Any]:
+    def parse_base_kwargs(cls, args: argparse.Namespace) -> dict[str, Any]:
         source_ip = args.source_ip
         if source_ip is None:
-            logger.warning(f"No --source-ip provided, so fetching IP from ipify.org...")
+            logger.warning("No --source-ip provided, so fetching IP from ipify.org...")
             source_ip = get_host_ip()
             logger.info(f"Fetched public IP: {source_ip}")
         return {

@@ -7,18 +7,17 @@ Genesis mode deployment with persistent IP addresses and node-specific allocatio
 
 import json
 import logging
-from typing import Tuple
 
-from yocto.conf.logs import setup_logging
 from yocto.azure_common import (
-    AzureCLI,
-    create_base_parser,
-    confirm,
     DEFAULT_RESOURCE_GROUP,
+    AzureCLI,
+    confirm,
+    create_base_parser,
 )
-from yocto.cfg import DeploymentConfig
-from yocto.deploy import Deployer
 from yocto.build import maybe_build
+from yocto.cfg import DeploymentConfig
+from yocto.conf.logs import setup_logging
+from yocto.deploy import Deployer
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ class GenesisIPManager:
     def ensure_genesis_resource_group(self, region: str) -> None:
         AzureCLI.ensure_created_resource_group(self.genesis_rg, region)
 
-    def get_or_create_node_ip(self, node_number: int, region: str) -> Tuple[str, str]:
+    def get_or_create_node_ip(self, node_number: int, region: str) -> tuple[str, str]:
         """Get or create persistent IP for a specific node number."""
         self.ensure_genesis_resource_group(region)
 

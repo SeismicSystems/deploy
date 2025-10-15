@@ -4,7 +4,6 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-from typing import Optional
 
 import requests
 
@@ -18,7 +17,7 @@ class ProxyClient:
         self.public_ip = public_ip
         self.measurements_file = measurements_file
         self.executable_path = BuildPaths(home).proxy_client
-        self.process: Optional[subprocess.Popen] = None
+        self.process: subprocess.Popen | None = None
 
     def start(self) -> bool:
         """Start the proxy client, make an HTTP request, and verify attestation."""

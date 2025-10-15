@@ -6,16 +6,15 @@ import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
+from yocto.azure_common import AzureCLI, confirm
+from yocto.conf.conf import DeployConfigs
 from yocto.measurements import Measurements, write_measurements_tmpfile
 from yocto.metadata import (
     load_metadata,
     remove_vm_from_metadata,
     write_metadata,
 )
-from yocto.azure_common import AzureCLI, confirm
-from yocto.conf.conf import DeployConfigs
 from yocto.paths import BuildPaths
 from yocto.proxy import ProxyClient
 
@@ -68,7 +67,7 @@ def delete_vm(vm_name: str, home: str) -> bool:
         return False
 
     logger.info(f"Successfully deleted {vm_name}:\n{stdout}")
-    logger.info(f"Deleting associated disk...")
+    logger.info("Deleting associated disk...")
     AzureCLI.delete_disk(resource_group, vm_name, meta["artifact"])
     remove_vm_from_metadata(vm_name, home)
     return True
@@ -139,7 +138,7 @@ class Deployer:
         self.show_logs = show_logs
 
         self.measurements_file = write_measurements_tmpfile(measurements)
-        self.proxy: Optional[ProxyClient] = None
+        self.proxy: ProxyClient | None = None
 
     def deploy(self) -> DeployOutput:
         public_ip = deploy_image(
