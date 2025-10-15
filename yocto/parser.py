@@ -38,7 +38,7 @@ def parse_args() -> argparse.Namespace:
     # Git args
     parser.add_argument(
         "--enclave-branch",
-        default="main",
+        default="seismic",
         help=(
             "Seismic Enclave git branch name. Defaults to 'main'. "
             "Only used if --enclave-commit is provided too"
@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument(
         "--summit-branch",
-        default="seismic",
+        default="main",
         help=(
             "Summit git branch name. Defaults to 'main'. "
             "Only used if --summit-commit is provided too"
