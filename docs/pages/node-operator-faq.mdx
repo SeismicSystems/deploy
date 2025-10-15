@@ -1,0 +1,507 @@
+# Seismic Network Node Operator FAQ
+
+Welcome to the Seismic Network Node Operator FAQ. This document provides comprehensive information about running nodes on the Seismic Network, including setup, operations, and technical specifications.
+
+## General Information
+
+**What is Seismic Network?**
+
+Seismic is an EVM-compatible Layer 1 blockchain that introduces shielded (private) computation capabilities to Solidity smart contracts. It's built on a fork of [Reth](https://reth.rs/) (the Rust Ethereum client) and includes custom features for privacy-preserving transactions.
+
+**Where can I find code and documentation?**
+
+**Documentation Sites**
+- High-Level Documentation: https://docs.seismic.systems
+- Client Documentation: https://client.seismic.systems (coming soon)
+- Network Status Page: https://status.seismic.systems (URL will move from status.seismicdev.net)
+
+**Core Node Components**
+- Reth Fork (Execution Client): https://github.com/SeismicSystems/seismic-reth
+- Summit (Consensus Client): https://github.com/SeismicSystems/summit
+- Enclave Server (Privacy/Shielded Computation): https://github.com/SeismicSystems/enclave
+- Seismic REVM (Modified EVM): https://github.com/SeismicSystems/seismic-revm
+
+**Deployment & Infrastructure**
+- Deploy Repository: https://github.com/SeismicSystems/deploy
+  - Puts everything together into VHD file
+  - Python CLI for deployment (docs coming soon)
+  - Architecture documentation and deployment instructions
+
+**Yocto Build System** (modeled off Flashbots TDX stack)
+- meta-seismic: https://github.com/SeismicSystems/meta-seismic
+  - Contains majority of Seismic-specific deployment code
+- yocto-manifests: https://github.com/SeismicSystems/yocto-manifests
+- yocto-scripts: https://github.com/SeismicSystems/yocto-scripts
+
+**Development Tools**
+- Sanvil (Local Testing): Fork of Anvil for Seismic development
+
+**How does Seismic communicate updates?**
+
+Updates and announcements are communicated through:
+- Twitter
+- Discord
+- Direct communication with partners
+
+All changes are deployed to testnet before mainnet.
+
+---
+
+## Network Details
+
+**Mainnet**
+
+| Property | Value |
+|----------|-------|
+| **Network Name** | Seismic |
+| **Chain ID** | 5123 (0x1403) |
+| **Chain Type** | EVM L1 |
+| **Block Rate** | 1 block per ~600ms - 1s |
+| **Finality** | 1 or 2 blocks (< 2 seconds) |
+| **Gas Token** | Seismic (native token) |
+
+**Testnet**
+
+| Property | Value |
+|----------|-------|
+| **Network Name** | Seismic Testnet |
+| **Chain ID** | 5124 (0x1404) |
+| **Chain Type** | EVM L1 |
+| **RPC HTTP** | https://internal-testnet.seismictest.net/rpc |
+| **RPC WS** | wss://internal-testnet.seismictest.net/ws |
+| **Block Rate** | 1 block per ~600ms |
+| **Finality** | 1 block (may become 2, but still < 2 seconds) |
+
+> **Note**: The testnet RPC endpoints currently have no uptime guarantee.
+
+**What is the gas pricing model?**
+
+Seismic uses the same gas pricing model as Ethereum with all latest EIPs activated, including EIP-1559 dynamic transaction fees. The minimum gas price defaults to 7 gwei (Reth default), but actual prices vary based on network activity.
+
+**When is the mainnet genesis date?**
+
+The mainnet genesis date will be announced publicly. Follow official channels for updates:
+- **Twitter**: Seismic announcements
+- **Discord**: Community updates
+- **Website**: https://seismic.systems
+
+**What are the bridge and oracle contracts?**
+
+**Bridge contracts**: Bridge infrastructure is being developed and contract addresses will be announced closer to mainnet launch.
+
+**Oracle contracts**: Oracle infrastructure details will be published as part of mainnet documentation.
+
+**Where can I get testnet tokens?**
+
+**Faucet**: A public faucet will be made available.
+
+**For testing/integration**: Large amounts can be requested by providing the following address:
+```
+0xdDBb6f358f290408D76847b4F602f0FD599295fd
+```
+
+Contact the team at c@seismic.systems for bulk testnet token requests.
+
+---
+
+## Node Setup and Requirements
+
+**What are the hardware requirements?**
+
+**Recommended specifications for Archive Nodes:**
+- **CPU**: High-performance multi-core processor
+- **Memory**: Substantial RAM (specific requirements TBD)
+- **Network**: High-bandwidth, low-latency connection
+- **Disk**: 1TB+ SSD storage
+- **Required Hardware**: Intel TDX (Trust Domain Extensions) support
+
+> **Note**: All nodes currently run as archival nodes. Storage requirements will grow linearly with network usage.
+
+**Benchmarked Performance:**
+Detailed system requirements and benchmark results are available in the [deploy repository](https://github.com/SeismicSystems/deploy).
+
+**What software do I need to run a node?**
+
+A Seismic node consists of three main components:
+1. **Seismic Reth** - The execution client ([Reth](https://reth.rs/) fork)
+2. **Summit** - The consensus client
+3. **Enclave Server** - Handles shielded computation
+
+All three binaries are deployed together in a VHD (Virtual Hard Disk) image built via Yocto.
+
+**What is the deployment method?**
+
+Nodes are deployed using a VHD image that contains all necessary binaries. Setup instructions and architecture documentation are available in the [deploy repository](https://github.com/SeismicSystems/deploy), which was open-sourced in October 2025.
+
+**Do nodes require special hardware?**
+
+Yes, Seismic nodes must run on **Intel TDX (Trust Domain Extensions)** for secure enclave execution. Internally, Azure has been used for deployments, and instructions for Azure deployment will be provided.
+
+**Are snapshots available?**
+
+Snapshot support is planned and will be made available in the future. Once available, snapshots will significantly reduce initial sync times. Check the documentation and status page for updates on snapshot availability.
+
+**How long does it take to sync a node?**
+
+- **From genesis**: Approximately 12 hours for the first year of mainnet operation (likely much less in the first 6 months)
+- **With snapshots**: TBD - snapshot solution is still being developed
+- **Startup time**: About 1 minute after a clean shutdown/reboot
+
+---
+
+## Infrastructure and Architecture
+
+**What makes Seismic's architecture unique?**
+
+Seismic runs on Intel TDX (Trusted Execution Environment), which enables secure, privacy-preserving computation. This is more complex than standard node deployments:
+
+- Nodes run in secure enclaves
+- The deployment uses a VHD image with three integrated components
+- Shutting down requires careful handling due to TDX constraints
+
+**How many binaries are required?**
+
+Three binaries work together:
+1. **[Seismic Reth](https://github.com/SeismicSystems/seismic-reth)** (execution layer)
+2. **[Summit](https://github.com/SeismicSystems/summit)** (consensus layer)
+3. **[Enclave](https://github.com/SeismicSystems/enclave)** (privacy/shielded computation)
+
+**Does Seismic support multiple client implementations?**
+
+Currently, Seismic uses the Reth-based stack. Multiple client support may be added in the future.
+
+**Can I configure the data directory?**
+
+Yes, Reth supports specifying custom data directories, though the default is built into the VHD image.
+
+**Are there any special network architecture requirements?**
+
+Yes - the node requires Intel TDX support and runs three interconnected components. Unlike simpler blockchain nodes, you cannot easily run individual pieces separately.
+
+---
+
+## RPC and API Support
+
+**What RPC methods are supported?**
+
+Seismic supports **all standard Ethereum JSON-RPC methods** with a few exceptions:
+- **Reduced functionality** on `eth_getStorageAt` (to prevent leaking shielded state)
+- **Limited call tracing** (some trace features blocked to protect shielded data)
+
+All endpoints are available; none have been entirely removed.
+
+**Does Seismic support WebSockets?**
+
+Yes, both HTTP and WebSocket connections are supported for RPC.
+
+**RPC Endpoint Paths:**
+- HTTP RPC: `/rpc`
+- WebSocket RPC: `/ws`
+
+Both paths support the same RPC methods.
+
+**WebSocket Subscriptions:**
+Seismic supports standard Ethereum WebSocket subscriptions:
+- `eth_subscribe` / `eth_unsubscribe` for real-time event monitoring
+- Subscription types: `newHeads`, `logs`, `newPendingTransactions`, `syncing`
+
+All standard Ethereum WebSocket features are available.
+
+**Are there rate limits on RPC calls?**
+
+No rate limits are currently imposed by the protocol itself, though node operators may implement their own.
+
+**What are the RPC configuration parameters?**
+
+Key Reth parameters include:
+- `--rpc.txfeecap`: Maximum transaction fee cap (default: 1 ETH)
+- `--rpc.max-response-size`: Maximum response size (default: 160MB, which is very high)
+
+**What is the maximum size for `eth_getLogs` responses?**
+
+At least 15MB, with Reth's default configured at 160MB. This can be adjusted if needed.
+
+**Is there a limit on batch RPC requests?**
+
+No specific batch count limit - only limited by total payload size. Batch sizes can be arbitrarily large.
+
+**Does Seismic support log lookback?**
+
+Yes, full nodes support complete log lookback and retrieval of contract events from the beginning of the chain.
+
+**What sync mode should I use for fetching logs?**
+
+Use RPC calls with block filters. Reth may support more efficient methods as well.
+
+**Does Seismic support debug and trace APIs?**
+
+- **Debug API**: Yes
+- **Trace API**: Yes, but with limitations
+  - `trace_filter` has some specific restrictions (TBD)
+  - Custom call tracers are supported via Geth tracers
+  - Some trace data is blocked to prevent leaking shielded state
+
+**Are block height indicators available?**
+
+Yes, use `eth_blockNumber` to check current block height and sync progress. This is also the recommended method to verify node health and sync status.
+
+**What are the heaviest RPC methods?**
+
+The most resource-intensive RPC methods are:
+- **`eth_getLogs`** with large block ranges or many matching events
+- **Tracing calls** (e.g., `debug_traceTransaction`, `trace_*` methods) with complex Geth tracers
+
+These methods typically require more computational resources and may take longer to respond depending on the complexity of the query.
+
+**Are there recommended caching rules for RPC methods?**
+
+Caching strategies have not been formally specified yet. Node operators may implement their own caching strategies based on their infrastructure requirements.
+
+---
+
+## EVM Compatibility
+
+**Is Seismic fully EVM-compatible?**
+
+Yes, Seismic is EVM-compatible with enhancements.
+
+For a detailed technical writeup of our EVM additions, see the [Seismic REVM README](https://github.com/SeismicSystems/seismic-revm/blob/c29f4ea0681f09fb1e9998fa16568d4979c47ee3/README.md).
+
+**Additions:**
+- 3 new opcodes: `CLOAD`, `CSTORE` (for shielded data), and `TIMESTAMP_MS`
+- 6 new precompiles for shielded operations (see [status page](https://status.seismicdev.net/))
+- Custom transaction type `0x4a` ("Seismic transaction") with encrypted calldata
+- Shielded types added to Solidity
+
+**Modifications:**
+- Block timestamps in milliseconds (in EVM and block headers)
+- Some trace data removed (to protect shielded state)
+
+**What's the same:**
+- All standard EVM opcodes supported
+- All standard precompiles available
+- Solidity contracts work as expected
+- EIP-1559 dynamic transactions supported
+
+**What Solidity version should I use?**
+
+Contracts should be compiled with EVM version **'Paris' or later**. Existing compiled contracts work without modification.
+
+**Are there any unsupported opcodes?**
+
+No, all standard EVM opcodes are supported, plus the three new shielded opcodes.
+
+**Does Seismic support precompiled contracts?**
+
+Yes, all standard Ethereum precompiles are supported at their standard addresses, including `ecrecover` at address(1).
+
+**Do Solidity global variables behave differently?**
+
+Mostly the same as Ethereum, with these differences:
+- **Timestamps**: Available in millisecond precision (though standard `block.timestamp` still returns seconds)
+- **Block structure**: Some internal trace data differs to protect shielded information
+
+**Can I deploy existing smart contracts?**
+
+Yes! Existing Solidity contracts can be deployed without modification. The additions (shielded types and opcodes) are opt-in for privacy features.
+
+**What is Seismic Solidity?**
+
+**[Seismic Solidity](https://github.com/SeismicSystems/seismic-solidity)** is Seismic's fork of the Solidity compiler that supports shielded types and privacy features. To develop contracts that use Seismic's privacy features, you must use Seismic Solidity instead of standard Solidity.
+
+For setup instructions and detailed documentation, see the [Seismic onboarding guide](https://docs.seismic.systems/onboarding/).
+
+**What is Seismic Forge (sforge)?**
+
+**[Seismic Forge (sforge)](https://github.com/SeismicSystems/seismic-foundry)** is Seismic's fork of Foundry's Forge that integrates with Seismic Solidity and Sanvil. It provides a complete development environment for building, testing, and deploying smart contracts on Seismic.
+
+For setup instructions and detailed documentation, see the [Seismic onboarding guide](https://docs.seismic.systems/onboarding/).
+
+**What is Sanvil?**
+
+**[Sanvil](https://github.com/SeismicSystems/seismic-foundry)** is Seismic's fork of Anvil (Foundry's local testnet node). To run local development and testing on Seismic, you must use Sanvil instead of the standard Anvil. Sanvil supports:
+- Starting from a fork point or genesis file
+- Sending the native asset
+- Creating and testing smart contracts
+- Local development workflows
+
+Standard Anvil is not compatible with Seismic's custom features (shielded state, transaction type 0x4a, etc.).
+
+**What are SRC20 tokens?**
+
+**SRC20** (Seismic Request for Comment 20) is Seismic's token standard for shielded tokens. Key differences from ERC20:
+- SRC20 tokens may not emit the standard `Transfer` event (topic hash: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`) due to privacy features
+- SRC20 tokens are expected to dominate usage on Seismic over standard ERC20s
+- Standard ERC20 tokens are still fully supported and will emit standard events
+
+Token integrators should be aware of this distinction when building indexers or wallets.
+
+---
+
+## Gas and Transactions
+
+**What transaction types are supported?**
+
+Seismic supports:
+- **Legacy transactions** (Type 0)
+- **EIP-1559 transactions** (Type 2)
+- **Seismic transactions** (Type 0x4a) - custom type with encrypted calldata for shielded operations
+
+**How do transaction fees work?**
+
+Seismic implements standard EIP-1559 pricing:
+- Base fee that adjusts based on network congestion
+- Priority fee (tip) for faster inclusion
+- No hidden costs outside of EVM gas usage
+
+Gas is paid using the native Seismic token. Excess gas is refunded after transaction execution, following standard EVM behavior.
+
+**Can nodes publish transactions on-chain?**
+
+Yes, if properly staked. Nodes can propagate and publish transactions.
+
+**Is there transaction expiration?**
+
+Standard EVM transaction expiration rules apply.
+
+**How is mempool visibility handled?**
+
+Mempool operates like standard EVM chains. Transaction priority follows EIP-1559 rules.
+
+**Are state overrides supported in eth_call?**
+
+Yes, `stateOverrides` are supported in `eth_call`.
+
+---
+
+## Operations and Maintenance
+
+**How often are hard forks expected?**
+
+No hard forks have occurred yet (network is pre-mainnet). The frequency of future hard forks is TBD, but all upgrades will be communicated via Twitter, Discord, and direct partner outreach.
+
+**Does the node handle SIGTERM gracefully?**
+
+Yes, but given the TDX deployment, shutting down nodes is more complex than standard deployments. The node will exit cleanly with SIGTERM.
+
+**Expected restart time**: About 1 minute from machine reboot.
+
+**Have there been any major outages?**
+
+Not on mainnet (not yet launched). During testing, various issues have occurred, but these have been resolved prior to public release.
+
+**Is there a network status page?**
+
+Yes: https://status.seismicdev.net/
+
+> **Note**: This status page is an MVP. The URL may change, and additional features are planned.
+
+**How much storage is required?**
+
+**Archive nodes**: 1TB+ recommended
+
+Storage requirements will grow linearly with network activity. Within the first year, expect approximately 12 hours of sync time for full archive history.
+
+**What is the monthly storage growth?**
+
+TBD - this depends on network activity and will be monitored after mainnet launch.
+
+**Does the node support custom host and port configuration?**
+
+- **Host**: Yes
+- **Port**: No (fixed in VHD image)
+
+**Can I use third-party RPC providers?**
+
+Seismic is in active discussions with RPC providers but doesn't currently have public partnerships. Updates will be shared as partnerships are established.
+
+---
+
+## Advanced Topics
+
+**How does finality work on Seismic?**
+
+Seismic achieves finality in 1-2 blocks, with total finality time under 2 seconds. This is significantly faster than Ethereum mainnet.
+
+**Finality details:**
+- **Block time**: 600ms - 1 second
+- **Blocks to finality**: 1-2 blocks
+- **Total time to finality**: < 2 seconds
+
+**Does Seismic support finality tags?**
+
+Currently, Seismic does not support the `"finalized"` block parameter tag as specified in EIP-3675. However, given the extremely fast finality (< 2 seconds), using `"latest"` provides near-equivalent guarantees.
+
+**Workaround**: Use `"latest"` or specify a block number minus 1-2 blocks for finalized state.
+
+This feature may be added in future updates if there's demand from integrators.
+
+**Does Seismic produce empty blocks?**
+
+Yes, like Ethereum, Seismic will produce empty blocks when there are no pending transactions.
+
+**Is Seismic a ZK (zero-knowledge) chain?**
+
+No. Seismic uses trusted execution environments (TEE) via Intel TDX for privacy, not zero-knowledge proofs.
+
+**What is the Seismic REVM?**
+
+The Seismic REVM is a modified version of the Rust Ethereum Virtual Machine (REVM) that supports shielded computation and the custom opcodes. More details: https://github.com/SeismicSystems/seismic-revm
+
+**Are there any scalability limitations?**
+
+Seismic has been extensively stress-tested under high load. Performance targets:
+- **P99 latency**: On the order of seconds under high load (1000+ QPS)
+- **P50 latency**: Tens of milliseconds
+
+Benchmarks will be made public soon.
+
+**What are the encryption/shielded features?**
+
+Seismic supports:
+- **Shielded storage**: Data stored privately on-chain via `CLOAD`/`CSTORE` opcodes
+- **Encrypted calldata**: Transaction type 0x4a encrypts calldata
+- **Shielded types in Solidity**: New data types for private state
+
+**Can Gnosis Safe be used on Seismic?**
+
+Yes, Gnosis contracts can function on-chain. However, the Gnosis UI doesn't natively support Seismic yet. The team may work with Gnosis to add support.
+
+**Is there a wrapped native token?**
+
+Not yet, but one will be deployed for both testnet and mainnet.
+
+**What block explorers are available?**
+
+Block explorer URLs will be announced closer to mainnet launch.
+
+**Does the explorer support contract verification?**
+
+TBD - explorer details will be shared once available.
+
+---
+
+## Getting Help
+
+**How do I report issues?**
+
+- **GitHub Issues**: Open issues on the relevant repository
+- **Discord**: Join the Seismic Discord community
+- **Direct Contact**: For partners, reach out directly to your Seismic contact
+
+**Who do I contact for DevRel questions?**
+
+- **Email**: c@seismic.systems
+- **Slack**: @Christian (in Seismic's Slack)
+- **Telegram**: @ChristianDrappi
+
+**Where can I find the latest updates?**
+
+- **Website**: https://seismic.systems
+- **Status Page**: https://status.seismicdev.net/
+- **Twitter**: Follow Seismic for announcements
+- **Discord**: Join the community
+
+---
+
+*Last updated 2025.*

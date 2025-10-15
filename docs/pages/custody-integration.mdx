@@ -1,0 +1,328 @@
+# Seismic Network Custody & Institutional Integration Guide
+
+This document provides information for institutional investors, custodians, and partners looking to integrate Seismic Network. It covers technical custody requirements, participation mechanisms, tokenomics, and regulatory considerations.
+
+## Table of Contents
+
+- [Technical Custody Integration](#technical-custody-integration)
+- [Network Participation](#network-participation)
+- [Tokenomics & Supply](#tokenomics--supply)
+- [Regulatory & Compliance](#regulatory--compliance)
+- [Institutional Support](#institutional-support)
+
+---
+
+## Technical Custody Integration
+
+### How does Seismic differ from standard EVM chains?
+
+Seismic is approximately a **superset of the EVM**, meaning:
+- Standard EVM functionality works identically to Ethereum
+- Additional features enable shielded (private) computation
+- Transaction construction and serialization identical to Ethereum (with one new transaction type)
+- Address generation, gas estimation, and signing work the same as Ethereum
+
+**Key differentiating features:**
+- **Shielded state storage**: Solidity contracts can store private data on-chain
+- **Encrypted calldata**: New transaction type (0x4a) encrypts transaction calldata
+- **Privacy-preserving**: Uses Intel TDX (Trusted Execution Environments), not zero-knowledge proofs
+
+### Which existing EVM chain is Seismic most like?
+
+Seismic is most like **Ethereum mainnet** with privacy enhancements. It uses:
+- Same transaction types (Legacy 0x0 and EIP-1559 0x2) plus one new type (0x4a)
+- Same gas model (EIP-1559 dynamic fees)
+- Same serialization (RLP)
+- Same address generation and cryptographic algorithms (Keccak-256, ECDSA secp256k1)
+- Same account model (not UTXO-based)
+
+### Have any RPC API methods been altered?
+
+Yes, but only to protect shielded state:
+- **`eth_getStorageAt`**: Will not reveal shielded storage slots
+- **Call tracers**: Modified to prevent leaking shielded state in debug traces
+- **`trace_filter`**: Some specific restrictions (TBD)
+
+All other standard Ethereum JSON-RPC methods work identically.
+
+### Is transaction construction identical to Ethereum?
+
+**Yes**, with one addition:
+- **Legacy (0x0)** and **EIP-1559 (0x2)** transactions are 100% identical to Ethereum
+- **Seismic transaction (0x4a)** is essentially a legacy transaction with encrypted calldata
+
+Standard Ethereum transaction construction libraries will work without modification.
+
+### Can gas be estimated using eth_estimateGas?
+
+Yes, `eth_estimateGas` works exactly as on Ethereum.
+
+### Are there other transaction types that could cause balance changes?
+
+The Seismic transaction type (0x4a) can cause balance changes, but it functions similarly to a standard transaction - it just has encrypted calldata. There are no special transaction types like Arbitrum's Retryable Tickets.
+
+### Do ERC-20 transfers emit the standard Transfer event?
+
+**It depends on the token type:**
+
+- **ERC20 tokens**: Yes, standard ERC20s emit the standard `Transfer` event (topic hash: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`)
+- **SRC20 tokens** (Seismic's shielded token standard): May not emit the standard Transfer event due to privacy features
+
+**Important for custody providers**: SRC20 tokens are expected to dominate on Seismic. Balance tracking may require alternative methods beyond event indexing.
+
+### Is the native asset transferred by setting the value field?
+
+**Long-term**: Yes, native asset transfers work by setting the `value` field in transactions, identical to Ethereum.
+
+**Short-term**: This is still being finalized for early mainnet. The native asset model may evolve in the first months post-launch.
+
+### Do you support Anvil for local testing?
+
+You must use **Sanvil**, Seismic's fork of Anvil. Standard Anvil does not support:
+- Seismic transaction type (0x4a)
+- Shielded storage opcodes (CLOAD/CSTORE)
+- Encrypted calldata handling
+
+Sanvil supports all standard Anvil operations including:
+- Starting from a fork point or genesis file
+- Sending native assets and ERC-20 tokens
+- Contract deployment and testing
+- Transaction tracing with `debug_traceTransaction`
+
+### Are smart contracts verified on Sourcify or Etherscan?
+
+Contract verification infrastructure is still being finalized. Details will be announced closer to mainnet launch.
+
+### What is the expected throughput?
+
+Seismic targets:
+- **Block time**: 600ms - 1 second
+- **Finality**: 1-2 blocks (< 2 seconds total)
+- **Stress test results**: Sustained 1000+ QPS with P99 latency in seconds, P50 in tens of milliseconds
+
+Exact throughput will depend on transaction complexity and network conditions.
+
+### Are there deviations in address generation, gas estimation, or transaction signing?
+
+**No deviations**. Seismic uses identical mechanisms to Ethereum:
+- **Address generation**: Hash public key using Keccak-256, take last 20 bytes
+- **Cryptographic algorithm**: ECDSA with secp256k1 curve
+- **Serialization**: RLP (Recursive Length Prefix)
+- **Hashing**: Keccak-256 (SHA-3 variant)
+- **Replay protection**: EIP-155 chain ID-based nonce system
+- **Transaction signing**: Standard Ethereum signing with chain ID 5123 (mainnet) or 5124 (testnet)
+
+### Can a transaction be signed today and broadcast tomorrow?
+
+Yes, there is no upper bound on the time between transaction construction and broadcast. Standard Ethereum nonce-based ordering applies.
+
+### Does the protocol have gas?
+
+Yes, Seismic uses the standard Ethereum gas model:
+- Gas is estimated with `eth_estimateGas`
+- Excess gas is refunded after execution
+- Gas must be paid in the native Seismic token (cannot be paid in other currencies)
+- EIP-1559 dynamic fees apply (base fee + priority fee)
+
+### How are accounts created?
+
+Accounts are **implicit** (same as Ethereum):
+- Addresses exist as soon as you have a private key
+- No on-chain instantiation required
+- Accounts become "active" when they first receive a transaction or balance
+
+### Does the blockchain have anonymity or privacy features?
+
+Yes, but they are **opt-in**:
+- Contracts can use shielded storage (CLOAD/CSTORE opcodes) for private state
+- Users can send Seismic transactions (type 0x4a) with encrypted calldata
+- Standard transactions remain fully transparent like Ethereum
+
+Privacy is achieved through Intel TDX (Trusted Execution Environments), not zero-knowledge proofs.
+
+### Can balances change without a corresponding blockchain transaction?
+
+**For standard ERC20/ERC721 tokens**: No, all balance changes require on-chain transactions.
+
+**For SRC20 (shielded) tokens**: Balance changes are recorded on-chain, but may not be publicly visible in the same way as standard tokens due to privacy features.
+
+### Can assets leave an address with no action from the sole key holder?
+
+No, Seismic follows standard Ethereum security model - assets can only move with a valid signature from the private key holder (or via approved smart contract logic like allowances).
+
+### Is it possible to query a blockchain node for deposits to an address?
+
+Yes:
+- Standard Ethereum methods (`eth_getLogs`, `eth_getBalance`, `eth_getTransactionReceipt`) work identically
+- Use RPC filters for event-based indexing
+- Full archive nodes support querying from genesis
+
+**Note**: Shielded (SRC20) token balances may require specialized queries depending on the token implementation.
+
+### Is it possible to query the status of a broadcast transaction?
+
+Yes, use standard Ethereum methods:
+- `eth_getTransactionReceipt` for finalized transactions
+- `eth_getTransactionByHash` for pending/confirmed transactions
+- `eth_blockNumber` to check sync status
+
+### How fast does storage for an RPC node grow?
+
+- **Current size**: TBD (network launching soon)
+- **Archive node**: 1TB+ storage recommended initially
+- **Growth rate**: Will depend on network activity; approximately 12 hours of sync time expected for first year of operation
+
+Detailed storage projections will be published after mainnet launch.
+
+### How is throughput handled?
+
+Seismic is a **monolithic L1 chain** (not sharded). Throughput is handled through:
+- Fast block times (600ms - 1s)
+- EIP-1559 dynamic gas pricing
+- Efficient execution via Reth and seismic-reVM
+
+### Is it possible to run a full node in local mode?
+
+Yes, use **Sanvil** (Seismic's fork of Anvil) for local development and testing, similar to Bitcoin Regtest or Ethereum's Ganache.
+
+### Are there any "gotcha's" to be aware of?
+
+- **SRC20 tokens**: May not emit standard Transfer events; requires specialized indexing
+- **Shielded storage**: `eth_getStorageAt` won't reveal private contract state
+- **Intel TDX requirement**: Nodes require Intel TDX hardware; cannot run on standard VMs
+- **Sanvil required**: Must use Sanvil instead of Anvil for local testing
+- **Transaction type 0x4a**: Ensures encrypted calldata is handled correctly
+- **Block timestamps**: Available in millisecond precision (though `block.timestamp` returns seconds for compatibility)
+
+---
+
+## Network Participation
+
+### Does Seismic support staking?
+
+**Current status**: Information about staking, delegation, and validation is not yet finalized.
+
+**What we know**:
+- Nodes can publish transactions if properly staked
+- Staking mechanisms and rewards are still being designed
+- Updates will be communicated via official channels
+
+### Does Seismic support governance?
+
+**Current status**: Governance mechanisms have not been publicly specified yet.
+
+Governance details (voting mechanisms, parameter changes, proposals) will be announced as the network matures.
+
+### What actions will institutional holders be expected to take upon network launch?
+
+**At launch**, institutions should be prepared for:
+- **Transfers**: Sending and receiving the native token
+- **Contract interactions**: Deploying and interacting with smart contracts
+- **Token holdings**: Custody of native assets and potentially SRC20 tokens
+
+**Future participation** may include:
+- Staking and delegation (mechanisms TBD)
+- Governance voting (mechanisms TBD)
+- Validator operations (requirements TBD)
+
+### Do you have vesting schedules?
+
+**Status**: Vesting schedule details have not been publicly disclosed. Please contact the Seismic team directly for information about:
+- Vesting start/end dates and unlock frequency
+- On-chain vs off-chain vesting implementation
+- Whether locked tokens can be used for staking or governance
+- Whether vested tokens need to be claimed or are automatically distributed
+
+### Where can I find tokenomics information?
+
+Detailed tokenomics (total supply, supply breakdown, allocation to foundation/grants/investors) have not been publicly released yet.
+
+For institutional inquiries about tokenomics, please contact: **c@seismic.systems**
+
+---
+
+## Tokenomics & Supply
+
+### What is the total token supply?
+
+**Status**: Total supply and distribution details will be announced closer to token generation event (TGE).
+
+### What is the fully diluted value (FDV)?
+
+**Status**: FDV and institutional ownership percentages will be disclosed closer to TGE.
+
+### Who are the current institutional investors?
+
+**Status**: Investor information has not been publicly disclosed. For partnership and investment inquiries, contact the Seismic team.
+
+### Does Seismic hold a reserve?
+
+**Status**: Information about foundation reserves and custody solutions will be announced as part of tokenomics disclosure.
+
+### What is the target Token Generation Event (TGE) date?
+
+**Status**: TGE timeline is not yet public. Follow official channels (Twitter, Discord) for announcements.
+
+---
+
+## Regulatory & Compliance
+
+### Is the Seismic token a security?
+
+**Status**: Legal classification and opinions have not been publicly disclosed. Institutional partners should consult with their legal teams and contact Seismic directly for regulatory discussions.
+
+### What is the domicile of the managing entity?
+
+**Status**: Corporate structure, jurisdiction, and regulatory body information will be disclosed in official documentation closer to mainnet launch.
+
+### Where is the team located?
+
+**Status**: Team location and office information have not been publicly disclosed. For business inquiries, contact: **c@seismic.systems**
+
+### Do you maintain an Anti-Money Laundering (AML) Program?
+
+**Status**: Compliance programs and procedures have not been publicly disclosed. Institutional partners should contact the Seismic team for compliance discussions.
+
+### Will you require offering services to New York customers?
+
+**Status**: Regulatory strategy for US states, including New York, has not been publicly disclosed.
+
+---
+
+## Institutional Support
+
+### Who should institutional partners contact?
+
+**Primary Contact:**
+- **Email**: c@seismic.systems
+- **Slack**: @Christian (in Seismic's Slack workspace)
+- **Telegram**: @ChristianDrappi
+
+### What custody solutions are recommended?
+
+**Fireblocks**: Native gas token support with Fireblocks is planned.
+
+**General**: Since Seismic is EVM-compatible, any custody solution supporting Ethereum should work with standard (non-shielded) features. For shielded token custody, please contact the team for specialized guidance.
+
+### Do you have USD custody needs?
+
+**Status**: USD custody solutions have not been publicly disclosed.
+
+### What block explorer should we use?
+
+Block explorer URL will be announced closer to mainnet launch. Check https://status.seismicdev.net/ for updates.
+
+### Are there RPC endpoint providers?
+
+Seismic is in active discussions with RPC providers. Public partnerships will be announced when available.
+
+### Where can I find the latest updates?
+
+- **Website**: https://seismic.systems
+- **Status Page**: https://status.seismicdev.net/
+- **Twitter**: Follow Seismic for announcements
+- **Discord**: Join for community updates
+
+---
+
+*Last updated 2025. For institutional inquiries, contact c@seismic.systems.*
