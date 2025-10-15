@@ -4,7 +4,6 @@ from pathlib import Path
 
 @dataclass
 class BuildPaths:
-
     def __init__(self, home: str):
         self.home = Path(home)
 

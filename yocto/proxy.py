@@ -105,8 +105,7 @@ class ProxyClient:
             )
             response.raise_for_status()
             logger.info(
-                f"HTTP request succeeded with output:\n"
-                f"{json.dumps(response.json())}"
+                f"HTTP request succeeded with output:\n{json.dumps(response.json())}"
             )
         except requests.RequestException as e:
             logger.error(f"HTTP request failed: {e}")

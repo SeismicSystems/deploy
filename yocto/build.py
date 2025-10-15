@@ -67,7 +67,7 @@ def build_image(home: str, capture_output: bool = True) -> Path:
         < datetime.datetime.now().timestamp() - _MAX_ARTIFACT_AGE * _ONE_HOUR_IN_SECONDS
     ):
         raise RuntimeError(
-            "Most recently built image more than " f"{_MAX_ARTIFACT_AGE} hours old"
+            f"Most recently built image more than {_MAX_ARTIFACT_AGE} hours old"
         )
 
     logger.info(f"Image built successfully at {image_path_str}")

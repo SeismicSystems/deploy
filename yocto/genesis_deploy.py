@@ -4,6 +4,7 @@ Genesis Azure VM Deployment Tool
 
 Genesis mode deployment with persistent IP addresses and node-specific allocation.
 """
+
 import json
 import logging
 from typing import Tuple
