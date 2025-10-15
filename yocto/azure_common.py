@@ -62,10 +62,10 @@ class AzureCLI:
         for tool in tools:
             try:
                 subprocess.run([tool, "--version"], capture_output=True, check=True)
-            except (subprocess.CalledProcessError, FileNotFoundError):
+            except (subprocess.CalledProcessError, FileNotFoundError) as e:
                 raise RuntimeError(
                     f"Error: '{tool}' command not found. Please install {tool}."
-                )
+                ) from e
 
     @classmethod
     def resource_group_exists(cls, name: str) -> bool:
@@ -179,7 +179,8 @@ class AzureCLI:
     def remove_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
         """Remove IP from DNS A record."""
         logger.info(
-            f"Removing {ip_address} from {config.domain.record}.{config.domain.name} record set"
+            f"Removing {ip_address} from "
+            f"{config.domain.record}.{config.domain.name} record set"
         )
         cmd = [
             "az",

@@ -39,17 +39,26 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--enclave-branch",
         default="main",
-        help="Seismic Enclave git branch name. Defaults to 'main'. Only used if --enclave-commit is provided too",
+        help=(
+            "Seismic Enclave git branch name. Defaults to 'main'. "
+            "Only used if --enclave-commit is provided too"
+        ),
     )
     parser.add_argument(
         "--enclave-commit",
-        help="Seismic Enclave git gommit hash. If not provided, does not change image",
+        help=(
+            "Seismic Enclave git gommit hash. "
+            "If not provided, does not change image"
+        ),
     )
 
     parser.add_argument(
         "--sreth-branch",
         default="seismic",
-        help="Seismic Reth git branch name. Defaults to 'seismic'. Only used if --sreth-commit is provided too",
+        help=(
+            "Seismic Reth git branch name. Defaults to 'seismic'. "
+            "Only used if --sreth-commit is provided too"
+        ),
     )
     parser.add_argument(
         "--sreth-commit",
@@ -59,17 +68,26 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--summit-branch",
         default="seismic",
-        help="Summit git branch name. Defaults to 'main'. Only used if --summit-commit is provided too",
+        help=(
+            "Summit git branch name. Defaults to 'main'. "
+            "Only used if --summit-commit is provided too"
+        ),
     )
     parser.add_argument(
         "--summit-commit",
-        help="Summit git commit hash. If not provided, does not change image",
+        help=(
+            "Summit git commit hash. "
+            "If not provided, does not change image"
+        ),
     )
 
     # Domain args
     parser.add_argument(
         "--domain-record",
-        help="Domain record name (e.g. xxx.seismicdev.net). Required if deploying",
+        help=(
+            "Domain record name (e.g. xxx.seismicdev.net). "
+            "Required if deploying"
+        ),
     )
     parser.add_argument(
         "--domain-name",

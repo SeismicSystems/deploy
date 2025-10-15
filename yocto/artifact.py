@@ -64,7 +64,8 @@ def delete_artifact(artifact: str, home: str):
     ]
     if deployed_to:
         confirm = input(
-            f'\nThe artifact "{artifact}" is deployed to {len(deployed_to)} resource group(s):'
+            f'\nThe artifact "{artifact}" is deployed to '
+            f'{len(deployed_to)} resource group(s):'
             f"\n - {'\n - '.join(deployed_to)}\n\n"
             "Are you really sure you want to delete it? "
             "This will not delete the resources (y/n): "

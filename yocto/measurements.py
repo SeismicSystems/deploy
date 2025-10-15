@@ -30,13 +30,17 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     if not image_path.exists():
         raise FileNotFoundError(f"Image path not found: {image_path}")
 
-    jq_format = f'{{"measurement_id": "{image_path.name}", "attestation_type": "azure-tdx", "measurements": .measurements}}'
+    jq_format = f'''{{
+        "measurement_id": "{image_path.name}",
+        "attestation_type": "azure-tdx",
+        "measurements": .measurements
+    }}'''
     measurements_tmpfile = Path(tempfile.mktemp())
     # Command to generate measurements
     measure_cmd = f"""
     cd {paths.source_env} && . ./oe-init-build-env &&
     cd {paths.measured_boot} &&
-    go build -o measured-boot && 
+    go build -o measured-boot &&
     ./measured-boot {image_path} ../output.json &&
     cd ~ &&
     jq '{jq_format}' {paths.measured_boot.parent}/output.json > {measurements_tmpfile}

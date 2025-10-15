@@ -38,7 +38,10 @@ def get_ip_address(vm_name: str) -> str:
 
 
 def delete_vm(vm_name: str, home: str) -> bool:
-    """Delete existing resource group if provided. Returns True if successful, False otherwise."""
+    """
+    Delete existing resource group if provided.
+    Returns True if successful, False otherwise.
+    """
     metadata = load_metadata(home)
     resources = metadata["resources"]
     meta = resources[vm_name]

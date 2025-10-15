@@ -59,9 +59,9 @@ class ProxyClient:
             # Monitor proxy output for successful attestation message
             return self._monitor_attestation(request_thread)
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             logger.error("Proxy client binary not found at specified path.")
-            raise FileNotFoundError("Proxy client binary not found.")
+            raise FileNotFoundError("Proxy client binary not found.") from e
         except RuntimeError as e:
             logger.error(f"Failed to start proxy: {e}")
             raise
@@ -108,7 +108,7 @@ class ProxyClient:
             )
         except requests.RequestException as e:
             logger.error(f"HTTP request failed: {e}")
-            raise ConnectionError(f"HTTP request to proxy server failed: {e}")
+            raise ConnectionError(f"HTTP request to proxy server failed: {e}") from e
 
     def stop(self):
         """Stop the proxy client"""
