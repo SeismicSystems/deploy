@@ -37,4 +37,5 @@ ENV/
 *.swp
 *.swo
 
-
+# NPM
+node_modules/
