@@ -282,56 +282,47 @@ export const sidebar = {
   ],
   '/': [
     {
-      text: 'Introduction',
-      link: '/introduction',
+      text: 'Getting Started',
+      items: [
+        { text: 'Introduction', link: '/introduction' },
+        { text: 'Install', link: '/install' },
+      ],
     },
     {
-      text: 'Install',
-      link: '/install',
+      text: 'Networks',
+      items: [
+        { text: 'Mainnet', link: '/mainnet' },
+        { text: 'Testnet', link: '/testnet' },
+      ],
     },
     {
-      text: 'Mainnet',
-      link: '/mainnet',
+      text: 'Technical',
+      items: [
+        { text: 'Differences from Ethereum', link: '/ethereum-differences' },
+        { text: 'Architecture', link: '/architecture' },
+        { text: 'Consensus', link: '/consensus' },
+        { text: 'Development Tools', link: '/tools' },
+      ],
     },
     {
-      text: 'Testnet',
-      link: '/testnet',
+      text: 'Operations',
+      items: [
+        { text: 'Node Operator FAQ', link: '/node-operator-faq' },
+        { text: 'Third-Party Infrastructure', link: '/third-party' },
+      ],
     },
     {
-      text: 'Differences from Ethereum',
-      link: '/ethereum-differences',
+      text: 'Legal & Governance',
+      items: [
+        { text: 'Governance', link: '/governance' },
+        { text: 'Compliance', link: '/compliance' },
+      ],
     },
     {
-      text: 'Architecture',
-      link: '/architecture',
-    },
-    {
-      text: 'Consensus',
-      link: '/consensus',
-    },
-    {
-      text: 'Development Tools',
-      link: '/tools',
-    },
-    {
-      text: 'Third-Party Infrastructure',
-      link: '/third-party',
-    },
-    {
-      text: 'Resources & Contact',
-      link: '/resources',
-    },
-    {
-      text: 'Node Operator FAQ',
-      link: '/node-operator-faq',
-    },
-    {
-      text: 'Governance',
-      link: '/governance',
-    },
-    {
-      text: 'Compliance',
-      link: '/compliance',
+      text: 'Support',
+      items: [
+        { text: 'Resources & Contact', link: '/resources' },
+      ],
     },
   ],
 } as const satisfies Sidebar

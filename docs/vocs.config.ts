@@ -30,46 +30,6 @@ const config: Config = defineConfig({
       link: 'https://x.com/SeismicSys',
     },
   ],
-  topNav: [
-    {
-      text: 'Getting Started',
-      items: [
-        { text: 'Introduction', link: '/introduction' },
-        { text: 'Install', link: '/install' },
-      ],
-    },
-    {
-      text: 'Networks',
-      items: [
-        { text: 'Mainnet', link: '/mainnet' },
-        { text: 'Testnet', link: '/testnet' },
-      ],
-    },
-    {
-      text: 'Technical',
-      items: [
-        { text: 'Differences from Ethereum', link: '/ethereum-differences' },
-        { text: 'Architecture', link: '/architecture' },
-        { text: 'Consensus', link: '/consensus' },
-        { text: 'Development Tools', link: '/tools' },
-      ],
-    },
-    {
-      text: 'Operations',
-      items: [
-        { text: 'Node Operators', link: '/node-operator-faq' },
-        { text: 'Third-Party', link: '/third-party' },
-      ],
-    },
-    {
-      text: 'Legal & Governance',
-      items: [
-        { text: 'Governance', link: '/governance' },
-        { text: 'Compliance', link: '/compliance' },
-      ],
-    },
-    { text: 'Resources', link: '/resources' },
-  ],
 })
 
 export default config
