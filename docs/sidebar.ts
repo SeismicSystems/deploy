@@ -206,7 +206,24 @@ export const sidebar = {
       ],
     },
   ],
+  '/install': [
+    {
+      text: 'Installation',
+      collapsed: false,
+      items: [
+        { text: 'Prerequisites', link: '/install#1-install-prerequisites' },
+        { text: 'Download sfoundryup', link: '/install#2-download-sfoundryup' },
+        { text: 'Install Tools', link: '/install#3-install-development-tools' },
+        { text: 'Clean Projects', link: '/install#4-clean-existing-projects' },
+        { text: 'VSCode Extension', link: '/install#vscode-extension' },
+      ],
+    },
+  ],
   '/': [
+    {
+      text: 'Install',
+      link: '/install',
+    },
     {
       text: 'Resources',
       link: '/resources',

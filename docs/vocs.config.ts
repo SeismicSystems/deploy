@@ -31,6 +31,7 @@ const config: Config = defineConfig({
     },
   ],
   topNav: [
+    { text: 'Install', link: '/install' },
     { text: 'Resources', link: '/resources' },
     { text: 'Node Operations', link: '/node-operator-faq' },
     { text: 'Custody', link: '/custody-integration' },
