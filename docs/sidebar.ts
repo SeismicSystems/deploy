@@ -1,208 +1,15 @@
 import type { Sidebar } from 'vocs'
 
 export const sidebar = {
-  '/node-operator-faq': [
+  '/introduction': [
     {
-      text: 'Getting Started',
-      collapsed: true,
-      items: [
-        { text: 'Overview', link: '/node-operator-faq#what-is-seismic-network' },
-        { text: 'Mainnet', link: '/node-operator-faq#mainnet' },
-        { text: 'Testnet', link: '/node-operator-faq#testnet' },
-        { text: 'Hardware', link: '/node-operator-faq#what-are-the-hardware-requirements' },
-        { text: 'Deploy', link: '/node-operator-faq#what-is-the-deployment-method' },
-      ],
-    },
-    {
-      text: 'Network',
-      collapsed: true,
-      items: [
-        { text: 'Gas', link: '/node-operator-faq#what-is-the-gas-pricing-model' },
-        { text: 'Genesis', link: '/node-operator-faq#when-is-the-mainnet-genesis-date' },
-        { text: 'Bridge', link: '/node-operator-faq#what-are-the-bridge-and-oracle-contracts' },
-        { text: 'Tokens', link: '/node-operator-faq#where-can-i-get-testnet-tokens' },
-      ],
-    },
-    {
-      text: 'Setup',
-      collapsed: true,
-      items: [
-        { text: 'Software', link: '/node-operator-faq#what-software-do-i-need-to-run-a-node' },
-        { text: 'TDX', link: '/node-operator-faq#do-nodes-require-special-hardware' },
-        { text: 'Snapshots', link: '/node-operator-faq#are-snapshots-available' },
-        { text: 'Sync', link: '/node-operator-faq#how-long-does-it-take-to-sync-a-node' },
-      ],
-    },
-    {
-      text: 'Architecture',
-      collapsed: true,
-      items: [
-        { text: 'Overview', link: '/node-operator-faq#what-makes-seismics-architecture-unique' },
-        { text: 'Binaries', link: '/node-operator-faq#how-many-binaries-are-required' },
-        { text: 'Clients', link: '/node-operator-faq#does-seismic-support-multiple-client-implementations' },
-        { text: 'Data Dir', link: '/node-operator-faq#can-i-configure-the-data-directory' },
-        { text: 'Requirements', link: '/node-operator-faq#are-there-any-special-network-architecture-requirements' },
-      ],
-    },
-    {
-      text: 'RPC',
-      collapsed: true,
-      items: [
-        { text: 'Methods', link: '/node-operator-faq#what-rpc-methods-are-supported' },
-        { text: 'WebSockets', link: '/node-operator-faq#does-seismic-support-websockets' },
-        { text: 'Limits', link: '/node-operator-faq#are-there-rate-limits-on-rpc-calls' },
-        { text: 'Config', link: '/node-operator-faq#what-are-the-rpc-configuration-parameters' },
-        { text: 'getLogs', link: '/node-operator-faq#what-is-the-maximum-size-for-eth_getlogs-responses' },
-        { text: 'Batches', link: '/node-operator-faq#is-there-a-limit-on-batch-rpc-requests' },
-        { text: 'Logs', link: '/node-operator-faq#does-seismic-support-log-lookback' },
-        { text: 'Sync Mode', link: '/node-operator-faq#what-sync-mode-should-i-use-for-fetching-logs' },
-        { text: 'Debug', link: '/node-operator-faq#does-seismic-support-debug-and-trace-apis' },
-        { text: 'Health', link: '/node-operator-faq#are-block-height-indicators-available' },
-        { text: 'Heavy', link: '/node-operator-faq#what-are-the-heaviest-rpc-methods' },
-        { text: 'Caching', link: '/node-operator-faq#are-there-recommended-caching-rules-for-rpc-methods' },
-      ],
-    },
-    {
-      text: 'EVM',
-      collapsed: true,
-      items: [
-        { text: 'Compatible', link: '/node-operator-faq#is-seismic-fully-evm-compatible' },
-        { text: 'Solidity', link: '/node-operator-faq#what-solidity-version-should-i-use' },
-        { text: 'Opcodes', link: '/node-operator-faq#are-there-any-unsupported-opcodes' },
-        { text: 'Precompiles', link: '/node-operator-faq#does-seismic-support-precompiled-contracts' },
-        { text: 'Globals', link: '/node-operator-faq#do-solidity-global-variables-behave-differently' },
-        { text: 'Contracts', link: '/node-operator-faq#can-i-deploy-existing-smart-contracts' },
-        { text: 'Sanvil', link: '/node-operator-faq#what-is-sanvil' },
-        { text: 'SRC20', link: '/node-operator-faq#what-are-src20-tokens' },
-      ],
-    },
-    {
-      text: 'Txs',
-      collapsed: true,
-      items: [
-        { text: 'Types', link: '/node-operator-faq#what-transaction-types-are-supported' },
-        { text: 'Fees', link: '/node-operator-faq#how-do-transaction-fees-work' },
-        { text: 'Publish', link: '/node-operator-faq#can-nodes-publish-transactions-on-chain' },
-        { text: 'Expiry', link: '/node-operator-faq#is-there-transaction-expiration' },
-        { text: 'Mempool', link: '/node-operator-faq#how-is-mempool-visibility-handled' },
-        { text: 'Overrides', link: '/node-operator-faq#are-state-overrides-supported-in-eth_call' },
-      ],
-    },
-    {
-      text: 'Ops',
-      collapsed: true,
-      items: [
-        { text: 'Forks', link: '/node-operator-faq#how-often-are-hard-forks-expected' },
-        { text: 'Shutdown', link: '/node-operator-faq#does-the-node-handle-sigterm-gracefully' },
-        { text: 'Outages', link: '/node-operator-faq#have-there-been-any-major-outages' },
-        { text: 'Status', link: '/node-operator-faq#is-there-a-network-status-page' },
-        { text: 'Storage', link: '/node-operator-faq#how-much-storage-is-required' },
-        { text: 'Growth', link: '/node-operator-faq#what-is-the-monthly-storage-growth' },
-        { text: 'Config', link: '/node-operator-faq#does-the-node-support-custom-host-and-port-configuration' },
-        { text: 'Providers', link: '/node-operator-faq#can-i-use-third-party-rpc-providers' },
-      ],
-    },
-    {
-      text: 'Advanced',
-      collapsed: true,
-      items: [
-        { text: 'Finality', link: '/node-operator-faq#how-does-finality-work-on-seismic' },
-        { text: 'Tags', link: '/node-operator-faq#does-seismic-support-finality-tags' },
-        { text: 'Empty', link: '/node-operator-faq#does-seismic-produce-empty-blocks' },
-        { text: 'Zero-knowledge', link: '/node-operator-faq#is-seismic-a-zk-zero-knowledge-chain' },
-        { text: 'reVM', link: '/node-operator-faq#what-is-the-seismic-revm' },
-        { text: 'Scale', link: '/node-operator-faq#are-there-any-scalability-limitations' },
-        { text: 'Shielded', link: '/node-operator-faq#what-are-the-encryptionshielded-features' },
-        { text: 'Gnosis', link: '/node-operator-faq#can-gnosis-safe-be-used-on-seismic' },
-        { text: 'Wrapped', link: '/node-operator-faq#is-there-a-wrapped-native-token' },
-        { text: 'Explorer', link: '/node-operator-faq#what-block-explorers-are-available' },
-        { text: 'Verify', link: '/node-operator-faq#does-the-explorer-support-contract-verification' },
-      ],
-    },
-    {
-      text: 'Help',
-      collapsed: true,
-      items: [
-        { text: 'Issues', link: '/node-operator-faq#how-do-i-report-issues' },
-        { text: 'Contact', link: '/node-operator-faq#who-do-i-contact-for-devrel-questions' },
-        { text: 'Updates', link: '/node-operator-faq#where-can-i-find-the-latest-updates' },
-      ],
-    },
-  ],
-  '/custody-integration': [
-    {
-      text: 'Technical',
+      text: 'Overview',
       collapsed: false,
       items: [
-        { text: 'EVM', link: '/custody-integration#how-does-seismic-differ-from-standard-evm-chains' },
-        { text: 'Similar', link: '/custody-integration#which-existing-evm-chain-is-seismic-most-like' },
-        { text: 'RPC', link: '/custody-integration#have-any-rpc-api-methods-been-altered' },
-        { text: 'Txs', link: '/custody-integration#is-transaction-construction-identical-to-ethereum' },
-        { text: 'Gas Est', link: '/custody-integration#can-gas-be-estimated-using-eth_estimategas' },
-        { text: 'Balances', link: '/custody-integration#are-there-other-transaction-types-that-could-cause-balance-changes' },
-        { text: 'ERC20', link: '/custody-integration#do-erc-20-transfers-emit-the-standard-transfer-event' },
-        { text: 'Native', link: '/custody-integration#is-the-native-asset-transferred-by-setting-the-value-field' },
-        { text: 'Anvil', link: '/custody-integration#do-you-support-anvil-for-local-testing' },
-        { text: 'Verify', link: '/custody-integration#are-smart-contracts-verified-on-sourcify-or-etherscan' },
-        { text: 'Speed', link: '/custody-integration#what-is-the-expected-throughput' },
-        { text: 'Signing', link: '/custody-integration#are-there-deviations-in-address-generation-gas-estimation-or-transaction-signing' },
-        { text: 'Timing', link: '/custody-integration#can-a-transaction-be-signed-today-and-broadcast-tomorrow' },
-        { text: 'Gas', link: '/custody-integration#does-the-protocol-have-gas' },
-        { text: 'Accounts', link: '/custody-integration#how-are-accounts-created' },
-        { text: 'Privacy', link: '/custody-integration#does-the-blockchain-have-anonymity-or-privacy-features' },
-        { text: 'Queries', link: '/custody-integration#can-balances-change-without-a-corresponding-blockchain-transaction' },
-        { text: 'Security', link: '/custody-integration#can-assets-leave-an-address-with-no-action-from-the-sole-key-holder' },
-        { text: 'Deposits', link: '/custody-integration#is-it-possible-to-query-a-blockchain-node-for-deposits-to-an-address' },
-        { text: 'Status', link: '/custody-integration#is-it-possible-to-query-the-status-of-a-broadcast-transaction' },
-        { text: 'Storage', link: '/custody-integration#how-fast-does-storage-for-an-rpc-node-grow' },
-        { text: 'Model', link: '/custody-integration#how-is-throughput-handled' },
-        { text: 'Local', link: '/custody-integration#is-it-possible-to-run-a-full-node-in-local-mode' },
-        { text: 'Gotchas', link: '/custody-integration#are-there-any-gotchas-to-be-aware-of' },
-      ],
-    },
-    {
-      text: 'Participation',
-      collapsed: false,
-      items: [
-        { text: 'Staking', link: '/custody-integration#does-seismic-support-staking' },
-        { text: 'Governance', link: '/custody-integration#does-seismic-support-governance' },
-        { text: 'Launch', link: '/custody-integration#what-actions-will-institutional-holders-be-expected-to-take-upon-network-launch' },
-        { text: 'Vesting', link: '/custody-integration#do-you-have-vesting-schedules' },
-        { text: 'Tokenomics', link: '/custody-integration#where-can-i-find-tokenomics-information' },
-      ],
-    },
-    {
-      text: 'Tokens',
-      collapsed: true,
-      items: [
-        { text: 'Supply', link: '/custody-integration#what-is-the-total-token-supply' },
-        { text: 'FDV', link: '/custody-integration#what-is-the-fully-diluted-value-fdv' },
-        { text: 'Investors', link: '/custody-integration#who-are-the-current-institutional-investors' },
-        { text: 'Reserve', link: '/custody-integration#does-seismic-hold-a-reserve' },
-        { text: 'TGE', link: '/custody-integration#what-is-the-target-token-generation-event-tge-date' },
-      ],
-    },
-    {
-      text: 'Regulatory',
-      collapsed: true,
-      items: [
-        { text: 'Security', link: '/custody-integration#is-the-seismic-token-a-security' },
-        { text: 'Domicile', link: '/custody-integration#what-is-the-domicile-of-the-managing-entity' },
-        { text: 'Team', link: '/custody-integration#where-is-the-team-located' },
-        { text: 'AML', link: '/custody-integration#do-you-maintain-an-anti-money-laundering-aml-program' },
-        { text: 'NY', link: '/custody-integration#will-you-require-offering-services-to-new-york-customers' },
-      ],
-    },
-    {
-      text: 'Help',
-      collapsed: true,
-      items: [
-        { text: 'Contact', link: '/custody-integration#who-should-institutional-partners-contact' },
-        { text: 'Custody', link: '/custody-integration#what-custody-solutions-are-recommended' },
-        { text: 'USD', link: '/custody-integration#do-you-have-usd-custody-needs' },
-        { text: 'Explorer', link: '/custody-integration#what-block-explorer-should-we-use' },
-        { text: 'RPC', link: '/custody-integration#are-there-rpc-endpoint-providers' },
-        { text: 'Updates', link: '/custody-integration#where-can-i-find-the-latest-updates' },
+        { text: 'What is Seismic?', link: '/introduction#what-is-seismic-network' },
+        { text: 'Key Features', link: '/introduction#key-features' },
+        { text: 'Documentation Structure', link: '/introduction#documentation-structure' },
+        { text: 'Quick Start', link: '/introduction#quick-start' },
       ],
     },
   ],
@@ -219,13 +26,299 @@ export const sidebar = {
       ],
     },
   ],
+  '/mainnet': [
+    {
+      text: 'Mainnet',
+      collapsed: false,
+      items: [
+        { text: 'Network Configuration', link: '/mainnet#network-configuration' },
+        { text: 'Genesis Date', link: '/mainnet#genesis-date' },
+        { text: 'Gas Pricing', link: '/mainnet#gas-pricing' },
+        { text: 'Block Explorer', link: '/mainnet#block-explorer' },
+        { text: 'Wrapped Token', link: '/mainnet#wrapped-native-token' },
+        { text: 'Network Status', link: '/mainnet#network-status' },
+      ],
+    },
+  ],
+  '/testnet': [
+    {
+      text: 'Testnet',
+      collapsed: false,
+      items: [
+        { text: 'Network Configuration', link: '/testnet#network-configuration' },
+        { text: 'Getting Tokens', link: '/testnet#getting-testnet-tokens' },
+        { text: 'Wrapped Token', link: '/testnet#wrapped-native-token' },
+      ],
+    },
+  ],
+  '/ethereum-differences': [
+    {
+      text: 'Overview',
+      collapsed: false,
+      items: [
+        { text: 'Introduction', link: '/ethereum-differences#overview' },
+      ],
+    },
+    {
+      text: 'EVM Compatibility',
+      collapsed: false,
+      items: [
+        { text: "What's Added", link: '/ethereum-differences#whats-added' },
+        { text: "What's Modified", link: '/ethereum-differences#whats-modified' },
+        { text: "What's the Same", link: '/ethereum-differences#whats-the-same' },
+      ],
+    },
+    {
+      text: 'Transactions',
+      collapsed: false,
+      items: [
+        { text: 'Transaction Types', link: '/ethereum-differences#transaction-types' },
+      ],
+    },
+    {
+      text: 'RPC',
+      collapsed: false,
+      items: [
+        { text: 'Modified Methods', link: '/ethereum-differences#modified-methods' },
+        { text: 'Supported Methods', link: '/ethereum-differences#supported-methods' },
+        { text: 'Configuration', link: '/ethereum-differences#configuration-parameters' },
+        { text: 'State Overrides', link: '/ethereum-differences#state-overrides' },
+      ],
+    },
+    {
+      text: 'Token Standards',
+      collapsed: false,
+      items: [
+        { text: 'SRC20', link: '/ethereum-differences#src20-token-standard' },
+      ],
+    },
+    {
+      text: 'Other',
+      collapsed: false,
+      items: [
+        { text: 'Solidity Compatibility', link: '/ethereum-differences#solidity-compatibility' },
+        { text: 'Finality', link: '/ethereum-differences#finality' },
+        { text: 'Miscellaneous', link: '/ethereum-differences#other-differences' },
+      ],
+    },
+  ],
+  '/architecture': [
+    {
+      text: 'Overview',
+      collapsed: false,
+      items: [
+        { text: 'What Makes Seismic Unique', link: '/architecture#what-makes-seismic-unique' },
+        { text: 'Required Binaries', link: '/architecture#required-binaries' },
+      ],
+    },
+    {
+      text: 'Deployment',
+      collapsed: false,
+      items: [
+        { text: 'Deployment Method', link: '/architecture#deployment-method' },
+      ],
+    },
+    {
+      text: 'Hardware',
+      collapsed: false,
+      items: [
+        { text: 'Intel TDX Requirement', link: '/architecture#intel-tdx-requirement' },
+        { text: 'Recommended Specs', link: '/architecture#recommended-specifications' },
+      ],
+    },
+    {
+      text: 'Configuration',
+      collapsed: false,
+      items: [
+        { text: 'Network Architecture', link: '/architecture#network-architecture' },
+        { text: 'Data Directory', link: '/architecture#data-directory' },
+        { text: 'Host and Port', link: '/architecture#host-and-port' },
+      ],
+    },
+    {
+      text: 'Storage',
+      collapsed: false,
+      items: [
+        { text: 'Requirements', link: '/architecture#storage-requirements' },
+        { text: 'Monthly Growth', link: '/architecture#monthly-growth' },
+        { text: 'Sync Time', link: '/architecture#sync-time' },
+        { text: 'Snapshots', link: '/architecture#snapshots' },
+      ],
+    },
+    {
+      text: 'Operations',
+      collapsed: false,
+      items: [
+        { text: 'Graceful Shutdown', link: '/architecture#graceful-shutdown' },
+        { text: 'Hard Forks', link: '/architecture#hard-forks' },
+      ],
+    },
+    {
+      text: 'Technical Details',
+      collapsed: false,
+      items: [
+        { text: 'Seismic REVM', link: '/architecture#seismic-revm' },
+        { text: 'Performance', link: '/architecture#performance' },
+        { text: 'Shielded Features', link: '/architecture#shielded-features' },
+      ],
+    },
+  ],
+  '/consensus': [
+    {
+      text: 'Consensus',
+      collapsed: false,
+      items: [
+        { text: 'Summit Client', link: '/consensus#summit-consensus-client' },
+        { text: 'Simplex Algorithm', link: '/consensus#simplex-consensus-algorithm' },
+        { text: 'Finality', link: '/consensus#finality' },
+        { text: 'Block Production', link: '/consensus#block-production' },
+        { text: 'Finality Tags', link: '/consensus#finality-tags' },
+        { text: 'Node Participation', link: '/consensus#node-participation' },
+      ],
+    },
+  ],
+  '/tools': [
+    {
+      text: 'Development Tools',
+      collapsed: false,
+      items: [
+        { text: 'Seismic Solidity', link: '/tools#seismic-solidity' },
+        { text: 'Seismic Forge', link: '/tools#seismic-forge-sforge' },
+        { text: 'Sanvil', link: '/tools#sanvil' },
+        { text: 'Seismic Compiler', link: '/tools#seismic-compiler-ssolc' },
+      ],
+    },
+  ],
+  '/third-party': [
+    {
+      text: 'Third-Party Infrastructure',
+      collapsed: false,
+      items: [
+        { text: 'Bridges', link: '/third-party#bridges' },
+        { text: 'Oracles', link: '/third-party#oracles' },
+        { text: 'RPC Providers', link: '/third-party#rpc-providers' },
+        { text: 'Custody Solutions', link: '/third-party#custody-solutions' },
+      ],
+    },
+  ],
+  '/resources': [
+    {
+      text: 'Resources & Contact',
+      collapsed: false,
+      items: [
+        { text: 'Documentation Sites', link: '/resources#documentation-sites' },
+        { text: 'GitHub Repositories', link: '/resources#github-repositories' },
+        { text: 'Community', link: '/resources#community-support' },
+        { text: 'Contact', link: '/resources#contact' },
+        { text: 'Communication', link: '/resources#communication-channels' },
+      ],
+    },
+  ],
+  '/node-operator-faq': [
+    {
+      text: 'Node Operator FAQ',
+      collapsed: false,
+      items: [
+        { text: 'RPC Operations', link: '/node-operator-faq#rpc-operations' },
+        { text: 'Storage & Performance', link: '/node-operator-faq#storage-performance' },
+        { text: 'Operations', link: '/node-operator-faq#operations' },
+      ],
+    },
+  ],
+  '/governance': [
+    {
+      text: 'Network Participation',
+      collapsed: false,
+      items: [
+        { text: 'Staking', link: '/governance#staking' },
+        { text: 'Governance', link: '/governance#governance' },
+        { text: 'Actions at Launch', link: '/governance#actions-at-network-launch' },
+        { text: 'Vesting', link: '/governance#vesting-schedules' },
+      ],
+    },
+    {
+      text: 'Tokenomics',
+      collapsed: false,
+      items: [
+        { text: 'Token Supply', link: '/governance#total-token-supply' },
+        { text: 'FDV', link: '/governance#fully-diluted-value-fdv' },
+        { text: 'Investors', link: '/governance#institutional-investors' },
+        { text: 'Reserve', link: '/governance#foundation-reserve' },
+        { text: 'TGE', link: '/governance#token-generation-event-tge' },
+      ],
+    },
+  ],
+  '/compliance': [
+    {
+      text: 'Token Classification',
+      collapsed: false,
+      items: [
+        { text: 'Is Token a Security?', link: '/compliance#is-the-seismic-token-a-security' },
+      ],
+    },
+    {
+      text: 'Entity Information',
+      collapsed: false,
+      items: [
+        { text: 'Entity Domicile', link: '/compliance#entity-domicile' },
+        { text: 'Team Location', link: '/compliance#team-location' },
+      ],
+    },
+    {
+      text: 'Compliance Programs',
+      collapsed: false,
+      items: [
+        { text: 'AML Program', link: '/compliance#anti-money-laundering-aml-program' },
+        { text: 'NY Customers', link: '/compliance#new-york-customers' },
+      ],
+    },
+    {
+      text: 'Other',
+      collapsed: false,
+      items: [
+        { text: 'USD Custody', link: '/compliance#usd-custody' },
+      ],
+    },
+  ],
   '/': [
+    {
+      text: 'Introduction',
+      link: '/introduction',
+    },
     {
       text: 'Install',
       link: '/install',
     },
     {
-      text: 'Resources',
+      text: 'Mainnet',
+      link: '/mainnet',
+    },
+    {
+      text: 'Testnet',
+      link: '/testnet',
+    },
+    {
+      text: 'Differences from Ethereum',
+      link: '/ethereum-differences',
+    },
+    {
+      text: 'Architecture',
+      link: '/architecture',
+    },
+    {
+      text: 'Consensus',
+      link: '/consensus',
+    },
+    {
+      text: 'Development Tools',
+      link: '/tools',
+    },
+    {
+      text: 'Third-Party Infrastructure',
+      link: '/third-party',
+    },
+    {
+      text: 'Resources & Contact',
       link: '/resources',
     },
     {
@@ -233,8 +326,12 @@ export const sidebar = {
       link: '/node-operator-faq',
     },
     {
-      text: 'Custody & Integration',
-      link: '/custody-integration',
+      text: 'Governance',
+      link: '/governance',
+    },
+    {
+      text: 'Compliance',
+      link: '/compliance',
     },
   ],
 } as const satisfies Sidebar

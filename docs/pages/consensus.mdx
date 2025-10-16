@@ -1,0 +1,43 @@
+# Consensus
+
+## Summit Consensus Client
+
+[Summit](https://github.com/SeismicSystems/summit) is Seismic's consensus client that coordinates with the execution layer (Seismic Reth) and the enclave server.
+
+Summit is built on [Commonware](https://commonware.xyz/), a modular framework for building blockchain infrastructure. Commonware provides the core building blocks that power Summit's consensus implementation.
+
+## Simplex Consensus Algorithm
+
+Seismic uses the Simplex consensus algorithm to achieve fast finality and high throughput.
+
+### Finality
+
+Seismic achieves finality in 1-2 blocks, with total finality time under 2 seconds. This is significantly faster than Ethereum mainnet.
+
+**Finality details:**
+- **Block time**: 600ms - 1 second
+- **Blocks to finality**: 1-2 blocks
+- **Total time to finality**: < 2 seconds
+
+### Block Production
+
+- **Block Rate**: 1 block per ~600ms - 1s
+- **Empty Blocks**: Yes, like Ethereum, Seismic will produce empty blocks when there are no pending transactions
+
+### Finality Tags
+
+Currently, Seismic does not support the `"finalized"` block parameter tag as specified in EIP-3675. However, given the extremely fast finality (< 2 seconds), using `"latest"` provides near-equivalent guarantees.
+
+**Workaround**: Use `"latest"` or specify a block number minus 1-2 blocks for finalized state.
+
+This feature may be added in future updates if there's demand from integrators.
+
+## Node Participation
+
+### Publishing Transactions
+
+Yes, if properly staked, nodes can propagate and publish transactions on-chain.
+
+### Outages
+
+Not on mainnet (not yet launched). During testing, various issues have occurred, but these have been resolved prior to public release.

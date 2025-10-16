@@ -1,0 +1,261 @@
+# Differences from Ethereum
+
+## Overview
+
+Seismic is approximately a **superset of the EVM**, meaning:
+- Standard EVM functionality works identically to Ethereum
+- Additional features enable shielded (private) computation
+- Transaction construction and serialization identical to Ethereum (with one new transaction type)
+- Address generation, gas estimation, and signing work the same as Ethereum
+
+**Key differentiating features:**
+- **Shielded state storage**: Solidity contracts can store private data on-chain
+- **Encrypted calldata**: New transaction type (0x4a) encrypts transaction calldata
+- **Privacy-preserving**: Uses Intel TDX (Trusted Execution Environments), not zero-knowledge proofs
+
+Seismic is most like **Ethereum mainnet** with privacy enhancements, using the same transaction types, gas model (EIP-1559), serialization (RLP), cryptographic algorithms (Keccak-256, ECDSA secp256k1), and account model.
+
+For a detailed technical writeup of our EVM additions, see the [Seismic REVM README](https://github.com/SeismicSystems/seismic-revm/blob/c29f4ea0681f09fb1e9998fa16568d4979c47ee3/README.md).
+
+## EVM Compatibility
+
+### What's Added
+
+**New Opcodes:**
+- `CLOAD` - Load shielded data from storage
+- `CSTORE` - Store shielded data to storage
+- `TIMESTAMP_MS` - Get block timestamp in milliseconds
+
+**New Precompiles:**
+- 6 new precompiles for shielded operations (see [status page](https://status.seismicdev.net/))
+
+**Custom Transaction Type:**
+- Type `0x4a` ("Seismic transaction") - Supports encrypted calldata for private operations
+
+**Shielded Types:**
+- New data types added to Solidity for private state management
+
+### What's Modified
+
+**Timestamps:**
+- Block timestamps are stored in milliseconds (in EVM and block headers)
+- Standard `block.timestamp` still returns seconds for compatibility
+
+**Trace Data:**
+- Some trace data is removed or restricted to protect shielded state
+- See RPC Differences section below for details
+
+### What's the Same
+
+- All standard EVM opcodes supported
+- All standard precompiles available (including `ecrecover` at address(1))
+- Solidity contracts work as expected
+- EIP-1559 dynamic transactions supported
+- Standard Solidity global variables behave the same (except timestamps have millisecond precision available)
+
+## Transaction Types
+
+Seismic supports:
+- **Legacy transactions** (Type 0x0) - 100% identical to Ethereum
+- **EIP-1559 transactions** (Type 0x2) - 100% identical to Ethereum
+- **Seismic transactions** (Type 0x4a) - Essentially a legacy transaction with encrypted calldata
+
+Standard Ethereum transaction construction libraries work without modification.
+
+### Transaction Construction
+
+- Transaction construction is identical to Ethereum
+- Standard signing with chain ID 5123 (mainnet) or 5124 (testnet)
+- EIP-155 chain ID-based nonce system for replay protection
+- No upper bound on time between transaction construction and broadcast
+- Standard nonce-based ordering applies
+
+### Transaction Fees & Gas
+
+Seismic uses the standard Ethereum gas model:
+- Transaction fees follow standard EIP-1559 pricing (base fee + priority fee)
+- Base fee adjusts based on network congestion
+- Priority fee (tip) for faster inclusion
+- Gas is paid using the native Seismic token
+- Gas is estimated with `eth_estimateGas` (works exactly as on Ethereum)
+- Excess gas is refunded after transaction execution
+- No hidden costs outside of EVM gas usage
+
+### Special Transaction Types
+
+The Seismic transaction type (0x4a) can cause balance changes, but it functions similarly to a standard transaction - it just has encrypted calldata. There are no special transaction types like Arbitrum's Retryable Tickets.
+
+## RPC Differences
+
+### Modified Methods
+
+**`eth_getStorageAt`:**
+- Reduced functionality to prevent leaking shielded state
+- Standard storage access works, but shielded storage is protected
+
+**Call Tracing:**
+- Limited trace functionality to protect shielded data
+- `debug_traceTransaction` and `trace_*` methods supported but some data is blocked
+- `trace_filter` has specific restrictions (TBD)
+- Custom call tracers supported via Geth tracers
+
+### Supported Methods
+
+Seismic supports **all standard Ethereum JSON-RPC methods** with the exceptions noted above. All endpoints are available; none have been entirely removed.
+
+**WebSocket Support:**
+- Both HTTP and WebSocket connections supported
+- HTTP RPC: `/rpc`
+- WebSocket RPC: `/ws`
+
+**WebSocket Subscriptions:**
+- `eth_subscribe` / `eth_unsubscribe` for real-time event monitoring
+- Subscription types: `newHeads`, `logs`, `newPendingTransactions`, `syncing`
+
+### Configuration Parameters
+
+Key Reth parameters include:
+- `--rpc.txfeecap`: Maximum transaction fee cap (default: 1 ETH)
+- `--rpc.max-response-size`: Maximum response size (default: 160MB)
+
+**`eth_getLogs` limits:**
+- At least 15MB response size
+- Reth default configured at 160MB
+- Adjustable if needed
+
+**Batch requests:**
+- No specific batch count limit
+- Only limited by total payload size
+
+### State Overrides
+
+Yes, `stateOverrides` are supported in `eth_call`.
+
+## SRC20 Token Standard
+
+**SRC20** (Seismic Request for Comment 20) is Seismic's token standard for shielded tokens.
+
+### Key Differences from ERC20
+
+- **Transfer Events**: SRC20 tokens may not emit the standard `Transfer` event (topic hash: `0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef`) due to privacy features
+- **Expected Dominance**: SRC20 tokens are expected to be more common than standard ERC20s on Seismic
+- **ERC20 Support**: Standard ERC20 tokens are still fully supported and will emit standard events
+- **Balance Tracking**: For SRC20 tokens, balance changes are recorded on-chain but may not be publicly visible in the same way as standard tokens due to privacy features
+
+:::warning
+Token integrators should be aware of this distinction when building indexers or wallets. Don't rely solely on `Transfer` events for SRC20 tokens. Balance tracking may require alternative methods beyond event indexing.
+:::
+
+### Native Asset Transfers
+
+**Long-term**: Native asset transfers work by setting the `value` field in transactions, identical to Ethereum.
+
+**Short-term**: This is still being finalized for early mainnet. The native asset model may evolve in the first months post-launch.
+
+## Solidity Compatibility
+
+### Compiler Version
+
+Contracts should be compiled with EVM version **'Paris' or later**. Existing compiled contracts work without modification.
+
+### Deploying Existing Contracts
+
+Yes! Existing Solidity contracts can be deployed without modification. The additions (shielded types and opcodes) are opt-in for privacy features.
+
+### Gnosis Safe Support
+
+Gnosis contracts can function on-chain. However, the Gnosis UI doesn't natively support Seismic yet. The team may work with Gnosis to add support.
+
+## Finality
+
+### How Finality Works
+
+Seismic achieves finality in 1-2 blocks, with total finality time under 2 seconds. This is significantly faster than Ethereum mainnet.
+
+**Finality details:**
+- **Block time**: 600ms - 1 second
+- **Blocks to finality**: 1-2 blocks
+- **Total time to finality**: < 2 seconds
+
+### Finality Tags
+
+Currently, Seismic does not support the `"finalized"` block parameter tag as specified in EIP-3675. However, given the extremely fast finality (< 2 seconds), using `"latest"` provides near-equivalent guarantees.
+
+**Workaround**: Use `"latest"` or specify a block number minus 1-2 blocks for finalized state.
+
+This feature may be added in future updates if there's demand from integrators.
+
+## Accounts & Cryptography
+
+### Account Creation
+
+Accounts are **implicit** (same as Ethereum):
+- Addresses exist as soon as you have a private key
+- No on-chain instantiation required
+- Accounts become "active" when they first receive a transaction or balance
+
+### Address Generation & Signing
+
+**No deviations from Ethereum**. Seismic uses identical mechanisms:
+- **Address generation**: Hash public key using Keccak-256, take last 20 bytes
+- **Cryptographic algorithm**: ECDSA with secp256k1 curve
+- **Serialization**: RLP (Recursive Length Prefix)
+- **Hashing**: Keccak-256 (SHA-3 variant)
+
+### Security Model
+
+Seismic follows standard Ethereum security model - assets can only move with a valid signature from the private key holder (or via approved smart contract logic like allowances).
+
+## Privacy Features
+
+Seismic has **opt-in** privacy features:
+- Contracts can use shielded storage (CLOAD/CSTORE opcodes) for private state
+- Users can send Seismic transactions (type 0x4a) with encrypted calldata
+- Standard transactions remain fully transparent like Ethereum
+- Privacy is achieved through Intel TDX (Trusted Execution Environments), not zero-knowledge proofs
+
+## Querying the Blockchain
+
+### Balance & Transaction Queries
+
+Standard Ethereum methods work identically:
+- `eth_getLogs` - Query logs and events
+- `eth_getBalance` - Check account balances
+- `eth_getTransactionReceipt` - Get finalized transaction details
+- `eth_getTransactionByHash` - Get pending/confirmed transactions
+- `eth_blockNumber` - Check sync status
+- Full archive nodes support querying from genesis
+- RPC filters work for event-based indexing
+
+**Note**: Shielded (SRC20) token balances may require specialized queries depending on the token implementation.
+
+### Performance & Throughput
+
+Seismic targets:
+- **Block time**: 600ms - 1 second
+- **Finality**: 1-2 blocks (< 2 seconds total)
+- **Stress test results**: Sustained 1000+ QPS with P99 latency in seconds, P50 in tens of milliseconds
+
+Seismic is a **monolithic L1 chain** (not sharded). Throughput is handled through fast block times, EIP-1559 dynamic gas pricing, and efficient execution via Reth and seismic-reVM.
+
+## Other Differences
+
+### Empty Blocks
+
+Yes, like Ethereum, Seismic will produce empty blocks when there are no pending transactions.
+
+### Mempool Visibility
+
+Mempool operates like standard EVM chains. Transaction priority follows EIP-1559 rules.
+
+### Transaction Expiration
+
+Standard EVM transaction expiration rules apply.
+
+## Important Considerations
+
+- **SRC20 tokens**: May not emit standard Transfer events; requires specialized indexing
+- **Shielded storage**: `eth_getStorageAt` won't reveal private contract state
+- **Intel TDX requirement**: Nodes require Intel TDX hardware; cannot run on standard VMs
+- **Transaction type 0x4a**: Ensure encrypted calldata is handled correctly
+- **Block timestamps**: Available in millisecond precision (though `block.timestamp` returns seconds for compatibility)

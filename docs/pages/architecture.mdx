@@ -1,0 +1,127 @@
+# Architecture
+
+## What Makes Seismic Unique
+
+Seismic runs on Intel TDX (Trusted Execution Environment), which enables secure, privacy-preserving computation. This is more complex than standard node deployments:
+
+- Nodes run in secure enclaves
+- The deployment uses a VHD image with three integrated components
+- Shutting down requires careful handling due to TDX constraints
+
+## Required Binaries
+
+Three binaries work together:
+
+1. **[Seismic Reth](https://github.com/SeismicSystems/seismic-reth)** - Execution layer (fork of [Reth](https://reth.rs/))
+2. **[Summit](https://github.com/SeismicSystems/summit)** - Consensus layer
+3. **[Enclave](https://github.com/SeismicSystems/enclave)** - Privacy/shielded computation
+
+All three binaries are deployed together in a VHD (Virtual Hard Disk) image built via Yocto.
+
+## Deployment Method
+
+Nodes are deployed using a VHD image that contains all necessary binaries. Setup instructions and architecture documentation are available in the [deploy repository](https://github.com/SeismicSystems/deploy), which was open-sourced in October 2025.
+
+## Hardware Requirements
+
+### Intel TDX Requirement
+
+Yes, Seismic nodes must run on **Intel TDX (Trust Domain Extensions)** for secure enclave execution. Internally, Azure has been used for deployments, and instructions for Azure deployment will be provided.
+
+### Recommended Specifications
+
+**Recommended specifications for Archive Nodes:**
+- **CPU**: High-performance multi-core processor
+- **Memory**: Substantial RAM (specific requirements TBD)
+- **Network**: High-bandwidth, low-latency connection
+- **Disk**: 1TB+ SSD storage
+- **Required Hardware**: Intel TDX (Trust Domain Extensions) support
+
+:::info
+All nodes currently run as archival nodes. Storage requirements will grow linearly with network usage.
+:::
+
+**Benchmarked Performance:**
+Detailed system requirements and benchmark results are available in the [deploy repository](https://github.com/SeismicSystems/deploy).
+
+## Network Architecture
+
+### Special Requirements
+
+Yes - the node requires Intel TDX support and runs three interconnected components. Unlike simpler blockchain nodes, you cannot easily run individual pieces separately.
+
+### Multiple Client Support
+
+Currently, Seismic uses the Reth-based stack. Multiple client support may be added in the future.
+
+## Configuration
+
+### Data Directory
+
+Yes, Reth supports specifying custom data directories, though the default is built into the VHD image.
+
+### Host and Port
+
+- **Host**: Yes, customizable
+- **Port**: No (fixed in VHD image)
+
+## Storage
+
+### Storage Requirements
+
+**Archive nodes**: 1TB+ recommended
+
+Storage requirements will grow linearly with network activity. Within the first year, expect approximately 12 hours of sync time for full archive history.
+
+### Monthly Growth
+
+TBD - this depends on network activity and will be monitored after mainnet launch.
+
+### Sync Time
+
+- **From genesis**: Approximately 12 hours for the first year of mainnet operation (likely much less in the first 6 months)
+- **With snapshots**: TBD - snapshot solution is still being developed
+- **Startup time**: About 1 minute after a clean shutdown/reboot
+
+### Snapshots
+
+Snapshot support is planned and will be made available in the future. Once available, snapshots will significantly reduce initial sync times. Check the documentation and status page for updates on snapshot availability.
+
+## Operations
+
+### Graceful Shutdown
+
+Yes, but given the TDX deployment, shutting down nodes is more complex than standard deployments. The node will exit cleanly with SIGTERM.
+
+**Expected restart time**: About 1 minute from machine reboot.
+
+### Hard Forks
+
+No hard forks have occurred yet (network is pre-mainnet). The frequency of future hard forks is TBD, but all upgrades will be communicated via Twitter, Discord, and direct partner outreach.
+
+All changes are deployed to testnet before mainnet.
+
+## Seismic REVM
+
+The Seismic REVM is a modified version of the Rust Ethereum Virtual Machine (REVM) that supports shielded computation and the custom opcodes. More details: https://github.com/SeismicSystems/seismic-revm
+
+## Performance
+
+### Scalability
+
+Seismic has been extensively stress-tested under high load. Performance targets:
+- **P99 latency**: On the order of seconds under high load (1000+ QPS)
+- **P50 latency**: Tens of milliseconds
+
+Benchmarks will be made public soon.
+
+### Is Seismic a ZK Chain?
+
+No. Seismic uses trusted execution environments (TEE) via Intel TDX for privacy, not zero-knowledge proofs.
+
+## Shielded Features
+
+Seismic supports:
+- **Shielded storage**: Data stored privately on-chain via `CLOAD`/`CSTORE` opcodes
+- **Encrypted calldata**: Transaction type 0x4a encrypts calldata
+- **Shielded types in Solidity**: New data types for private state
