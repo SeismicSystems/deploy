@@ -18,6 +18,15 @@ Three binaries work together:
 
 All three binaries are deployed together in a VHD (Virtual Hard Disk) image built via Yocto.
 
+### Additional Software
+
+Node images also include:
+- **SGX/TDX libraries** - Required for trusted execution environment
+- **Supervisor** - Process management
+- **Nginx** - Reverse proxy for RPC endpoints
+- **Certbot** - SSL certificate management
+- **Rust toolchain** - For building and running Rust binaries
+
 ## Deployment Method
 
 Nodes are deployed using a VHD image that contains all necessary binaries. Setup instructions and architecture documentation are available in the [deploy repository](https://github.com/SeismicSystems/deploy), which was open-sourced in October 2025.
@@ -31,15 +40,23 @@ Yes, Seismic nodes must run on **Intel TDX (Trust Domain Extensions)** for secur
 ### Recommended Specifications
 
 **Recommended specifications for Archive Nodes:**
-- **CPU**: High-performance multi-core processor
-- **Memory**: Substantial RAM (specific requirements TBD)
+- **CPU**: 4+ vCPUs (high-performance multi-core processor)
+- **Memory**: 32GB+ RAM
 - **Network**: High-bandwidth, low-latency connection
-- **Disk**: 1TB+ SSD storage
+- **OS Disk**: 256GB+ Premium SSD
+- **Data Disk**: 1TB+ SSD storage for blockchain data
 - **Required Hardware**: Intel TDX (Trust Domain Extensions) support
+- **Security Type**: Confidential virtual machines with secure boot and TPM enabled
 
 :::info
 All nodes currently run as archival nodes. Storage requirements will grow linearly with network usage.
 :::
+
+**Example Azure Configuration (Devnet):**
+- Size: Standard EC4es v5 (4 vCPUs, 32GB RAM)
+- OS Disk: 256GB Premium SSD LRS
+- Data Disks: 1x additional disk for blockchain data
+- Security: Confidential VM with secure boot and TPM
 
 **Benchmarked Performance:**
 Detailed system requirements and benchmark results are available in the [deploy repository](https://github.com/SeismicSystems/deploy).
