@@ -2,18 +2,20 @@ import argparse
 import json
 import tempfile
 from pathlib import Path
+from typing import List, Dict, Tuple
 
-from yocto.azure_common import CONSENSUS_PORT, AzureCLI
-from yocto.metadata import load_metadata
 from yocto.summit_client import SummitClient
+from yocto.metadata import load_metadata
+from yocto.azure_common import AzureCLI, CONSENSUS_PORT
+from yocto.cfg import _DOMAIN_RECORD_PREFIX, _GENESIS_VM_PREFIX
 
 
 def _genesis_vm_name(node: int) -> str:
-    return f"yocto-genesis-{node}"
+    return f"{_GENESIS_VM_PREFIX}-{node}"
 
 
 def _genesis_client(node: int) -> SummitClient:
-    return SummitClient(f"https://summit-genesis-{node}.seismictest.net/summit")
+    return SummitClient(f"https://{_DOMAIN_RECORD_PREFIX}-{node}.seismictest.net/summit")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -30,8 +32,8 @@ def _parse_args() -> argparse.Namespace:
 
 def _get_pubkeys(
     home: Path,
-    node_clients: list[tuple[int, SummitClient]],
-) -> tuple[list[dict[str, str]], dict[int, str]]:
+    node_clients: List[Tuple[int, SummitClient]],
+) -> Tuple[List[Dict[str, str]], Dict[int, str]]:
     resources = load_metadata(str(home))["resources"]
 
     validators = []
@@ -56,8 +58,8 @@ def _get_pubkeys(
 
 def _post_shares(
     tmpdir: str,
-    node_clients: list[tuple[int, SummitClient]],
-    node_to_pubkey: dict[int, str],
+    node_clients: List[Tuple[int, SummitClient]],
+    node_to_pubkey: Dict[int, str],
 ):
     genesis_file = f"{tmpdir}/genesis.toml"
     genesis_toml = SummitClient.load_genesis_toml(genesis_file)
@@ -71,7 +73,7 @@ def _post_shares(
         )
         ip = validators[share_index]["ip_address"]
         share_file = f"{tmpdir}/node{share_index}/share.pem"
-        with open(share_file) as f:
+        with open(share_file, "r") as f:
             share = f.read()
             print(
                 f"Posting share {share} to node {node} @ {ip} / {node_to_pubkey[node]}"

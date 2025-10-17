@@ -24,6 +24,8 @@ DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
 DEFAULT_REGION = "eastus2"
 DEFAULT_VM_SIZE = "Standard_EC4es_v5"
 
+_DOMAIN_RECORD_PREFIX = "node"
+_GENESIS_VM_PREFIX = "yocto-genesis"
 
 # Disk Operations
 def get_disk_size(disk_path: str) -> int:
@@ -122,8 +124,8 @@ class DeploymentConfig:
             raise ValueError("Argument --node is required and cannot be less than 1")
         return {
             "node": node,
-            "record_name": f"summit-genesis-{node}",
-            "vm_name": f"yocto-genesis-{node}",
+            "record_name": f"{_DOMAIN_RECORD_PREFIX}-{node}",
+            "vm_name": f"{_GENESIS_VM_PREFIX}-{node}",
         }
 
     @classmethod
