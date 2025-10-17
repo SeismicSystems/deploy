@@ -1,0 +1,54 @@
+# Development Tools
+
+## Seismic Solidity
+
+**[Seismic Solidity](https://github.com/SeismicSystems/seismic-solidity)** is Seismic's fork of the Solidity compiler that supports shielded types and privacy features.
+
+:::info
+Normal Solidity contracts will work on Seismic out-of-the-box. However, you will only be able to manage shielded state in contracts written with Seismic Solidity.
+:::
+
+To develop contracts that use Seismic's privacy features, you must use Seismic Solidity instead of standard Solidity.
+
+For setup instructions and detailed documentation, see the [Seismic onboarding guide](https://docs.seismic.systems/onboarding/).
+
+### Compiler Requirements
+
+Contracts should be compiled with EVM version **'Paris' or later**. Existing compiled contracts work without modification.
+
+## Seismic Forge (sforge)
+
+**[Seismic Forge (sforge)](https://github.com/SeismicSystems/seismic-foundry)** is Seismic's fork of Foundry's Forge that integrates with Seismic Solidity and Sanvil. It provides a complete development environment for building, testing, and deploying smart contracts on Seismic.
+
+For setup instructions and detailed documentation, see the [Seismic onboarding guide](https://docs.seismic.systems/onboarding/).
+
+## Sanvil
+
+**[Sanvil](https://github.com/SeismicSystems/seismic-foundry)** is Seismic's fork of Anvil (Foundry's local testnet node). To run local development and testing on Seismic, you must use Sanvil instead of the standard Anvil.
+
+### Features
+
+Sanvil supports:
+- Starting from a fork point or genesis file
+- Sending the native asset and ERC-20 tokens
+- Creating and testing smart contracts
+- Contract deployment and testing
+- Transaction tracing with `debug_traceTransaction`
+- Local development workflows (similar to Bitcoin Regtest or Ethereum's Ganache)
+
+### Why Sanvil is Required
+
+Standard Anvil does not support:
+- Seismic transaction type (0x4a)
+- Shielded storage opcodes (CLOAD/CSTORE)
+- Encrypted calldata handling
+
+:::warning
+Standard Anvil is not compatible with Seismic's custom features (shielded state, transaction type 0x4a, etc.). You must use Sanvil for local testing.
+:::
+
+## Seismic Compiler (ssolc)
+
+`ssolc` is Seismic's Solidity compiler that includes support for shielded types and privacy features. It's part of the Seismic Solidity toolchain.
+
+Installation instructions are available in the [Installation guide](/install).

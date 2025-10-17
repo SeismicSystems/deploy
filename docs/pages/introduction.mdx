@@ -1,0 +1,79 @@
+# Introduction
+
+## What is Seismic Network?
+
+Seismic is an EVM-compatible Layer 1 blockchain that introduces shielded (private) computation capabilities to Solidity smart contracts. It's built on a fork of [Reth](https://reth.rs/) (the Rust Ethereum client) and includes custom features for privacy-preserving transactions.
+
+Seismic runs on Intel TDX (Trusted Execution Environment), which enables secure, privacy-preserving computation while maintaining full EVM compatibility.
+
+## Key Features
+
+- **EVM-Compatible**: Deploy existing Solidity contracts without modification
+- **Shielded Computation**: Private data storage and computation via new opcodes and precompiles
+- **Fast Finality**: 1-2 blocks (< 2 seconds) to finality
+- **High Performance**: Optimized for throughput with stress-tested performance under load
+- **Secure Enclaves**: Runs on Intel TDX for trusted execution
+
+## Documentation Structure
+
+This documentation is organized into the following sections:
+
+### [Installation](/install)
+
+Get started with Seismic development tools including sforge, sanvil, and ssolc. Learn how to set up your local development environment.
+
+### [Mainnet](/mainnet)
+
+Network configuration, gas pricing, and mainnet-specific information including genesis details and network status.
+
+### [Testnet](/testnet)
+
+Testnet network configuration, RPC endpoints, and how to get testnet tokens for development and testing.
+
+### [Differences from Ethereum](/ethereum-differences)
+
+Understand how Seismic differs from Ethereum, including EVM enhancements, RPC modifications, the SRC20 token standard, and transaction types.
+
+### [Architecture](/architecture)
+
+Learn about Seismic's unique architecture including the three-binary system (Reth, Summit, Enclave), Intel TDX requirements, hardware specifications, and storage requirements.
+
+### [Consensus](/consensus)
+
+Details on Summit (the consensus client), the Simplex consensus algorithm, and how Seismic achieves fast finality.
+
+### [Development Tools](/tools)
+
+Comprehensive guide to Seismic's development toolchain including Seismic Solidity, Seismic Forge (sforge), Sanvil, and the Seismic compiler (ssolc).
+
+### [Third-Party Infrastructure](/third-party)
+
+Information about bridges, oracles, RPC providers, and custody solutions for the Seismic ecosystem.
+
+### [Resources](/resources)
+
+Links to documentation sites, GitHub repositories, and contact information for support and partnership inquiries.
+
+### [Node Operator FAQ](/node-operator-faq)
+
+Frequently asked questions about running nodes, RPC operations, and network maintenance.
+
+### [Custody & Integration](/custody-integration)
+
+Technical information and frequently asked questions for institutional partners and custody providers.
+
+## Quick Start
+
+1. **Install Seismic Tools**: Follow the [Installation guide](/install) to set up sforge, sanvil, and ssolc
+2. **Explore the Architecture**: Read about Seismic's [unique architecture](/architecture) and [consensus mechanism](/consensus)
+3. **Understand the Differences**: Review [differences from Ethereum](/ethereum-differences) to understand Seismic's enhancements
+4. **Start Building**: Use [Seismic's development tools](/tools) to build and test smart contracts
+
+## Stay Connected
+
+- **Website**: [seismic.systems](https://seismic.systems)
+- **Twitter**: [@SeismicSys](https://x.com/SeismicSys)
+- **Discord**: [Join our community](https://discord.gg/MnMJ37JN)
+- **GitHub**: [SeismicSystems](https://github.com/SeismicSystems)
+
+For technical questions or partnership inquiries, contact c@seismic.systems.

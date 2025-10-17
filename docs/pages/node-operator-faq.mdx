@@ -1,0 +1,79 @@
+# Node Operator FAQ
+
+Welcome to the Seismic Network Node Operator FAQ. This document provides answers to frequently asked questions about running and operating nodes on the Seismic Network.
+
+## RPC Operations
+
+### Are there rate limits on RPC calls?
+
+No rate limits are currently imposed by the protocol itself, though node operators may implement their own.
+
+### What are the RPC configuration parameters?
+
+Key Reth parameters include:
+- `--rpc.txfeecap`: Maximum transaction fee cap (default: 1 ETH)
+- `--rpc.max-response-size`: Maximum response size (default: 160MB, which is very high)
+
+### What is the maximum size for `eth_getLogs` responses?
+
+At least 15MB, with Reth's default configured at 160MB. This can be adjusted if needed.
+
+### Is there a limit on batch RPC requests?
+
+No specific batch count limit - only limited by total payload size. Batch sizes can be arbitrarily large.
+
+### Does Seismic support log lookback?
+
+Yes, full nodes support complete log lookback and retrieval of contract events from the beginning of the chain.
+
+### What sync mode should I use for fetching logs?
+
+Use RPC calls with block filters. Reth may support more efficient methods as well.
+
+### Are block height indicators available?
+
+Yes, use `eth_blockNumber` to check current block height and sync progress. This is also the recommended method to verify node health and sync status.
+
+### What are the heaviest RPC methods?
+
+The most resource-intensive RPC methods are:
+- **`eth_getLogs`** with large block ranges or many matching events
+- **Tracing calls** (e.g., `debug_traceTransaction`, `trace_*` methods) with complex Geth tracers
+
+These methods typically require more computational resources and may take longer to respond depending on the complexity of the query.
+
+### Are there recommended caching rules for RPC methods?
+
+Caching strategies have not been formally specified yet. Node operators may implement their own caching strategies based on their infrastructure requirements.
+
+## Storage & Performance
+
+### How fast does storage for an RPC node grow?
+
+- **Current size**: TBD (network launching soon)
+- **Archive node**: 1TB+ storage recommended initially
+- **Growth rate**: Will depend on network activity; approximately 12 hours of sync time expected for first year of operation
+
+Detailed storage projections will be published after mainnet launch.
+
+## Operations
+
+### How often are hard forks expected?
+
+No hard forks have occurred yet (network is pre-mainnet). The frequency of future hard forks is TBD, but all upgrades will be communicated via Twitter, Discord, and direct partner outreach.
+
+All changes are deployed to testnet before mainnet.
+
+### Does the node handle SIGTERM gracefully?
+
+Yes, but given the TDX deployment, shutting down nodes is more complex than standard deployments. The node will exit cleanly with SIGTERM.
+
+**Expected restart time**: About 1 minute from machine reboot.
+
+### Have there been any major outages?
+
+Not on mainnet (not yet launched). During testing, various issues have occurred, but these have been resolved prior to public release.
+
+### Can I use third-party RPC providers?
+
+Seismic is in active discussions with RPC providers but doesn't currently have public partnerships. Updates will be shared as partnerships are established.

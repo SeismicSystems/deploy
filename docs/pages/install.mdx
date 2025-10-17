@@ -1,0 +1,50 @@
+# Installation
+
+:::info
+We currently support devices with x86_64/arm64 architectures running MacOS, Ubuntu or Windows.
+:::
+
+The local development suite uses `sforge` as the testing framework, `sanvil` as the local node, and `ssolc` as the compiler.
+
+## sforge, sanvil, and ssolc
+
+### 1. Install Prerequisites
+
+Install [rust](https://www.rust-lang.org/tools/install) / [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) / [brew](https://brew.sh/) / [jq](https://formulae.brew.sh/formula/jq) on your machine if you don't already have them. Default installations for all work well.
+
+```bash
+# install rust and cargo
+curl https://sh.rustup.rs -sSf | sh
+```
+
+### 2. Download sfoundryup
+
+Download and execute the sfoundryup installation script.
+
+```bash
+curl -L \
+     -H "Accept: application/vnd.github.v3.raw" \
+     "https://api.github.com/repos/SeismicSystems/seismic-foundry/contents/sfoundryup/install?ref=seismic" | bash
+source ~/.zshenv  # or ~/.bashrc or ~/.zshrc
+```
+
+### 3. Install Development Tools
+
+Install `sforge`, `sanvil`, `ssolc`. Expect this to take between 5-20 minutes depending on your machine.
+
+```bash
+sfoundryup
+source ~/.zshenv  # or ~/.bashrc or ~/.zshrc
+```
+
+### 4. Clean Existing Projects
+
+Remove old build artifacts in existing projects.
+
+```bash
+sforge clean  # run in your project's contract directory
+```
+
+## VSCode Extension
+
+We also recommend adding syntax highlighting via the [`seismic`](https://marketplace.visualstudio.com/items?itemName=SeismicSys.seismic) extension from the VSCode marketplace. If you have the `solidity` extension, you'll have to disable it while writing Seismic code.
