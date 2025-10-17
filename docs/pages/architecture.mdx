@@ -43,20 +43,19 @@ Yes, Seismic nodes must run on **Intel TDX (Trust Domain Extensions)** for secur
 - **CPU**: 4+ vCPUs (high-performance multi-core processor)
 - **Memory**: 32GB+ RAM
 - **Network**: High-bandwidth, low-latency connection
-- **OS Disk**: 256GB+ Premium SSD
-- **Data Disk**: 1TB+ SSD storage for blockchain data
+- **Storage**: Disk size depends on VHD image (blockchain data stored on OS disk)
 - **Required Hardware**: Intel TDX (Trust Domain Extensions) support
 - **Security Type**: Confidential virtual machines with secure boot and TPM enabled
 
 :::info
-All nodes currently run as archival nodes. Storage requirements will grow linearly with network usage.
+All nodes currently run as archival nodes. Storage requirements will grow linearly with network usage. The OS disk size is determined by the VHD image and should include sufficient space for blockchain data growth.
 :::
 
-**Example Azure Configuration (Devnet):**
+**Example Azure Configuration:**
 - Size: Standard EC4es v5 (4 vCPUs, 32GB RAM)
-- OS Disk: 256GB Premium SSD LRS
-- Data Disks: 1x additional disk for blockchain data
-- Security: Confidential VM with secure boot and TPM
+- OS Disk: Size determined by VHD image, Standard LRS
+- Security: Confidential VM with secure boot and vTPM (NonPersistedTPM)
+- SKU: `standard_lrs` with `ConfidentialVM_NonPersistedTPM` security type
 
 **Benchmarked Performance:**
 Detailed system requirements and benchmark results are available in the [deploy repository](https://github.com/SeismicSystems/deploy).
