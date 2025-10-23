@@ -484,7 +484,7 @@ class AzureCLI:
                 "--enable-vtpm",
                 "true",
                 "--enable-secure-boot",
-                "false",
+                "true",
                 "--os-disk-security-encryption-type",
                 "NonPersistedTPM",
                 "--os-type",
