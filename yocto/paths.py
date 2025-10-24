@@ -25,7 +25,7 @@ class BuildPaths:
 
     @property
     def enclave_bb(self) -> str:
-        return "recipes-nodes/enclave/enclave.bb"
+        return "recipes-nodes/attester/attester.bb"
 
     @property
     def sreth_bb(self) -> str:
