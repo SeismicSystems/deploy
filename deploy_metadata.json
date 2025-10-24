@@ -1,39 +1,5 @@
 {
   "resources": {
-    "yocto-genesis-2": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251023201454.wic.vhd",
-      "public_ip": "4.152.152.179",
-      "domain": {
-        "url": "https://node-2.seismictest.net",
-        "record": "node-2",
-        "name": "seismictest.net",
-        "resource_group": "yocto-testnet"
-      },
-      "vm": {
-        "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-2",
-        "nsgName": "yocto-genesis-2",
-        "location": "eastus2",
-        "size": "Standard_EC4es_v5"
-      }
-    },
-    "yocto-genesis-3": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251023212231.wic.vhd",
-      "public_ip": "4.152.153.129",
-      "domain": {
-        "url": "https://node-3.seismictest.net",
-        "record": "node-3",
-        "name": "seismictest.net",
-        "resource_group": "yocto-testnet"
-      },
-      "vm": {
-        "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-3",
-        "nsgName": "yocto-genesis-3",
-        "location": "eastus2",
-        "size": "Standard_EC4es_v5"
-      }
-    },
     "yocto-genesis-4": {
       "artifact": "cvm-image-azure-tdx.rootfs-20251024152853.wic.vhd",
       "public_ip": "172.175.19.226",
@@ -68,19 +34,19 @@
         "size": "Standard_EC4es_v5"
       }
     },
-    "yocto-genesis-1": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251024170855.wic.vhd",
-      "public_ip": "135.222.187.137",
+    "yocto-genesis-3": {
+      "artifact": "cvm-image-azure-tdx.rootfs-20251024184703.wic.vhd",
+      "public_ip": "4.152.153.129",
       "domain": {
-        "url": "https://node-1.seismictest.net",
-        "record": "node-1",
+        "url": "https://node-3.seismictest.net",
+        "record": "node-3",
         "name": "seismictest.net",
         "resource_group": "yocto-testnet"
       },
       "vm": {
         "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-1",
-        "nsgName": "yocto-genesis-1",
+        "name": "yocto-genesis-3",
+        "nsgName": "yocto-genesis-3",
         "location": "eastus2",
         "size": "Standard_EC4es_v5"
       }
@@ -276,6 +242,92 @@
       },
       "image": {
         "measurement_id": "cvm-image-azure-tdx.rootfs-20251024170855.wic.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "b1eba05920d20536a8fbb44152aadfdc18cee36bf7feabbe7f652fcbc6cb299d"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "83ab9e702cc4ccc9b3c34a644fba3f58d5a3713e4f6887c058a9bbf7f3d00b6b"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "28d31f0daebb865d413fe3d9eb02d8913dd30e8d72b8230ee663047d32bdbbb0"
+          }
+        }
+      }
+    },
+    "cvm-image-azure-tdx.rootfs-20251024184703.wic.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "ymtest",
+          "commit": "${AUTOREV}"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "d7456d5d13d74e67d076e89466dfbeac7dd5b6e1"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "6309f56afa10b4d03e7c5fa381354d2324d607c9"
+        }
+      },
+      "image": {
+        "measurement_id": "cvm-image-azure-tdx.rootfs-20251024184703.wic.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "b1eba05920d20536a8fbb44152aadfdc18cee36bf7feabbe7f652fcbc6cb299d"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "83ab9e702cc4ccc9b3c34a644fba3f58d5a3713e4f6887c058a9bbf7f3d00b6b"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "28d31f0daebb865d413fe3d9eb02d8913dd30e8d72b8230ee663047d32bdbbb0"
+          }
+        }
+      }
+    },
+    "cvm-image-azure-tdx.rootfs-20251024193104.wic.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "ymtest",
+          "commit": "${AUTOREV}"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "d7456d5d13d74e67d076e89466dfbeac7dd5b6e1"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "6309f56afa10b4d03e7c5fa381354d2324d607c9"
+        }
+      },
+      "image": {
+        "measurement_id": "cvm-image-azure-tdx.rootfs-20251024193104.wic.vhd",
         "attestation_type": "azure-tdx",
         "measurements": {
           "11": {
