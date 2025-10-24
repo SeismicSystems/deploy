@@ -100,11 +100,11 @@ class Builder:
         paths = BuildPaths(self.home)
         git = self.configs.git
         enclave = update_git_bb(paths.enclave_bb, git.enclave, self.home)
-        sreth = update_git_bb(paths.sreth_bb, git.sreth, self.home)
+        # sreth = update_git_bb(paths.sreth_bb, git.sreth, self.home)
         # summit = update_git_bb(paths.summit_bb, git.summit, self.home)
         return GitConfigs(
             enclave=enclave,
-            sreth=sreth,
+            # sreth=sreth,
             # summit=summit,
         )
 

@@ -37,21 +37,21 @@ class GitConfig:
 @dataclass
 class GitConfigs:
     enclave: GitConfig
-    sreth: GitConfig
+    # sreth: GitConfig
     # summit: GitConfig
 
     @staticmethod
     def from_args(args: Namespace) -> "GitConfigs":
         return GitConfigs(
             enclave=GitConfig.from_args(args, "enclave"),
-            sreth=GitConfig.from_args(args, "sreth"),
+            # sreth=GitConfig.from_args(args, "sreth"),
             # summit=GitConfig.from_args(args, "summit"),
         )
 
     def to_dict(self):
         return {
             "enclave": self.enclave.to_dict(),
-            "sreth": self.sreth.to_dict(),
+            # "sreth": self.sreth.to_dict(),
             # "summit": self.summit.to_dict(),
         }
 
@@ -59,7 +59,7 @@ class GitConfigs:
     def default() -> "GitConfigs":
         return GitConfigs(
             enclave=GitConfig.branch_only("seismic"),
-            sreth=GitConfig.branch_only("seismic"),
+            # sreth=GitConfig.branch_only("seismic"),
             # summit=GitConfig.branch_only("main"),
         )
 
