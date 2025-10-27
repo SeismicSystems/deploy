@@ -1,22 +1,5 @@
 {
   "resources": {
-    "yocto-genesis-4": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251024152853.wic.vhd",
-      "public_ip": "172.175.19.226",
-      "domain": {
-        "url": "https://node-4.seismictest.net",
-        "record": "node-4",
-        "name": "seismictest.net",
-        "resource_group": "yocto-testnet"
-      },
-      "vm": {
-        "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-4",
-        "nsgName": "yocto-genesis-4",
-        "location": "eastus2",
-        "size": "Standard_EC4es_v5"
-      }
-    },
     "yocto-genesis-5": {
       "artifact": "cvm-image-azure-tdx.rootfs-20251024170855.wic.vhd",
       "public_ip": "68.220.25.161",
@@ -350,6 +333,41 @@
           },
           "9": {
             "expected": "28d31f0daebb865d413fe3d9eb02d8913dd30e8d72b8230ee663047d32bdbbb0"
+          }
+        }
+      }
+    },
+    "cvm-image-azure-tdx.rootfs-20251024193105.wic.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "43e805a8a438d2e7a659fcf9e388ca6e445cbc9f"
+        }
+      },
+      "image": {
+        "measurement_id": "cvm-image-azure-tdx.rootfs-20251024193105.wic.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "c31e1fdf27d449a1efba8596556325ab573b93a84f1b5c950a6f7a2401674910"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "4f26a2393e9207cb3709448a6b6f0c35e11e76735ab3781e15d65c6c8845b700"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "f7b2fbb97ef9b500dce4c354ac5410a42dd4e752e32a6f27d31a9f7457fa4697"
           }
         }
       }
