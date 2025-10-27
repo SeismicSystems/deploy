@@ -1,52 +1,18 @@
 {
   "resources": {
-    "yocto-genesis-4": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251024152853.wic.vhd",
-      "public_ip": "172.175.19.226",
+    "yocto-genesis-2": {
+      "artifact": "cvm-image-azure-tdx.rootfs-20251027185959.wic.vhd",
+      "public_ip": "4.152.152.179",
       "domain": {
-        "url": "https://node-4.seismictest.net",
-        "record": "node-4",
+        "url": "https://node-2.seismictest.net",
+        "record": "node-2",
         "name": "seismictest.net",
         "resource_group": "yocto-testnet"
       },
       "vm": {
         "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-4",
-        "nsgName": "yocto-genesis-4",
-        "location": "eastus2",
-        "size": "Standard_EC4es_v5"
-      }
-    },
-    "yocto-genesis-5": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251024170855.wic.vhd",
-      "public_ip": "68.220.25.161",
-      "domain": {
-        "url": "https://node-5.seismictest.net",
-        "record": "node-5",
-        "name": "seismictest.net",
-        "resource_group": "yocto-testnet"
-      },
-      "vm": {
-        "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-5",
-        "nsgName": "yocto-genesis-5",
-        "location": "eastus2",
-        "size": "Standard_EC4es_v5"
-      }
-    },
-    "yocto-genesis-3": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251024184703.wic.vhd",
-      "public_ip": "4.152.153.129",
-      "domain": {
-        "url": "https://node-3.seismictest.net",
-        "record": "node-3",
-        "name": "seismictest.net",
-        "resource_group": "yocto-testnet"
-      },
-      "vm": {
-        "resourceGroup": "yocto-testnet",
-        "name": "yocto-genesis-3",
-        "nsgName": "yocto-genesis-3",
+        "name": "yocto-genesis-2",
+        "nsgName": "yocto-genesis-2",
         "location": "eastus2",
         "size": "Standard_EC4es_v5"
       }
@@ -350,6 +316,79 @@
           },
           "9": {
             "expected": "28d31f0daebb865d413fe3d9eb02d8913dd30e8d72b8230ee663047d32bdbbb0"
+          }
+        }
+      }
+    },
+    "cvm-image-azure-tdx.rootfs-20251027165015.wic.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "ymtest",
+          "commit": "${AUTOREV}"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "d7456d5d13d74e67d076e89466dfbeac7dd5b6e1"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "6309f56afa10b4d03e7c5fa381354d2324d607c9"
+        }
+      },
+      "image": {
+        "measurement_id": "cvm-image-azure-tdx.rootfs-20251027165015.wic.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "6243096670f7898895f27556fb8f16c6c1a48e155817f8d8fe65fbaccd3388ca"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "0978847184e350fa506a9e6fdf5ffab81c4b87a262eccbffbca0bb04eb4c510d"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "ef2fff09578976c2f6dc95571e664408b8e3a8ce0500b922d86b051b53785dd2"
+          }
+        }
+      }
+    },
+    "cvm-image-azure-tdx.rootfs-20251027185959.wic.vhd": {
+      "repos": {},
+      "image": {
+        "measurement_id": "cvm-image-azure-tdx.rootfs-20251027185959.wic.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "345332772eb8a9686a8316dd5e0d05725a0e5abfedc0f017c5ec94fe1d3ec8a0"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "d87ac5eb159d085054899ebeacbe7485b20683d8b06624eb1a8d4c38d10856b4"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "713c62ac197b96defe2bd498ffa121ff80dc891ebdd8c5c13d6ff09e29eda972"
           }
         }
       }
