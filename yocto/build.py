@@ -45,6 +45,7 @@ def build_image(home: str, capture_output: bool = True) -> Path:
     find_cmd = """
     find ~/yocto-manifests/reproducible-build/artifacts \
     -name 'cvm-image-azure-tdx.rootfs-*.wic.vhd' \
+    -name 'core-image-minimal-tdx.rootfs-*.wic.tar.gz'
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """
     find_result = subprocess.run(
