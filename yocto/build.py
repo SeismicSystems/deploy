@@ -104,7 +104,7 @@ class Builder:
         summit = update_git_bb(paths.summit_bb, git.summit, self.home)
         return GitConfigs(
             enclave=enclave,
-            sreth=sreth,
+            sreth=git.sreth,
             summit=summit,
         )
 
