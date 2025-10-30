@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def _extract_timestamp(artifact: str):
     """
     Extract timestamp from artifact filename
-        e.g. 'cvm-image-azure-tdx.rootfs-20241202202935.wic.vhd'
+        e.g. 'core-image-minimal-tdx.rootfs-20241202202935.wic.vhd'
     Returns the timestamp if found, None otherwise
     """
 
@@ -22,7 +22,7 @@ def _extract_timestamp(artifact: str):
     if not match:
         raise ValueError(
             f"Invalid artifact name: {artifact}. "
-            'It should look like "cvm-image-azure-tdx.rootfs-20241202202935.wic.vhd"'
+            'It should look like "core-image-minimal-tdx.rootfs-20241202202935.wic.vhd"'
         )
     return match.group(1)
 
@@ -30,7 +30,7 @@ def _extract_timestamp(artifact: str):
 def artifact_timestamp(artifact: str) -> int:
     """
     Extract timestamp from artifact filename
-        e.g. 'cvm-image-azure-tdx.rootfs-20241202202935.wic.vhd'
+        e.g. 'core-image-minimal-tdx.rootfs-20241202202935.wic.vhd'
     Returns the timestamp if found, None otherwise
     """
     ts_string = _extract_timestamp(artifact)
@@ -41,7 +41,7 @@ def artifact_timestamp(artifact: str) -> int:
 
 
 def _artifact_from_timestamp(timestamp: str) -> str:
-    return f"cvm-image-azure-tdx.rootfs-{timestamp}.wic.vhd"
+    return f"core-image-minimal-tdx.rootfs-{timestamp}.wic.vhd"
 
 
 def parse_artifact(artifact_arg: str | None) -> str | None:

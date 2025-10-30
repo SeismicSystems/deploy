@@ -44,8 +44,7 @@ def build_image(home: str, capture_output: bool = True) -> Path:
     # Find the latest built image
     find_cmd = """
     find ~/yocto-manifests/reproducible-build/artifacts \
-    -name 'cvm-image-azure-tdx.rootfs-*.wic.vhd' \
-    -name 'core-image-minimal-tdx.rootfs-*.wic.tar.gz'
+    -name 'core-image-minimal-tdx.rootfs-*.wic.vhd' \
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """
     find_result = subprocess.run(
@@ -101,7 +100,7 @@ class Builder:
         paths = BuildPaths(self.home)
         git = self.configs.git
         enclave = update_git_bb(paths.enclave_bb, git.enclave, self.home)
-        sreth = update_git_bb(paths.sreth_bb, git.sreth, self.home)
+        # sreth = update_git_bb(paths.sreth_bb, git.sreth, self.home)
         summit = update_git_bb(paths.summit_bb, git.summit, self.home)
         return GitConfigs(
             enclave=enclave,

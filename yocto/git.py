@@ -51,7 +51,7 @@ class GitConfigs:
     def to_dict(self):
         return {
             "enclave": self.enclave.to_dict(),
-            "sreth": self.sreth.to_dict(),
+            # "sreth": self.sreth.to_dict(),
             "summit": self.summit.to_dict(),
         }
 
