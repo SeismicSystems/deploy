@@ -29,7 +29,7 @@ def build_image(home: str, capture_output: bool = True) -> Path:
 
     # Run the build command
     build_cmd = " && ".join(
-        [f"cd {yocto_manifests_path}", "rm -rf build/", "make azure-image"]
+        [f"cd {yocto_manifests_path}", "rm -rf build/", "make image-rbuilder"]
     )
     build_result = subprocess.run(
         build_cmd,
@@ -40,11 +40,13 @@ def build_image(home: str, capture_output: bool = True) -> Path:
     if build_result.returncode != 0:
         err = build_result.stderr.strip() if build_result.stderr else "Unknown error"
         raise RuntimeError(f"Image build failed: {err}")
+    
+    paths = BuildPaths()
 
     # Find the latest built image
-    find_cmd = """
-    find ~/yocto-manifests/reproducible-build/artifacts \
-    -name 'core-image-minimal-tdx.rootfs-*.wic.vhd' \
+    find_cmd = f"""
+    find ~/yocto-manifests/reproducible-build/{paths.artifacts_folder()} \
+    -name '{paths.image_name()}-*.wic.vhd' \
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """
     find_result = subprocess.run(

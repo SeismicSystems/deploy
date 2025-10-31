@@ -13,7 +13,15 @@ class BuildPaths:
 
     @property
     def artifacts(self) -> Path:
-        return self.yocto_manifests / "reproducible-build/artifacts"
+        return self.yocto_manifests / f"reproducible-build/{self.artifacts_folder()}"
+
+    @staticmethod
+    def artifacts_folder(self) -> str:
+        return "artifacts-buildernet"
+
+    @staticmethod
+    def image_name(self) -> str:
+        return "cvm-image-azure-tdx.rootfs"
 
     @property
     def meta_seismic(self) -> Path:

@@ -41,7 +41,7 @@ def artifact_timestamp(artifact: str) -> int:
 
 
 def _artifact_from_timestamp(timestamp: str) -> str:
-    return f"core-image-minimal-tdx.rootfs-{timestamp}.wic.vhd"
+    return f"{BuildPaths().image_name()}-{timestamp}.wic.vhd"
 
 
 def parse_artifact(artifact_arg: str | None) -> str | None:
