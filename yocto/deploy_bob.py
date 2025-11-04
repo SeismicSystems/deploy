@@ -30,17 +30,64 @@ def create_bob_nsg_rules(config: DeployConfigs, az_cli: AzureCLI) -> None:
 
     rules = [
         # SSH ports (restricted to source IP)
-        ("AllowSSH", "100", "22", "Tcp", config.source_ip, "Port 22 - Dropbear control plane"),
-        ("AllowSSHKeyReg", "101", "8080", "Tcp", config.source_ip, "Port 8080 - SSH key registration"),
-        ("AllowContainerSSH", "102", "10022", "Tcp", config.source_ip, "Port 10022 - Container SSH"),
-
+        (
+            "AllowSSH",
+            "100",
+            "22",
+            "Tcp",
+            config.source_ip,
+            "Port 22 - Dropbear control plane",
+        ),
+        (
+            "AllowSSHKeyReg",
+            "101",
+            "8080",
+            "Tcp",
+            config.source_ip,
+            "Port 8080 - SSH key registration",
+        ),
+        (
+            "AllowContainerSSH",
+            "102",
+            "10022",
+            "Tcp",
+            config.source_ip,
+            "Port 10022 - Container SSH",
+        ),
         # Searcher service ports (open to all)
         ("AllowAttestation", "110", "8745", "Tcp", "*", "Port 8745 - CVM attestation"),
-        ("AllowSearcherInput", "111", "27017", "Udp", "*", "Port 27017 - Searcher input channel (UDP)"),
-        ("AllowConsensusP2P", "112", "9000", "*", "*", "Port 9000 - Lighthouse consensus P2P (TCP+UDP)"),
-        ("AllowExecutionP2P", "113", "30303", "*", "*", "Port 30303 - Execution client P2P (TCP+UDP)"),
-        ("AllowEngineAPI", "114", "8551", "Tcp", "*", "Port 8551 - Engine API (Lighthouse)"),
-
+        (
+            "AllowSearcherInput",
+            "111",
+            "27017",
+            "Udp",
+            "*",
+            "Port 27017 - Searcher input channel (UDP)",
+        ),
+        (
+            "AllowConsensusP2P",
+            "112",
+            "9000",
+            "*",
+            "*",
+            "Port 9000 - Lighthouse consensus P2P (TCP+UDP)",
+        ),
+        (
+            "AllowExecutionP2P",
+            "113",
+            "30303",
+            "*",
+            "*",
+            "Port 30303 - Execution client P2P (TCP+UDP)",
+        ),
+        (
+            "AllowEngineAPI",
+            "114",
+            "8551",
+            "Tcp",
+            "*",
+            "Port 8551 - Engine API (Lighthouse)",
+        ),
         # Standard ports (open to all)
         ("AllowHTTP", "120", "80", "Tcp", "*", "Port 80 - HTTP"),
         ("AllowHTTPS", "121", "443", "Tcp", "*", "Port 443 - HTTPS"),
@@ -58,7 +105,9 @@ def create_bob_nsg_rules(config: DeployConfigs, az_cli: AzureCLI) -> None:
 # Data disk and VM creation now use generic methods from azure_common
 
 
-def deploy_bob_vm(config: DeploymentConfig, image_path: Path, data_disk_size: int) -> str:
+def deploy_bob_vm(
+    config: DeploymentConfig, image_path: Path, data_disk_size: int
+) -> str:
     """Execute full BOB VM deployment pipeline."""
     logger.info("=" * 70)
     logger.info("BOB TEE Searcher Deployment")
@@ -79,7 +128,9 @@ def deploy_bob_vm(config: DeploymentConfig, image_path: Path, data_disk_size: in
 
     # Step 2: Create resource group
     logger.info("\n==> Step 2/9: Creating resource group...")
-    az_cli.ensure_created_resource_group(deploy_cfg.vm.resource_group, deploy_cfg.vm.location)
+    az_cli.ensure_created_resource_group(
+        deploy_cfg.vm.resource_group, deploy_cfg.vm.location
+    )
 
     # Step 3: Get or create public IP
     logger.info("\n==> Step 3/9: Getting or creating public IP address...")
@@ -102,7 +153,9 @@ def deploy_bob_vm(config: DeploymentConfig, image_path: Path, data_disk_size: in
     if az_cli.disk_exists(deploy_cfg, image_path):
         logger.warning(f"    Disk already exists, deleting to allow fresh upload...")
         disk_name = deploy_cfg.vm.disk_name(image_path)
-        az_cli.delete_disk(deploy_cfg.vm.resource_group, deploy_cfg.vm.name, image_path.name)
+        az_cli.delete_disk(
+            deploy_cfg.vm.resource_group, deploy_cfg.vm.name, image_path.name
+        )
         logger.info(f"    Deleted existing disk: {disk_name}")
 
     az_cli.create_disk(deploy_cfg, image_path)
@@ -162,12 +215,16 @@ def print_next_steps(vm_name: str, ip_address: str, resource_group: str) -> None
     logger.info(f"  Public IP:  {ip_address}")
     logger.info(f"\nNext Steps:")
     logger.info(f"\n1. Wait for VM to boot (~2 minutes), then register your SSH key:")
-    logger.info(f'   curl -X POST -d "$(cut -d\' \' -f2 ~/.ssh/id_ed25519.pub)" http://{ip_address}:8080')
+    logger.info(
+        f"   curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://{ip_address}:8080"
+    )
     logger.info(f"\n2. Initialize the encrypted persistent disk:")
     logger.info(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} initialize")
     logger.info(f"\n3. Verify attestation (requires cvm-reverse-proxy):")
     logger.info(f"   cd ~/cvm-reverse-proxy")
-    logger.info(f"   ./build/proxy-client --server-measurements ../measurements.json --target-addr=https://{ip_address}:8745")
+    logger.info(
+        f"   ./build/proxy-client --server-measurements ../measurements.json --target-addr=https://{ip_address}:8745"
+    )
     logger.info(f"   # In another terminal:")
     logger.info(f"   curl http://127.0.0.1:8080")
     logger.info(f"\n4. Access control plane (toggle modes, check status):")
@@ -244,6 +301,7 @@ def main():
     except Exception as e:
         logger.error(f"Deployment failed: {e}")
         import traceback
+
         traceback.print_exc()
         exit(1)
 

@@ -29,6 +29,7 @@ DEFAULT_VM_SIZE = "Standard_DC4es_v6"
 _DOMAIN_RECORD_PREFIX = "gn"
 _GENESIS_VM_PREFIX = "yocto-genesis"
 
+
 # Disk Operations
 def get_disk_size(disk_path: str) -> int:
     """Get disk size in bytes."""

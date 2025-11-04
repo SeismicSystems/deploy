@@ -15,7 +15,9 @@ def _genesis_vm_name(node: int) -> str:
 
 
 def _genesis_client(node: int) -> SummitClient:
-    return SummitClient(f"https://{_DOMAIN_RECORD_PREFIX}-{node}.seismictest.net/summit")
+    return SummitClient(
+        f"https://{_DOMAIN_RECORD_PREFIX}-{node}.seismictest.net/summit"
+    )
 
 
 def _parse_args() -> argparse.Namespace:
