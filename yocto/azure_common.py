@@ -17,12 +17,12 @@ from yocto.conf.conf import DeployConfigs, VmConfigs
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_RESOURCE_GROUP = "yocto-testnet"
+DEFAULT_RESOURCE_GROUP = "tdx-testnet"
 DEFAULT_DOMAIN_NAME = "seismictest.net"
 DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
 
-DEFAULT_REGION = "eastus2"
-DEFAULT_VM_SIZE = "Standard_EC4es_v5"
+DEFAULT_REGION = "eastus"
+DEFAULT_VM_SIZE = "Standard_EC4es_v6"
 
 CONSENSUS_PORT = 18551
 
@@ -442,6 +442,66 @@ class AzureCLI:
             cls.add_nsg_rule(config, name, priority, port, protocol, source)
 
     @classmethod
+    def create_data_disk(
+        cls,
+        resource_group: str,
+        disk_name: str,
+        location: str,
+        size_gb: int,
+        sku: str = "Premium_LRS",
+        show_logs: bool = False,
+    ) -> None:
+        """Create a data disk for persistent storage."""
+        logger.info(f"Creating data disk: {disk_name} ({size_gb}GB)")
+        cmd = [
+            "az",
+            "disk",
+            "create",
+            "--resource-group",
+            resource_group,
+            "--name",
+            disk_name,
+            "--location",
+            location,
+            "--size-gb",
+            str(size_gb),
+            "--sku",
+            sku,
+            "--hyper-v-generation",
+            "V2",
+            "--security-type",
+            "ConfidentialVM_NonPersistedTPM",
+        ]
+        cls.run_command(cmd, show_logs=show_logs)
+
+    @classmethod
+    def attach_data_disk(
+        cls,
+        resource_group: str,
+        vm_name: str,
+        disk_name: str,
+        lun: int = 10,
+        show_logs: bool = False,
+    ) -> None:
+        """Attach a data disk to a VM."""
+        logger.info(f"Attaching data disk {disk_name} to {vm_name} at LUN {lun}")
+        cmd = [
+            "az",
+            "vm",
+            "disk",
+            "attach",
+            "--resource-group",
+            resource_group,
+            "--vm-name",
+            vm_name,
+            "--name",
+            disk_name,
+            "--lun",
+            str(lun),
+        ]
+        cls.run_command(cmd, show_logs=show_logs)
+
+    @classmethod
     def create_user_data_file(cls, config: DeployConfigs) -> str:
         """Create temporary user data file."""
         fd, temp_file = tempfile.mkstemp(suffix=".yaml")
@@ -461,8 +521,53 @@ class AzureCLI:
             raise
 
     @classmethod
+    def create_vm_simple(
+        cls,
+        vm_name: str,
+        vm_size: str,
+        resource_group: str,
+        location: str,
+        os_disk_name: str,
+        nsg_name: str,
+        ip_name: str,
+        show_logs: bool = False,
+    ) -> None:
+        """Create a confidential VM without user-data (for BOB-style deployments)."""
+        logger.info("Creating TDX-enabled confidential VM...")
+        cmd = [
+            "az",
+            "vm",
+            "create",
+            "--name",
+            vm_name,
+            "--size",
+            vm_size,
+            "--resource-group",
+            resource_group,
+            "--location",
+            location,
+            "--attach-os-disk",
+            os_disk_name,
+            "--os-type",
+            "Linux",
+            "--security-type",
+            "ConfidentialVM",
+            "--enable-vtpm",
+            "true",
+            "--enable-secure-boot",
+            "false",
+            "--os-disk-security-encryption-type",
+            "NonPersistedTPM",
+            "--nsg",
+            nsg_name,
+            "--public-ip-address",
+            ip_name,
+        ]
+        cls.run_command(cmd, show_logs=show_logs)
+
+    @classmethod
     def create_vm(cls, config: DeployConfigs, image_path: Path, ip_name: str) -> None:
-        """Create the virtual machine."""
+        """Create the virtual machine with user-data."""
         user_data_file = cls.create_user_data_file(config)
 
         try:
@@ -516,10 +621,16 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         help=f"Azure region (default: {DEFAULT_REGION})",
     )
     parser.add_argument(
-        "--domain-resource-group",
+        "--resource-group",
         type=str,
         default=DEFAULT_RESOURCE_GROUP,
-        help="Domain resource group (default: devnet2)",
+        help=f"Domain resource group (default: {DEFAULT_RESOURCE_GROUP})",
+    )
+    parser.add_argument(
+        "--domain-resource-group",
+        type=str,
+        default=DEFAULT_DOMAIN_RESOURCE_GROUP,
+        help=f"Domain resource group (default: {DEFAULT_DOMAIN_RESOURCE_GROUP})",
     )
     parser.add_argument(
         "--domain-name",
