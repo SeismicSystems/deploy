@@ -10,7 +10,7 @@ import json
 import logging
 from pathlib import Path
 
-from yocto.azure_common import AzureCLI, create_base_parser, get_disk_size
+from yocto.azure_common import AzureCLI, create_base_parser
 from yocto.cfg import DeploymentConfig
 from yocto.conf.conf import DeployConfigs
 
@@ -142,7 +142,7 @@ def deploy_bob_vm(
         logger.info(f"    Using existing public IP: {existing_ip}")
         ip_address = existing_ip
     else:
-        logger.info(f"    Creating new public IP...")
+        logger.info("    Creating new public IP...")
         ip_address = az_cli.create_public_ip(ip_name, deploy_cfg.vm.resource_group)
         logger.info(f"    Created public IP: {ip_address}")
 
@@ -151,7 +151,7 @@ def deploy_bob_vm(
 
     # Check if disk already exists and delete it to allow fresh upload
     if az_cli.disk_exists(deploy_cfg, image_path):
-        logger.warning(f"    Disk already exists, deleting to allow fresh upload...")
+        logger.warning("    Disk already exists, deleting to allow fresh upload...")
         disk_name = deploy_cfg.vm.disk_name(image_path)
         az_cli.delete_disk(
             deploy_cfg.vm.resource_group, deploy_cfg.vm.name, image_path.name
@@ -210,29 +210,29 @@ def print_next_steps(vm_name: str, ip_address: str, resource_group: str) -> None
     logger.info("\n" + "=" * 70)
     logger.info("DEPLOYMENT SUCCESSFUL! 🚀")
     logger.info("=" * 70)
-    logger.info(f"\nVM Details:")
+    logger.info("\nVM Details:")
     logger.info(f"  Name:       {vm_name}")
     logger.info(f"  Public IP:  {ip_address}")
-    logger.info(f"\nNext Steps:")
-    logger.info(f"\n1. Wait for VM to boot (~2 minutes), then register your SSH key:")
+    logger.info("\nNext Steps:")
+    logger.info("\n1. Wait for VM to boot (~2 minutes), then register your SSH key:")
     logger.info(
         f"   curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://{ip_address}:8080"
     )
-    logger.info(f"\n2. Initialize the encrypted persistent disk:")
+    logger.info("\n2. Initialize the encrypted persistent disk:")
     logger.info(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} initialize")
-    logger.info(f"\n3. Verify attestation (requires cvm-reverse-proxy):")
-    logger.info(f"   cd ~/cvm-reverse-proxy")
+    logger.info("\n3. Verify attestation (requires cvm-reverse-proxy):")
+    logger.info("   cd ~/cvm-reverse-proxy")
     logger.info(
         f"   ./build/proxy-client --server-measurements ../measurements.json --target-addr=https://{ip_address}:8745"
     )
-    logger.info(f"   # In another terminal:")
-    logger.info(f"   curl http://127.0.0.1:8080")
-    logger.info(f"\n4. Access control plane (toggle modes, check status):")
+    logger.info("   # In another terminal:")
+    logger.info("   curl http://127.0.0.1:8080")
+    logger.info("\n4. Access control plane (toggle modes, check status):")
     logger.info(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} status")
     logger.info(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} toggle")
-    logger.info(f"\n5. Access data plane (SSH into container):")
+    logger.info("\n5. Access data plane (SSH into container):")
     logger.info(f"   ssh -i ~/.ssh/id_ed25519 -p 10022 root@{ip_address}")
-    logger.info(f"\nResource Cleanup:")
+    logger.info("\nResource Cleanup:")
     logger.info(f"  az group delete --name {resource_group} --yes --no-wait")
     logger.info("=" * 70)
 
