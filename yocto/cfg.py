@@ -16,13 +16,18 @@ from yocto.conf.conf import (
 
 logger = logging.getLogger(__name__)
 
-
-DEFAULT_RESOURCE_GROUP = "yocto-testnet"
+DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"
+DEFAULT_RESOURCE_GROUP = "tdx-testnet"
 DEFAULT_DOMAIN_NAME = "seismictest.net"
 DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
 
 DEFAULT_REGION = "eastus2"
-DEFAULT_VM_SIZE = "Standard_EC4es_v5"
+# TDX-enabled VM for attestation
+# Also works: Standard_EC4es_v6
+DEFAULT_VM_SIZE = "Standard_DC4es_v6"
+
+_DOMAIN_RECORD_PREFIX = "gn"
+_GENESIS_VM_PREFIX = "yocto-genesis"
 
 
 # Disk Operations
@@ -44,17 +49,15 @@ class DeploymentConfig:
     ip_only: bool
     artifact: str | None
     home: str
-    domain_resource_group: str = DEFAULT_RESOURCE_GROUP
+    domain_resource_group: str = DEFAULT_DOMAIN_RESOURCE_GROUP
     domain_name: str = DEFAULT_DOMAIN_NAME
     certbot_email: str = DEFAULT_CERTBOT_EMAIL
-    resource_group: str | None = None
+    resource_group: str = DEFAULT_RESOURCE_GROUP
     nsg_name: str | None = None
     show_logs: bool = True
 
     def __post_init__(self):
         """Set derived values after initialization."""
-        if self.resource_group is None:
-            self.resource_group = self.domain_resource_group
         if self.nsg_name is None:
             self.nsg_name = self.vm_name
 
@@ -98,6 +101,7 @@ class DeploymentConfig:
             "artifact": parse_artifact(args.artifact),
             "ip_only": args.ip_only,
             "region": args.region,
+            "resource_group": args.resource_group,
             "vm_size": args.vm_size,
             "source_ip": source_ip,
             "domain_resource_group": args.domain_resource_group,
@@ -122,8 +126,8 @@ class DeploymentConfig:
             raise ValueError("Argument --node is required and cannot be less than 1")
         return {
             "node": node,
-            "record_name": f"summit-genesis-{node}",
-            "vm_name": f"yocto-genesis-{node}",
+            "record_name": f"{_DOMAIN_RECORD_PREFIX}-{node}",
+            "vm_name": f"{_GENESIS_VM_PREFIX}-{node}",
         }
 
     @classmethod
