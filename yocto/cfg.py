@@ -22,7 +22,9 @@ DEFAULT_DOMAIN_NAME = "seismictest.net"
 DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
 
 DEFAULT_REGION = "eastus2"
-DEFAULT_VM_SIZE = "Standard_DC4es_v6"  # TDX-enabled VM for attestation
+# TDX-enabled VM for attestation
+# Also works: Standard_EC4es_v6
+DEFAULT_VM_SIZE = "Standard_DC4es_v6"
 
 _DOMAIN_RECORD_PREFIX = "gn"
 _GENESIS_VM_PREFIX = "yocto-genesis"

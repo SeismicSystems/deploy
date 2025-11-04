@@ -17,6 +17,7 @@ from yocto.conf.conf import DeployConfigs, VmConfigs
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"
 DEFAULT_RESOURCE_GROUP = "tdx-testnet"
 DEFAULT_DOMAIN_NAME = "seismictest.net"
 DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
