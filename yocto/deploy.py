@@ -71,7 +71,8 @@ def delete_vm(vm_name: str, home: str) -> bool:
 
     logger.info(f"Successfully deleted {vm_name}:\n{stdout}")
     logger.info("Deleting associated disk...")
-    AzureApi.delete_disk(resource_group, vm_name, meta["artifact"])
+    region = meta["vm"]["region"]
+    AzureApi.delete_disk(resource_group, vm_name, meta["artifact"], region)
     remove_vm_from_metadata(vm_name, home)
     return True
 

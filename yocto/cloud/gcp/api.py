@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-GCP API functionality.
-GCP CLI wrapper and deployment functions.
+GCP API functionality using Google Cloud Python SDKs.
 """
 
 import argparse
 import logging
 import os
-import subprocess
 import tempfile
 import time
 from pathlib import Path
 
-from google.cloud import compute_v1, storage
+from google.cloud import compute_v1, resourcemanager_v3, storage
 
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
@@ -76,7 +74,6 @@ class GcpApi(CloudApi):
         project: str,
         bucket_name: str,
         blob_name: str,
-        show_logs: bool = False,
     ) -> None:
         """Upload image file to Google Cloud Storage."""
         storage_client = storage.Client(project=project)
@@ -97,15 +94,7 @@ class GcpApi(CloudApi):
         file_size_gb = file_size / (1024**3)
         logger.info(f"Uploading {file_size_gb:.2f} GB to Cloud Storage...")
 
-        if show_logs:
-            # Upload with progress callback
-            def progress_callback(bytes_transferred):
-                progress = (bytes_transferred / file_size) * 100
-                logger.info(f"Upload progress: {progress:.1f}%")
-
-            blob.upload_from_filename(str(image_path), timeout=3600)
-        else:
-            blob.upload_from_filename(str(image_path), timeout=3600)
+        blob.upload_from_filename(str(image_path), timeout=3600)
 
         logger.info(f"Upload complete: gs://{bucket_name}/{blob_name}")
 
@@ -176,44 +165,22 @@ class GcpApi(CloudApi):
         logger.info(f"Disk {disk_name} created successfully")
 
     @staticmethod
-    def run_command(
-        cmd: list[str],
-        show_logs: bool = False,
-    ) -> subprocess.CompletedProcess:
-        """Execute a GCP CLI command."""
-        try:
-            result = subprocess.run(
-                cmd,
-                capture_output=not show_logs,
-                text=True,
-                check=True,
-            )
-            return result
-        except subprocess.CalledProcessError as e:
-            logger.info(f"Command failed: {' '.join(cmd)}")
-            logger.info(f"Error: {e.stderr}")
-            raise
-
-    @staticmethod
     def check_dependencies():
-        """Check if required tools are installed."""
-        tools = ["gcloud", "gsutil"]
-        for tool in tools:
-            try:
-                subprocess.run([tool, "--version"], capture_output=True, check=True)
-            except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                raise RuntimeError(
-                    f"Error: '{tool}' command not found. Please install {tool}."
-                ) from e
+        """Check if required dependencies are available.
+
+        For GCP, all dependencies are Python packages that are imported at
+        module load time, so this is a no-op.
+        """
+        pass
 
     @classmethod
     def resource_group_exists(cls, name: str) -> bool:
         """Check if project exists (GCP equivalent of resource group)."""
         try:
-            cmd = ["gcloud", "projects", "describe", name]
-            cls.run_command(cmd)
+            client = resourcemanager_v3.ProjectsClient()
+            client.get_project(name=f"projects/{name}")
             return True
-        except subprocess.CalledProcessError:
+        except Exception:
             return False
 
     @classmethod
@@ -243,37 +210,28 @@ class GcpApi(CloudApi):
     def create_public_ip(cls, name: str, resource_group: str) -> str:
         """Create a static public IP address and return it."""
         logger.info(f"Creating static public IP address: {name}")
-        cmd = [
-            "gcloud",
-            "compute",
-            "addresses",
-            "create",
-            name,
-            "--project",
-            resource_group,
-            "--region",
-            DEFAULT_REGION,
-            "--network-tier",
-            DEFAULT_NETWORK_TIER,
-        ]
-        cls.run_command(cmd)
+
+        address_client = compute_v1.AddressesClient()
+
+        address = compute_v1.Address()
+        address.name = name
+        address.network_tier = DEFAULT_NETWORK_TIER
+
+        operation = address_client.insert(
+            project=resource_group,
+            region=DEFAULT_REGION,
+            address_resource=address,
+        )
+
+        wait_for_extended_operation(operation, "IP address creation")
 
         # Get the IP address
-        cmd = [
-            "gcloud",
-            "compute",
-            "addresses",
-            "describe",
-            name,
-            "--project",
-            resource_group,
-            "--region",
-            DEFAULT_REGION,
-            "--format",
-            "get(address)",
-        ]
-        result = cls.run_command(cmd)
-        return result.stdout.strip()
+        address_obj = address_client.get(
+            project=resource_group,
+            region=DEFAULT_REGION,
+            address=name,
+        )
+        return address_obj.address
 
     @classmethod
     def get_existing_public_ip(
@@ -283,23 +241,14 @@ class GcpApi(CloudApi):
     ) -> str | None:
         """Get existing IP address if it exists."""
         try:
-            cmd = [
-                "gcloud",
-                "compute",
-                "addresses",
-                "describe",
-                name,
-                "--project",
-                resource_group,
-                "--region",
-                DEFAULT_REGION,
-                "--format",
-                "get(address)",
-            ]
-            result = cls.run_command(cmd)
-            ip = result.stdout.strip()
-            return ip if ip else None
-        except subprocess.CalledProcessError:
+            address_client = compute_v1.AddressesClient()
+            address = address_client.get(
+                project=resource_group,
+                region=DEFAULT_REGION,
+                address=name,
+            )
+            return address.address if address.address else None
+        except Exception:
             return None
 
     @classmethod
@@ -375,7 +324,6 @@ class GcpApi(CloudApi):
             project=config.vm.resource_group,
             bucket_name=bucket_name,
             blob_name=blob_name,
-            show_logs=config.show_logs,
         )
 
         # Step 2: Create image from Cloud Storage
@@ -406,14 +354,11 @@ class GcpApi(CloudApi):
 
     @classmethod
     def delete_disk(
-        cls, resource_group: str, vm_name: str, artifact: str, zone: str = None
+        cls, resource_group: str, vm_name: str, artifact: str, zone: str
     ):
         """Delete a disk."""
         disk_name = VmConfigs.get_disk_name(vm_name, artifact)
         logger.info(f"Deleting disk {disk_name} from project {resource_group}")
-
-        if zone is None:
-            zone = DEFAULT_ZONE
 
         disk_client = compute_v1.DisksClient()
         operation = disk_client.delete(
@@ -429,7 +374,7 @@ class GcpApi(CloudApi):
     def copy_disk(
         cls,
         image_path: Path,
-        access_uri: str,
+        sas_uri: str,
         show_logs: bool = False,
     ) -> None:
         """Copy disk to cloud storage.
@@ -472,32 +417,36 @@ class GcpApi(CloudApi):
         rule_name = f"{config.vm.name}-{name.lower()}"
         protocol_lower = protocol.lower()
 
-        cmd = [
-            "gcloud",
-            "compute",
-            "firewall-rules",
-            "create",
-            rule_name,
-            "--project",
-            config.vm.resource_group,
-            "--direction",
-            "INGRESS",
-            "--priority",
-            priority,
-            "--network",
-            "default",
-            "--action",
-            "ALLOW",
-            "--rules",
-            f"{protocol_lower}:{port}" if protocol_lower != "*" else "all",
-            "--source-ranges",
-            source if source != "*" else "0.0.0.0/0",
-        ]
+        firewall_client = compute_v1.FirewallsClient()
+
+        firewall = compute_v1.Firewall()
+        firewall.name = rule_name
+        firewall.direction = "INGRESS"
+        firewall.priority = int(priority)
+        firewall.network = (
+            f"projects/{config.vm.resource_group}/global/networks/default"
+        )
+
+        # Configure allowed rules
+        allowed = compute_v1.Allowed()
+        if protocol_lower == "*" or protocol_lower == "all":
+            allowed.I_p_protocol = "all"
+        else:
+            allowed.I_p_protocol = protocol_lower
+            if port:
+                allowed.ports = [port]
+
+        firewall.allowed = [allowed]
+        firewall.source_ranges = [source if source != "*" else "0.0.0.0/0"]
 
         try:
-            cls.run_command(cmd, show_logs=config.show_logs)
-        except subprocess.CalledProcessError:
-            logger.warning(f"Firewall rule {rule_name} may already exist")
+            operation = firewall_client.insert(
+                project=config.vm.resource_group,
+                firewall_resource=firewall,
+            )
+            wait_for_extended_operation(operation, f"firewall rule {rule_name}")
+        except Exception as e:
+            logger.warning(f"Firewall rule {rule_name} may already exist: {e}")
 
     @classmethod
     def create_standard_nsg_rules(cls, config: DeployConfigs) -> None:
@@ -565,19 +514,16 @@ class GcpApi(CloudApi):
         resource_group: str,
         vm_name: str,
         disk_name: str,
+        zone: str,
         lun: int = 10,
         show_logs: bool = False,
-        zone: str = None,
     ) -> None:
         """Attach a data disk to a VM.
 
         Args:
-            zone: For GCP, the zone where the VM and disk are located
+            zone: For GCP, the zone where the VM and disk are located.
         """
         logger.info(f"Attaching data disk {disk_name} to {vm_name}")
-
-        if zone is None:
-            zone = DEFAULT_ZONE
 
         instance_client = compute_v1.InstancesClient()
 
@@ -633,33 +579,60 @@ class GcpApi(CloudApi):
             location: For GCP, this should be the zone (e.g., 'us-central1-a')
         """
         logger.info("Creating TDX-enabled confidential VM...")
-        cmd = [
-            "gcloud",
-            "compute",
-            "instances",
-            "create",
-            vm_name,
-            "--project",
-            resource_group,
-            "--zone",
-            location,
-            "--machine-type",
-            vm_size,
-            "--network-interface",
-            f"network-tier={DEFAULT_NETWORK_TIER},nic-type={DEFAULT_NIC_TYPE},stack-type=IPV4_ONLY,subnet=default",
-            "--maintenance-policy",
-            "TERMINATE",
-            "--provisioning-model",
-            DEFAULT_PROVISIONING_MODEL,
-            "--create-disk",
-            f"auto-delete=yes,boot=yes,device-name={vm_name},disk={os_disk_name},mode=rw",
-            "--no-shielded-secure-boot",
-            "--shielded-vtpm",
-            "--shielded-integrity-monitoring",
-            "--confidential-compute-type",
-            "TDX",
-        ]
-        cls.run_command(cmd, show_logs=show_logs)
+
+        instance_client = compute_v1.InstancesClient()
+
+        # Configure network interface
+        network_interface = compute_v1.NetworkInterface()
+        network_interface.network = (
+            f"projects/{resource_group}/global/networks/default"
+        )
+        network_interface.stack_type = "IPV4_ONLY"
+        network_interface.nic_type = DEFAULT_NIC_TYPE
+
+        # Configure attached disk
+        attached_disk = compute_v1.AttachedDisk()
+        attached_disk.boot = True
+        attached_disk.auto_delete = True
+        attached_disk.mode = "READ_WRITE"
+        attached_disk.device_name = vm_name
+        attached_disk.source = (
+            f"projects/{resource_group}/zones/{location}/disks/{os_disk_name}"
+        )
+
+        # Configure shielded instance config
+        shielded_config = compute_v1.ShieldedInstanceConfig()
+        shielded_config.enable_secure_boot = False
+        shielded_config.enable_vtpm = True
+        shielded_config.enable_integrity_monitoring = True
+
+        # Configure confidential instance config
+        confidential_config = compute_v1.ConfidentialInstanceConfig()
+        confidential_config.confidential_instance_type = "TDX"
+
+        # Configure scheduling
+        scheduling = compute_v1.Scheduling()
+        scheduling.on_host_maintenance = "TERMINATE"
+        scheduling.provisioning_model = DEFAULT_PROVISIONING_MODEL
+
+        # Create instance
+        instance = compute_v1.Instance()
+        instance.name = vm_name
+        instance.machine_type = f"zones/{location}/machineTypes/{vm_size}"
+        instance.network_interfaces = [network_interface]
+        instance.disks = [attached_disk]
+        instance.shielded_instance_config = shielded_config
+        instance.confidential_instance_config = confidential_config
+        instance.scheduling = scheduling
+
+        operation = instance_client.insert(
+            project=resource_group,
+            zone=location,
+            instance_resource=instance,
+        )
+
+        wait_for_extended_operation(operation, "VM creation")
+        logger.info(f"VM {vm_name} created successfully")
 
     @classmethod
     def create_vm(cls, config: DeployConfigs, image_path: Path, ip_name: str) -> None:
@@ -669,35 +642,75 @@ class GcpApi(CloudApi):
         try:
             logger.info("Booting VM...")
 
-            cmd = [
-                "gcloud",
-                "compute",
-                "instances",
-                "create",
-                config.vm.name,
-                "--project",
-                config.vm.resource_group,
-                "--zone",
-                config.vm.location,
-                "--machine-type",
-                config.vm.size,
-                "--network-interface",
-                f"network-tier={DEFAULT_NETWORK_TIER},nic-type={DEFAULT_NIC_TYPE},stack-type=IPV4_ONLY,subnet=default",
-                "--maintenance-policy",
-                "TERMINATE",
-                "--provisioning-model",
-                DEFAULT_PROVISIONING_MODEL,
-                "--create-disk",
-                f"auto-delete=yes,boot=yes,device-name={config.vm.name},disk={config.vm.disk_name(image_path)},mode=rw",
-                "--metadata-from-file",
-                f"user-data={user_data_file}",
-                "--no-shielded-secure-boot",
-                "--shielded-vtpm",
-                "--shielded-integrity-monitoring",
-                "--confidential-compute-type",
-                "TDX",
-            ]
-            cls.run_command(cmd, show_logs=False)
+            instance_client = compute_v1.InstancesClient()
+
+            # Read user data content
+            with open(user_data_file) as f:
+                user_data_content = f.read()
+
+            # Configure network interface
+            network_interface = compute_v1.NetworkInterface()
+            network_interface.network = (
+                f"projects/{config.vm.resource_group}/global/networks/default"
+            )
+            network_interface.stack_type = "IPV4_ONLY"
+            network_interface.nic_type = DEFAULT_NIC_TYPE
+
+            # Configure attached disk
+            attached_disk = compute_v1.AttachedDisk()
+            attached_disk.boot = True
+            attached_disk.auto_delete = True
+            attached_disk.mode = "READ_WRITE"
+            attached_disk.device_name = config.vm.name
+            disk_name = config.vm.disk_name(image_path)
+            attached_disk.source = (
+                f"projects/{config.vm.resource_group}/zones/"
+                f"{config.vm.location}/disks/{disk_name}"
+            )
+
+            # Configure shielded instance config
+            shielded_config = compute_v1.ShieldedInstanceConfig()
+            shielded_config.enable_secure_boot = False
+            shielded_config.enable_vtpm = True
+            shielded_config.enable_integrity_monitoring = True
+
+            # Configure confidential instance config
+            confidential_config = compute_v1.ConfidentialInstanceConfig()
+            confidential_config.confidential_instance_type = "TDX"
+
+            # Configure scheduling
+            scheduling = compute_v1.Scheduling()
+            scheduling.on_host_maintenance = "TERMINATE"
+            scheduling.provisioning_model = DEFAULT_PROVISIONING_MODEL
+
+            # Configure metadata with user-data
+            metadata = compute_v1.Metadata()
+            metadata_item = compute_v1.Items()
+            metadata_item.key = "user-data"
+            metadata_item.value = user_data_content
+            metadata.items = [metadata_item]
+
+            # Create instance
+            instance = compute_v1.Instance()
+            instance.name = config.vm.name
+            instance.machine_type = (
+                f"zones/{config.vm.location}/machineTypes/{config.vm.size}"
+            )
+            instance.network_interfaces = [network_interface]
+            instance.disks = [attached_disk]
+            instance.shielded_instance_config = shielded_config
+            instance.confidential_instance_config = confidential_config
+            instance.scheduling = scheduling
+            instance.metadata = metadata
+
+            operation = instance_client.insert(
+                project=config.vm.resource_group,
+                zone=config.vm.location,
+                instance_resource=instance,
+            )
+
+            wait_for_extended_operation(operation, "VM creation")
+            logger.info(f"VM {config.vm.name} created successfully")
         finally:
             os.unlink(user_data_file)
             logger.info(f"Deleted temporary user-data file: {user_data_file}")

@@ -114,7 +114,7 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def delete_disk(cls, resource_group: str, vm_name: str, artifact: str):
+    def delete_disk(cls, resource_group: str, vm_name: str, artifact: str, zone: str):
         """Delete a disk."""
         pass
 
@@ -188,6 +188,7 @@ class CloudApi(ABC):
         resource_group: str,
         vm_name: str,
         disk_name: str,
+        zone: str,
         lun: int = 10,
         show_logs: bool = False,
     ) -> None:

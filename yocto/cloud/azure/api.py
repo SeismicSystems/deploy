@@ -311,7 +311,12 @@ class AzureApi(CloudApi):
         return sas_data["accessSas"]
 
     @classmethod
-    def delete_disk(cls, resource_group: str, vm_name: str, artifact: str):
+    def delete_disk(cls, resource_group: str, vm_name: str, artifact: str, zone: str):
+        """Delete a disk.
+
+        Note: zone parameter is unused for Azure, but included for API
+        consistency with GCP.
+        """
         disk_name = VmConfigs.get_disk_name(vm_name, artifact)
         logger.info(f"Deleting disk {disk_name} from resource group {resource_group}")
         cmd = [
@@ -480,10 +485,15 @@ class AzureApi(CloudApi):
         resource_group: str,
         vm_name: str,
         disk_name: str,
+        zone: str,
         lun: int = 10,
         show_logs: bool = False,
     ) -> None:
-        """Attach a data disk to a VM."""
+        """Attach a data disk to a VM.
+
+        Note: zone parameter is unused for Azure, but included for API
+        consistency with GCP.
+        """
         logger.info(f"Attaching data disk {disk_name} to {vm_name} at LUN {lun}")
         cmd = [
             "az",
