@@ -325,17 +325,32 @@ def main():
         logger.info(f"Detected source IP: {source_ip}")
 
     try:
+        # Import defaults here to avoid circular imports
+        from yocto.cloud.azure.defaults import (
+            DEFAULT_CERTBOT_EMAIL,
+            DEFAULT_DOMAIN_NAME,
+            DEFAULT_DOMAIN_RESOURCE_GROUP,
+            DEFAULT_REGION,
+            DEFAULT_RESOURCE_GROUP,
+            DEFAULT_VM_SIZE,
+        )
+
         # Create config (similar to genesis but without domain/DNS)
         config = DeploymentConfig(
             vm_name=args.name,
-            region=args.region,
-            vm_size=args.vm_size,
+            region=args.region or DEFAULT_REGION,
+            vm_size=args.vm_size or DEFAULT_VM_SIZE,
             node=0,  # Not used for BOB
             record_name="",  # No DNS for BOB
             source_ip=source_ip,
             ip_only=False,
             artifact=args.artifact,
             home=str(Path.home()),
+            resource_group=DEFAULT_RESOURCE_GROUP,
+            domain_resource_group=DEFAULT_DOMAIN_RESOURCE_GROUP,  # Not used for BOB
+            domain_name=DEFAULT_DOMAIN_NAME,  # Not used for BOB
+            certbot_email=DEFAULT_CERTBOT_EMAIL,  # Not used for BOB
+            nsg_name=args.name,
             show_logs=args.logs,
         )
 

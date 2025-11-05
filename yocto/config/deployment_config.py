@@ -7,12 +7,6 @@ from pathlib import Path
 from typing import Any
 
 from yocto.artifact import parse_artifact
-from yocto.cloud.azure.defaults import (
-    DEFAULT_CERTBOT_EMAIL,
-    DEFAULT_DOMAIN_NAME,
-    DEFAULT_DOMAIN_RESOURCE_GROUP,
-    DEFAULT_RESOURCE_GROUP,
-)
 from yocto.config.configs import Configs
 from yocto.config.deploy_config import DeployConfigs
 from yocto.config.domain_config import DomainConfig
@@ -40,17 +34,12 @@ class DeploymentConfig:
     ip_only: bool
     artifact: str | None
     home: str
-    domain_resource_group: str = DEFAULT_DOMAIN_RESOURCE_GROUP
-    domain_name: str = DEFAULT_DOMAIN_NAME
-    certbot_email: str = DEFAULT_CERTBOT_EMAIL
-    resource_group: str = DEFAULT_RESOURCE_GROUP
-    nsg_name: str | None = None
-    show_logs: bool = True
-
-    def __post_init__(self):
-        """Set derived values after initialization."""
-        if self.nsg_name is None:
-            self.nsg_name = self.vm_name
+    domain_resource_group: str
+    domain_name: str
+    certbot_email: str
+    resource_group: str
+    nsg_name: str
+    show_logs: bool
 
     def to_configs(self) -> Configs:
         return Configs(
@@ -80,24 +69,35 @@ class DeploymentConfig:
 
     @classmethod
     def parse_base_kwargs(cls, args: argparse.Namespace) -> dict[str, Any]:
+        # Import defaults here to avoid circular imports
+        from yocto.cloud.azure.defaults import (
+            DEFAULT_CERTBOT_EMAIL,
+            DEFAULT_DOMAIN_NAME,
+            DEFAULT_DOMAIN_RESOURCE_GROUP,
+            DEFAULT_REGION,
+            DEFAULT_RESOURCE_GROUP,
+            DEFAULT_VM_SIZE,
+        )
+
         source_ip = args.source_ip
         if source_ip is None:
             logger.warning("No --source-ip provided, so fetching IP from ipify.org...")
             source_ip = get_host_ip()
             logger.info(f"Fetched public IP: {source_ip}")
+
         return {
             "home": str(
                 Path.home() / args.code_path if args.code_path else Path.home()
             ),
             "artifact": parse_artifact(args.artifact),
             "ip_only": args.ip_only,
-            "region": args.region,
-            "resource_group": args.resource_group,
-            "vm_size": args.vm_size,
+            "region": args.region or DEFAULT_REGION,
+            "resource_group": args.resource_group or DEFAULT_RESOURCE_GROUP,
+            "vm_size": args.vm_size or DEFAULT_VM_SIZE,
             "source_ip": source_ip,
-            "domain_resource_group": args.domain_resource_group,
-            "domain_name": args.domain_name,
-            "certbot_email": args.certbot_email,
+            "domain_resource_group": args.domain_resource_group or DEFAULT_DOMAIN_RESOURCE_GROUP,
+            "domain_name": args.domain_name or DEFAULT_DOMAIN_NAME,
+            "certbot_email": args.certbot_email or DEFAULT_CERTBOT_EMAIL,
             "show_logs": args.logs,
         }
 
@@ -105,20 +105,24 @@ class DeploymentConfig:
     def parse_deploy_args(cls, args: argparse.Namespace) -> dict[str, Any]:
         if not args.node or args.node < 1:
             raise ValueError("Argument -n is required and cannot be less than 1")
+        vm_name = f"yocto-node-{args.node}"
         return {
             "node": args.node,
             "record_name": f"node-{args.node}",
-            "vm_name": f"yocto-node-{args.node}",
+            "vm_name": vm_name,
+            "nsg_name": vm_name,
         }
 
     @classmethod
     def configure_genesis_node(cls, node: int) -> dict[str, Any]:
         if node < 1:
             raise ValueError("Argument --node is required and cannot be less than 1")
+        vm_name = f"{_GENESIS_VM_PREFIX}-{node}"
         return {
             "node": node,
             "record_name": f"{_DOMAIN_RECORD_PREFIX}-{node}",
-            "vm_name": f"{_GENESIS_VM_PREFIX}-{node}",
+            "vm_name": vm_name,
+            "nsg_name": vm_name,
         }
 
     @classmethod
