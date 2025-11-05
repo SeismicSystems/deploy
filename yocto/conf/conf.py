@@ -43,7 +43,7 @@ class VmConfigs:
     resource_group: str
     name: str
     nsg_name: str
-    location: str = "eastus2"
+    region: str = "eastus2"  # Azure region or GCP zone
     size: str = "Standard_EC4es_v5"
     api_port: int = 7878
     client_proxy_port: int = 8080
@@ -58,9 +58,8 @@ class VmConfigs:
             resource_group=args.resource_group,
             name=args.resource_group,
             nsg_name=args.resource_group,
-            # TODO:
-            # location=args.location,
-            # size=args.vm_size,
+            region=args.region,
+            size=args.vm_size,
         )
 
     def to_dict(self):
@@ -68,9 +67,15 @@ class VmConfigs:
             "resourceGroup": self.resource_group,
             "name": self.name,
             "nsgName": self.nsg_name,
-            "location": self.location,
+            "region": self.region,
             "size": self.size,
         }
+
+    # For backwards compatibility
+    @property
+    def location(self) -> str:
+        """Alias for region (backwards compatibility)."""
+        return self.region
 
     @staticmethod
     def get_disk_name(vm_name: str, artifact: str) -> str:

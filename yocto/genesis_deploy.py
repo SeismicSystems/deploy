@@ -10,7 +10,7 @@ import logging
 
 from yocto.azure import (
     DEFAULT_RESOURCE_GROUP,
-    AzureCLI,
+    AzureApi,
     confirm,
     create_base_parser,
 )
@@ -29,7 +29,7 @@ class GenesisIPManager:
         self.genesis_rg = DEFAULT_RESOURCE_GROUP
 
     def ensure_genesis_resource_group(self, region: str) -> None:
-        AzureCLI.ensure_created_resource_group(self.genesis_rg, region)
+        AzureApi.ensure_created_resource_group(self.genesis_rg, region)
 
     def get_or_create_node_ip(self, node_number: int, region: str) -> tuple[str, str]:
         """Get or create persistent IP for a specific node number."""
@@ -38,7 +38,7 @@ class GenesisIPManager:
         ip_name = f"genesis-node-{node_number}"
 
         # Check if IP already exists
-        existing_ip = AzureCLI.get_existing_public_ip(ip_name, self.genesis_rg)
+        existing_ip = AzureApi.get_existing_public_ip(ip_name, self.genesis_rg)
         if existing_ip:
             logger.info(f"Using existing IP {existing_ip} for node {node_number}")
             return (existing_ip, ip_name)
@@ -46,7 +46,7 @@ class GenesisIPManager:
         # Create new IP
         logger.info(f"Creating new IP for node {node_number}")
         confirm(f"create new IP for node {node_number} @ {ip_name}")
-        ip_address = AzureCLI.create_public_ip(ip_name, self.genesis_rg)
+        ip_address = AzureApi.create_public_ip(ip_name, self.genesis_rg)
         logger.info(f"Created IP {ip_address} for node {node_number}")
         return (ip_address, ip_name)
 
@@ -66,10 +66,10 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     genesis_ip_manager = GenesisIPManager()
 
     # Check dependencies
-    AzureCLI.check_dependencies()
+    AzureApi.check_dependencies()
 
     # Create resource group
-    AzureCLI.ensure_created_resource_group(
+    AzureApi.ensure_created_resource_group(
         name=deploy_cfg.vm.resource_group,
         location=deploy_cfg.vm.location,
     )
@@ -82,7 +82,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
         node_number=node,
         region=deploy_cfg.vm.location,
     )
-    AzureCLI.update_dns_record(deploy_cfg, ip_address, remove_old=False)
+    AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=False)
 
     if args.ip_only:
         logger.info("Not creating machines (used --ip-only flag)")

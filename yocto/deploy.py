@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from yocto.azure import AzureCLI, confirm
+from yocto.azure import AzureApi, confirm
 from yocto.conf.conf import DeployConfigs
 from yocto.measurements import Measurements, write_measurements_tmpfile
 from yocto.metadata import (
@@ -71,7 +71,7 @@ def delete_vm(vm_name: str, home: str) -> bool:
 
     logger.info(f"Successfully deleted {vm_name}:\n{stdout}")
     logger.info("Deleting associated disk...")
-    AzureCLI.delete_disk(resource_group, vm_name, meta["artifact"])
+    AzureApi.delete_disk(resource_group, vm_name, meta["artifact"])
     remove_vm_from_metadata(vm_name, home)
     return True
 
@@ -88,18 +88,18 @@ def deploy_image(
         raise FileNotFoundError(f"Image path not found: {image_path}")
 
     # Disk
-    if AzureCLI.disk_exists(configs, image_path):
+    if AzureApi.disk_exists(configs, image_path):
         logger.error(f"Artifact {image_path.name} already exists for {configs.vm.name}")
 
-    AzureCLI.create_disk(configs, image_path)
-    AzureCLI.upload_disk(configs, image_path)
+    AzureApi.create_disk(configs, image_path)
+    AzureApi.upload_disk(configs, image_path)
 
     # Security groups
-    AzureCLI.create_nsg(configs)
-    AzureCLI.create_standard_nsg_rules(configs)
+    AzureApi.create_nsg(configs)
+    AzureApi.create_standard_nsg_rules(configs)
 
     # Actually create the VM
-    AzureCLI.create_vm(configs, image_path, ip_name)
+    AzureApi.create_vm(configs, image_path, ip_name)
 
     return get_ip_address(configs.vm.name)
 

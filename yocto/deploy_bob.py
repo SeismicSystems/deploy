@@ -10,7 +10,7 @@ import json
 import logging
 from pathlib import Path
 
-from yocto.azure import AzureCLI, create_base_parser
+from yocto.azure import AzureApi, create_base_parser
 from yocto.cfg import DeploymentConfig
 from yocto.conf.conf import DeployConfigs
 
@@ -20,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def create_bob_nsg_rules(config: DeployConfigs, az_cli: AzureCLI) -> None:
+def create_bob_nsg_rules(config: DeployConfigs, az_cli: AzureApi) -> None:
     """Create BOB searcher-specific network security group rules.
 
     Based on firewall table from bob-common/readme.md:
@@ -120,7 +120,7 @@ def deploy_bob_vm(
     logger.info(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
     logger.info("=" * 70)
 
-    az_cli = AzureCLI()
+    az_cli = AzureApi()
 
     # Step 1: Check dependencies
     logger.info("\n==> Step 1/9: Checking prerequisites...")

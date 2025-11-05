@@ -21,6 +21,7 @@ from yocto.azure.defaults import (
     DEFAULT_RESOURCE_GROUP,
     DEFAULT_VM_SIZE,
 )
+from yocto.cloud_api import CloudApi
 from yocto.conf.conf import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,8 @@ def get_disk_size(disk_path: Path) -> int:
     return disk_path.stat().st_size
 
 
-class AzureCLI:
-    """Wrapper for Azure CLI commands."""
+class AzureApi(CloudApi):
+    """Azure implementation of CloudApi."""
 
     @staticmethod
     def run_command(

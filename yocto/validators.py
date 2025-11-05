@@ -3,7 +3,7 @@ import json
 import tempfile
 from pathlib import Path
 
-from yocto.azure import CONSENSUS_PORT, AzureCLI
+from yocto.azure import CONSENSUS_PORT, AzureApi
 from yocto.cfg import _DOMAIN_RECORD_PREFIX, _GENESIS_VM_PREFIX
 from yocto.metadata import load_metadata
 from yocto.summit_client import SummitClient
@@ -100,7 +100,7 @@ def main():
         print(f"Wrote validators to {tmp_validators}")
         json.dump(validators, f, indent=2)
 
-    AzureCLI.run_command(
+    AzureApi.run_command(
         cmd=[
             summit_genesis_target,
             "-o",

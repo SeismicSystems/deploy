@@ -5,7 +5,7 @@ Azure VM Deployment Tool
 A modular Python replacement for deploy.sh that handles Azure VM deployment.
 """
 
-from yocto.azure import AzureCLI, create_base_parser
+from yocto.azure import AzureApi, create_base_parser
 from yocto.cfg import DeploymentConfig
 
 
@@ -14,25 +14,25 @@ def deploy_vm(config: DeploymentConfig) -> None:
     print("Starting Azure VM deployment...")
 
     # Check dependencies
-    AzureCLI.check_dependencies()
+    AzureApi.check_dependencies()
 
     # Create resource group
-    AzureCLI.create_resource_group(config.resource_group, config.region)
+    AzureApi.create_resource_group(config.resource_group, config.region)
 
     # Create and configure IP address
-    ip_address = AzureCLI.create_public_ip(config.resource_group, config.resource_group)
-    AzureCLI.update_dns_record(config, ip_address)
+    ip_address = AzureApi.create_public_ip(config.resource_group, config.resource_group)
+    AzureApi.update_dns_record(config, ip_address)
 
     # Create and upload disk
-    AzureCLI.create_disk(config)
-    AzureCLI.upload_disk(config)
+    AzureApi.create_disk(config)
+    AzureApi.upload_disk(config)
 
     # Create network security group and rules
-    AzureCLI.create_nsg(config)
-    AzureCLI.create_standard_nsg_rules(config)
+    AzureApi.create_nsg(config)
+    AzureApi.create_standard_nsg_rules(config)
 
     # Create VM
-    AzureCLI.create_vm(config)
+    AzureApi.create_vm(config)
 
     print("Deployment completed.")
 
