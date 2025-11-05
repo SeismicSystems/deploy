@@ -23,37 +23,37 @@ class CloudApi(ABC):
         show_logs: bool = False,
     ) -> subprocess.CompletedProcess:
         """Execute a cloud CLI command."""
-        pass
+        raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def check_dependencies():
         """Check if required tools are installed."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def resource_group_exists(cls, name: str) -> bool:
         """Check if resource group exists."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_resource_group(cls, name: str, location: str) -> None:
         """Create a resource group."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def ensure_created_resource_group(cls, name: str, location: str):
         """Ensure resource group exists."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_public_ip(cls, name: str, resource_group: str) -> str:
         """Create a static public IP address and return it."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -63,25 +63,25 @@ class CloudApi(ABC):
         resource_group: str,
     ) -> str | None:
         """Get existing IP address if it exists."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def get_existing_dns_ips(cls, config: "DeployConfigs") -> list[str]:
         """Get existing DNS A record IPs."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def remove_dns_ip(cls, config: "DeployConfigs", ip_address: str) -> None:
         """Remove IP from DNS A record."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def add_dns_ip(cls, config: "DeployConfigs", ip_address: str) -> None:
         """Add IP to DNS A record."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -92,31 +92,31 @@ class CloudApi(ABC):
         remove_old: bool = True,
     ) -> None:
         """Update DNS A record with new IP address."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def disk_exists(cls, config: "DeployConfigs", image_path: Path) -> bool:
         """Check if disk exists."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Create a managed disk for upload."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def grant_disk_access(cls, config: "DeployConfigs", image_path: Path) -> str:
         """Grant access to disk and return access URI."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def delete_disk(cls, resource_group: str, vm_name: str, artifact: str, zone: str):
         """Delete a disk."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -127,25 +127,25 @@ class CloudApi(ABC):
         show_logs: bool = False,
     ) -> None:
         """Copy disk to cloud storage."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def revoke_disk_access(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Revoke access to disk."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def upload_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Upload disk image to cloud."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_nsg(cls, config: "DeployConfigs") -> None:
         """Create network security group / firewall rules."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -159,13 +159,13 @@ class CloudApi(ABC):
         source: str,
     ) -> None:
         """Add a single network security rule."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_standard_nsg_rules(cls, config: "DeployConfigs") -> None:
         """Add all standard security rules."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -179,7 +179,7 @@ class CloudApi(ABC):
         show_logs: bool = False,
     ) -> None:
         """Create a data disk for persistent storage."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -193,13 +193,13 @@ class CloudApi(ABC):
         show_logs: bool = False,
     ) -> None:
         """Attach a data disk to a VM."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_user_data_file(cls, config: "DeployConfigs") -> str:
         """Create temporary user data file."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
@@ -215,10 +215,10 @@ class CloudApi(ABC):
         show_logs: bool = False,
     ) -> None:
         """Create a confidential VM without user-data."""
-        pass
+        raise NotImplementedError
 
     @classmethod
     @abstractmethod
     def create_vm(cls, config: "DeployConfigs", image_path: Path, ip_name: str) -> None:
         """Create the virtual machine with user-data."""
-        pass
+        raise NotImplementedError
