@@ -9,8 +9,8 @@ import json
 import logging
 
 from yocto.azure import (
-    AzureCLI,
     DEFAULT_RESOURCE_GROUP,
+    AzureCLI,
     confirm,
     create_base_parser,
 )

@@ -9,9 +9,7 @@ from yocto.azure.defaults import (
     DEFAULT_CERTBOT_EMAIL,
     DEFAULT_DOMAIN_NAME,
     DEFAULT_DOMAIN_RESOURCE_GROUP,
-    DEFAULT_REGION,
     DEFAULT_RESOURCE_GROUP,
-    DEFAULT_VM_SIZE,
 )
 from yocto.conf.conf import (
     Configs,
