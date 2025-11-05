@@ -5,7 +5,8 @@ Azure VM Deployment Tool
 A modular Python replacement for deploy.sh that handles Azure VM deployment.
 """
 
-from yocto.cloud.azure import AzureApi, create_base_parser
+from yocto.cloud.azure import AzureApi
+from yocto.cloud.cloud_parser import create_base_parser
 from yocto.config import DeploymentConfig
 
 

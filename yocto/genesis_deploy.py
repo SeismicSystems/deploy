@@ -9,12 +9,8 @@ import json
 import logging
 
 from yocto.build import maybe_build
-from yocto.cloud.azure import (
-    DEFAULT_RESOURCE_GROUP,
-    AzureApi,
-    create_base_parser,
-)
-from yocto.cloud.cloud_parser import confirm
+from yocto.cloud.azure import DEFAULT_RESOURCE_GROUP, AzureApi
+from yocto.cloud.cloud_parser import confirm, create_base_parser
 from yocto.config import DeploymentConfig
 from yocto.deploy import Deployer
 from yocto.logging_setup import setup_logging
