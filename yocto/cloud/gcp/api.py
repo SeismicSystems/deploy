@@ -71,11 +71,6 @@ class GcpApi(CloudApi):
     """GCP implementation of CloudApi."""
 
     @staticmethod
-    def _get_azure_api():
-        """Get AzureApi for DNS (lazy import to avoid circular dependency)."""
-        return AzureApi
-
-    @staticmethod
     def _upload_to_gcs(
         image_path: Path,
         project: str,
@@ -314,21 +309,18 @@ class GcpApi(CloudApi):
         """
         # For now, we'll use Azure DNS even for GCP deployments
         # This can be changed to Cloud DNS later if needed
-        AzureApi = cls._get_azure_api()
         return AzureApi.get_existing_dns_ips(config)
 
     @classmethod
     def remove_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
         """Remove IP from DNS A record."""
         # For now, we'll use Azure DNS even for GCP deployments
-        AzureApi = cls._get_azure_api()
         AzureApi.remove_dns_ip(config, ip_address)
 
     @classmethod
     def add_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
         """Add IP to DNS A record."""
         # For now, we'll use Azure DNS even for GCP deployments
-        AzureApi = cls._get_azure_api()
         AzureApi.add_dns_ip(config, ip_address)
 
     @classmethod
