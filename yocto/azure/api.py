@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Common Azure deployment functionality.
-Shared components for Azure VM deployment scripts.
+Azure API functionality.
+Azure CLI wrapper and deployment functions.
 """
 
 import argparse
@@ -12,20 +12,18 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from yocto.azure.defaults import (
+    CONSENSUS_PORT,
+    DEFAULT_CERTBOT_EMAIL,
+    DEFAULT_DOMAIN_NAME,
+    DEFAULT_DOMAIN_RESOURCE_GROUP,
+    DEFAULT_REGION,
+    DEFAULT_RESOURCE_GROUP,
+    DEFAULT_VM_SIZE,
+)
 from yocto.conf.conf import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
-
-
-DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"
-DEFAULT_RESOURCE_GROUP = "tdx-testnet"
-DEFAULT_DOMAIN_NAME = "seismictest.net"
-DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
-
-DEFAULT_REGION = "eastus"
-DEFAULT_VM_SIZE = "Standard_EC4es_v6"
-
-CONSENSUS_PORT = 18551
 
 
 # Disk Operations

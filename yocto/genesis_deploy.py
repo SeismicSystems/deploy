@@ -8,7 +8,7 @@ Genesis mode deployment with persistent IP addresses and node-specific allocatio
 import json
 import logging
 
-from yocto.azure_common import (
+from yocto.azure import (
     DEFAULT_RESOURCE_GROUP,
     AzureCLI,
     confirm,

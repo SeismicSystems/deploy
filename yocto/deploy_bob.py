@@ -3,14 +3,14 @@
 BOB TEE Searcher Image Deployment Tool
 
 Deploys flashbots-images bob VHD to Azure TDX confidential VM.
-Uses existing azure_common tools with BOB-specific configuration.
+Uses Azure deployment tools with BOB-specific configuration.
 """
 
 import json
 import logging
 from pathlib import Path
 
-from yocto.azure_common import AzureCLI, create_base_parser
+from yocto.azure import AzureCLI, create_base_parser
 from yocto.cfg import DeploymentConfig
 from yocto.conf.conf import DeployConfigs
 
@@ -102,7 +102,7 @@ def create_bob_nsg_rules(config: DeployConfigs, az_cli: AzureCLI) -> None:
         az_cli.add_nsg_rule(config, name, priority, port, protocol, source)
 
 
-# Data disk and VM creation now use generic methods from azure_common
+# Data disk and VM creation now use generic methods from azure module
 
 
 def deploy_bob_vm(
