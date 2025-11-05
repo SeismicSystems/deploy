@@ -4,7 +4,6 @@ Azure API functionality.
 Azure CLI wrapper and deployment functions.
 """
 
-import argparse
 import json
 import logging
 import os
@@ -14,12 +13,6 @@ from pathlib import Path
 
 from yocto.cloud.azure.defaults import (
     CONSENSUS_PORT,
-    DEFAULT_CERTBOT_EMAIL,
-    DEFAULT_DOMAIN_NAME,
-    DEFAULT_DOMAIN_RESOURCE_GROUP,
-    DEFAULT_REGION,
-    DEFAULT_RESOURCE_GROUP,
-    DEFAULT_VM_SIZE,
 )
 from yocto.cloud.cloud_api import CloudApi
 from yocto.config import DeployConfigs, VmConfigs
@@ -28,11 +21,6 @@ logger = logging.getLogger(__name__)
 
 
 # Disk Operations
-def get_disk_size(disk_path: Path) -> int:
-    """Get disk size in bytes."""
-    return disk_path.stat().st_size
-
-
 class AzureApi(CloudApi):
     """Azure implementation of CloudApi."""
 
@@ -90,6 +78,9 @@ class AzureApi(CloudApi):
         if cls.resource_group_exists(name):
             logger.info(f"Resource group {name} already exists")
         else:
+            # Import here to avoid circular import
+            from yocto.cloud.cloud_parser import confirm
+
             confirm(f"create genesis resource group: {name} in {location}")
             logger.info(f"Creating genesis IP resource group: {name} in {location}")
             cls.create_resource_group(name, location)
@@ -259,7 +250,7 @@ class AzureApi(CloudApi):
     @classmethod
     def create_disk(cls, config: DeployConfigs, image_path: Path) -> None:
         """Create a managed disk for upload."""
-        disk_size = get_disk_size(image_path)
+        disk_size = image_path.stat().st_size
 
         logger.info("Creating disk")
         cmd = [
@@ -618,91 +609,3 @@ class AzureApi(CloudApi):
 
 
 # Common Argument Parser
-def create_base_parser(description: str) -> argparse.ArgumentParser:
-    """Create base argument parser with common arguments."""
-    parser = argparse.ArgumentParser(description=description)
-
-    # Common optional arguments
-    parser.add_argument(
-        "-r",
-        "--region",
-        type=str,
-        default=DEFAULT_REGION,
-        help=f"Azure region (default: {DEFAULT_REGION})",
-    )
-    parser.add_argument(
-        "--resource-group",
-        type=str,
-        default=DEFAULT_RESOURCE_GROUP,
-        help=f"Domain resource group (default: {DEFAULT_RESOURCE_GROUP})",
-    )
-    parser.add_argument(
-        "--domain-resource-group",
-        type=str,
-        default=DEFAULT_DOMAIN_RESOURCE_GROUP,
-        help=f"Domain resource group (default: {DEFAULT_DOMAIN_RESOURCE_GROUP})",
-    )
-    parser.add_argument(
-        "--domain-name",
-        type=str,
-        default=DEFAULT_DOMAIN_NAME,
-        help="Domain name (default: seismicdev.net)",
-    )
-    parser.add_argument(
-        "--certbot-email",
-        type=str,
-        default=DEFAULT_CERTBOT_EMAIL,
-        help=f"Certbot email (default: {DEFAULT_CERTBOT_EMAIL})",
-    )
-    parser.add_argument(
-        "--source-ip",
-        type=str,
-        help="Source IP address for SSH access. Defaults to this machine's IP",
-    )
-    parser.add_argument(
-        "--vm_size",
-        type=str,
-        # TODO: validate that it's a TDX machine
-        default=DEFAULT_VM_SIZE,
-        help=f"VM size (default: {DEFAULT_VM_SIZE})",
-    )
-    parser.add_argument(
-        "-v",
-        "--logs",
-        action="store_true",
-        help="If flagged, print build and/or deploy logs as they run",
-        default=False,
-    )
-    parser.add_argument(
-        "--code-path",
-        default="",
-        type=str,
-        help="Path to code relative to $HOME",
-    )
-
-    deploy_parser = parser.add_mutually_exclusive_group(required=True)
-
-    # Only one of these two
-    deploy_parser.add_argument(
-        "-a",
-        "--artifact",
-        type=str,
-        help=(
-            "If not running with --build, "
-            "use this to specify an artifact to deploy, "
-            "e.g. 'cvm-image-azure-tdx.rootfs-20241203182636.wic.vhd'"
-        ),
-    )
-    deploy_parser.add_argument(
-        "--ip-only",
-        action="store_true",
-        help="Only deploy genesis IPs",
-    )
-    return parser
-
-
-def confirm(what: str) -> bool:
-    inp = input(f"Are you sure you want to {what}? [y/N]\n")
-    if not inp.strip().lower() == "y":
-        raise ValueError(f"Aborting; will not {what}")
-    return True

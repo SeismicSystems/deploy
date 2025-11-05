@@ -15,7 +15,6 @@ from yocto.cloud.cloud_parser import (
     confirm,
     create_cloud_parser,
     parse_cloud_args,
-    validate_and_apply_defaults,
 )
 
 __all__ = [
@@ -32,7 +31,6 @@ __all__ = [
     "get_cloud_api",
     # Cloud Parser
     "create_cloud_parser",
-    "validate_and_apply_defaults",
     "parse_cloud_args",
     "confirm",
 ]

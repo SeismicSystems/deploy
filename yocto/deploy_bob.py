@@ -6,12 +6,14 @@ Deploys flashbots-images bob VHD to Azure TDX confidential VM.
 Uses Azure deployment tools with BOB-specific configuration.
 """
 
+import argparse
 import json
 import logging
 import traceback
 from pathlib import Path
 
-from yocto.cloud.azure import AzureApi, create_base_parser
+from yocto.cloud.azure import AzureApi
+from yocto.cloud.azure.defaults import DEFAULT_REGION, DEFAULT_VM_SIZE
 from yocto.config import DeployConfigs, DeploymentConfig, get_host_ip
 
 logging.basicConfig(
@@ -242,10 +244,12 @@ def print_next_steps(vm_name: str, ip_address: str, resource_group: str) -> None
 
 
 def parse_bob_args():
-    """Parse BOB-specific command line arguments (matching genesis_deploy pattern)."""
-    parser = create_base_parser("BOB TEE Searcher Azure VM Deployment Tool")
+    """Parse BOB-specific command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="BOB TEE Searcher Azure VM Deployment Tool"
+    )
 
-    # artifact is already defined in create_base_parser, just add BOB-specific args
+    # BOB-specific arguments
     parser.add_argument(
         "--name",
         "-n",
@@ -255,10 +259,48 @@ def parse_bob_args():
     )
 
     parser.add_argument(
+        "-a",
+        "--artifact",
+        type=str,
+        required=True,
+        help="VHD artifact to deploy (e.g., 'bob-searcher.vhd')",
+    )
+
+    parser.add_argument(
         "--data-disk-size",
         type=int,
         default=2048,
         help="Persistent data disk size in GB (default: 2048 = 2TB)",
+    )
+
+    # Azure-specific arguments
+    parser.add_argument(
+        "-r",
+        "--region",
+        type=str,
+        default=DEFAULT_REGION,
+        help=f"Azure region (default: {DEFAULT_REGION})",
+    )
+
+    parser.add_argument(
+        "--vm-size",
+        type=str,
+        default=DEFAULT_VM_SIZE,
+        help=f"VM size (default: {DEFAULT_VM_SIZE})",
+    )
+
+    parser.add_argument(
+        "--source-ip",
+        type=str,
+        help="Source IP address for SSH access (auto-detected if not provided)",
+    )
+
+    parser.add_argument(
+        "-v",
+        "--logs",
+        action="store_true",
+        help="Print deployment logs",
+        default=False,
     )
 
     return parser.parse_args()

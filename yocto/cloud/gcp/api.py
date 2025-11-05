@@ -3,7 +3,6 @@
 GCP API functionality using Google Cloud Python SDKs.
 """
 
-import argparse
 import logging
 import os
 import tempfile
@@ -16,17 +15,11 @@ from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
-    DEFAULT_CERTBOT_EMAIL,
     DEFAULT_DISK_TYPE,
-    DEFAULT_DOMAIN_NAME,
-    DEFAULT_DOMAIN_RESOURCE_GROUP,
     DEFAULT_NETWORK_TIER,
     DEFAULT_NIC_TYPE,
-    DEFAULT_PROJECT,
     DEFAULT_PROVISIONING_MODEL,
     DEFAULT_REGION,
-    DEFAULT_VM_TYPE,
-    DEFAULT_ZONE,
 )
 from yocto.config import DeployConfigs, VmConfigs
 
@@ -34,11 +27,6 @@ logger = logging.getLogger(__name__)
 
 
 # Disk Operations
-def get_disk_size(disk_path: Path) -> int:
-    """Get disk size in bytes."""
-    return disk_path.stat().st_size
-
-
 def wait_for_extended_operation(
     operation: compute_v1.Operation,
     operation_name: str,
@@ -716,94 +704,3 @@ class GcpApi(CloudApi):
             logger.info(f"Deleted temporary user-data file: {user_data_file}")
 
 
-# Common Argument Parser
-def create_base_parser(description: str) -> argparse.ArgumentParser:
-    """Create base argument parser with common arguments."""
-    parser = argparse.ArgumentParser(description=description)
-
-    # Common optional arguments
-    parser.add_argument(
-        "-r",
-        "--region",
-        type=str,
-        default=DEFAULT_ZONE,
-        help=(
-            f"GCP zone (default: {DEFAULT_ZONE}). "
-            "Note: For GCP, this is a zone like 'us-central1-a'"
-        ),
-    )
-    parser.add_argument(
-        "--resource-group",
-        type=str,
-        default=DEFAULT_PROJECT,
-        help=f"GCP project (default: {DEFAULT_PROJECT})",
-    )
-    parser.add_argument(
-        "--domain-resource-group",
-        type=str,
-        default=DEFAULT_DOMAIN_RESOURCE_GROUP,
-        help=f"Domain resource group (default: {DEFAULT_DOMAIN_RESOURCE_GROUP})",
-    )
-    parser.add_argument(
-        "--domain-name",
-        type=str,
-        default=DEFAULT_DOMAIN_NAME,
-        help="Domain name (default: seismictest.net)",
-    )
-    parser.add_argument(
-        "--certbot-email",
-        type=str,
-        default=DEFAULT_CERTBOT_EMAIL,
-        help=f"Certbot email (default: {DEFAULT_CERTBOT_EMAIL})",
-    )
-    parser.add_argument(
-        "--source-ip",
-        type=str,
-        help="Source IP address for SSH access. Defaults to this machine's IP",
-    )
-    parser.add_argument(
-        "--vm_size",
-        type=str,
-        default=DEFAULT_VM_TYPE,
-        help=f"VM machine type (default: {DEFAULT_VM_TYPE})",
-    )
-    parser.add_argument(
-        "-v",
-        "--logs",
-        action="store_true",
-        help="If flagged, print build and/or deploy logs as they run",
-        default=False,
-    )
-    parser.add_argument(
-        "--code-path",
-        default="",
-        type=str,
-        help="Path to code relative to $HOME",
-    )
-
-    deploy_parser = parser.add_mutually_exclusive_group(required=True)
-
-    # Only one of these two
-    deploy_parser.add_argument(
-        "-a",
-        "--artifact",
-        type=str,
-        help=(
-            "If not running with --build, "
-            "use this to specify an artifact to deploy, "
-            "e.g. 'cvm-image-gcp-tdx.rootfs-20241203182636.wic.raw'"
-        ),
-    )
-    deploy_parser.add_argument(
-        "--ip-only",
-        action="store_true",
-        help="Only deploy genesis IPs",
-    )
-    return parser
-
-
-def confirm(what: str) -> bool:
-    inp = input(f"Are you sure you want to {what}? [y/N]\n")
-    if not inp.strip().lower() == "y":
-        raise ValueError(f"Aborting; will not {what}")
-    return True

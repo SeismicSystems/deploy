@@ -6,7 +6,7 @@ This package contains all GCP-specific functionality including:
 - api: GCP API wrapper and deployment functions
 """
 
-from yocto.cloud.gcp.api import GcpApi, confirm, create_base_parser, get_disk_size
+from yocto.cloud.gcp.api import GcpApi
 from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
     DEFAULT_CERTBOT_EMAIL,
@@ -26,9 +26,6 @@ from yocto.cloud.gcp.defaults import (
 __all__ = [
     # API functions and classes
     "GcpApi",
-    "confirm",
-    "create_base_parser",
-    "get_disk_size",
     # Default constants
     "CONSENSUS_PORT",
     "DEFAULT_CERTBOT_EMAIL",

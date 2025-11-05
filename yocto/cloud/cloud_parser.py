@@ -4,7 +4,6 @@ Unified cloud argument parser.
 """
 
 import argparse
-import sys
 
 from yocto.cloud.cloud_config import (
     AZURE_REGIONS,
@@ -13,7 +12,6 @@ from yocto.cloud.cloud_config import (
     get_default_region,
     get_default_resource_group,
     get_default_vm_size,
-    validate_region,
 )
 
 
@@ -143,54 +141,18 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
     return parser
 
 
-def validate_and_apply_defaults(args: argparse.Namespace) -> argparse.Namespace:
-    """Validate arguments and apply cloud-specific defaults.
-
-    Args:
-        args: Parsed arguments
-
-    Returns:
-        Args with defaults applied and validated
-
-    Raises:
-        ValueError: If validation fails
-    """
-    # Convert cloud string to enum
-    cloud = CloudProvider(args.cloud)
-
-    # Apply defaults based on cloud provider
-    if args.region is None:
-        args.region = get_default_region(cloud)
-    if args.resource_group is None:
-        args.resource_group = get_default_resource_group(cloud)
-    if args.vm_size is None:
-        args.vm_size = get_default_vm_size(cloud)
-
-    # Validate region for the selected cloud
-    try:
-        validate_region(cloud, args.region)
-    except ValueError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # Store cloud enum for later use
-    args.cloud_provider = cloud
-
-    return args
-
-
 def parse_cloud_args(description: str) -> argparse.Namespace:
-    """Parse and validate cloud deployment arguments.
+    """Parse cloud deployment arguments.
 
     Args:
         description: Description for the parser
 
     Returns:
-        Validated arguments with cloud-specific defaults applied
+        Parsed arguments (defaults will be applied in config.from_args())
     """
     parser = create_cloud_parser(description)
     args = parser.parse_args()
-    return validate_and_apply_defaults(args)
+    return args
 
 
 def confirm(what: str) -> bool:

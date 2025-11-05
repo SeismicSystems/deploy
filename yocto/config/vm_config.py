@@ -17,16 +17,43 @@ class VmConfigs:
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "VmConfigs":
-        if not args.resource_group:
-            raise ValueError(
-                "If passing in --deploy, you must specify a --resource-group"
-            )
+        # Import at runtime to avoid circular import
+        from yocto.cloud.cloud_config import (
+            CloudProvider,
+            get_default_region,
+            get_default_resource_group,
+            get_default_vm_size,
+            validate_region,
+        )
+
+        # Get cloud provider (should be set by parser or passed in)
+        if not hasattr(args, "cloud"):
+            raise ValueError("args must have 'cloud' attribute set")
+
+        cloud = CloudProvider(args.cloud)
+
+        # Apply cloud-specific defaults if not provided
+        resource_group = args.resource_group
+        if resource_group is None:
+            resource_group = get_default_resource_group(cloud)
+
+        region = args.region
+        if region is None:
+            region = get_default_region(cloud)
+
+        vm_size = args.vm_size
+        if vm_size is None:
+            vm_size = get_default_vm_size(cloud)
+
+        # Validate region for the selected cloud
+        validate_region(cloud, region)
+
         return VmConfigs(
-            resource_group=args.resource_group,
-            name=args.resource_group,
-            nsg_name=args.resource_group,
-            region=args.region,
-            size=args.vm_size,
+            resource_group=resource_group,
+            name=resource_group,
+            nsg_name=resource_group,
+            region=region,
+            size=vm_size,
         )
 
     def to_dict(self):
