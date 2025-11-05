@@ -7,8 +7,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from yocto.azure import AzureApi, confirm
-from yocto.conf.conf import DeployConfigs
+from yocto.cloud.azure import AzureApi, confirm
+from yocto.config import DeployConfigs
 from yocto.measurements import Measurements, write_measurements_tmpfile
 from yocto.metadata import (
     load_metadata,

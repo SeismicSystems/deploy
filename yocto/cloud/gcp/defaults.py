@@ -31,3 +31,25 @@ DEFAULT_NIC_TYPE = "GVNIC"
 DEFAULT_PROVISIONING_MODEL = "STANDARD"
 DEFAULT_DISK_TYPE = "pd-balanced"
 DEFAULT_DISK_SIZE_GB = 32
+
+# Valid GCP zones
+VALID_ZONES = {
+    "us-central1-a",
+    "asia-northeast1-b",
+}
+
+
+def validate_region(region: str) -> None:
+    """Validate that the zone is a valid GCP zone.
+
+    Args:
+        region: The GCP zone to validate
+
+    Raises:
+        ValueError: If the zone is not valid
+    """
+    if region not in VALID_ZONES:
+        valid_zones = ", ".join(sorted(VALID_ZONES))
+        raise ValueError(
+            f"Invalid GCP zone: {region}. Valid GCP zones are: {valid_zones}"
+        )

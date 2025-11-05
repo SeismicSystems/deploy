@@ -14,9 +14,8 @@ from pathlib import Path
 
 from google.cloud import compute_v1, storage
 
-from yocto.cloud_api import CloudApi
-from yocto.conf.conf import DeployConfigs, VmConfigs
-from yocto.gcp.defaults import (
+from yocto.cloud.cloud_api import CloudApi
+from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
     DEFAULT_CERTBOT_EMAIL,
     DEFAULT_DISK_TYPE,
@@ -30,6 +29,7 @@ from yocto.gcp.defaults import (
     DEFAULT_VM_TYPE,
     DEFAULT_ZONE,
 )
+from yocto.config import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +68,13 @@ def wait_for_extended_operation(
 
 class GcpApi(CloudApi):
     """GCP implementation of CloudApi."""
+
+    @staticmethod
+    def _get_azure_api():
+        """Get AzureApi for DNS (lazy import to avoid circular dependency)."""
+        from yocto.cloud.azure.api import AzureApi
+
+        return AzureApi
 
     @staticmethod
     def _upload_to_gcs(
@@ -308,24 +315,21 @@ class GcpApi(CloudApi):
         """
         # For now, we'll use Azure DNS even for GCP deployments
         # This can be changed to Cloud DNS later if needed
-        from yocto.azure.api import AzureApi
-
+        AzureApi = cls._get_azure_api()
         return AzureApi.get_existing_dns_ips(config)
 
     @classmethod
     def remove_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
         """Remove IP from DNS A record."""
         # For now, we'll use Azure DNS even for GCP deployments
-        from yocto.azure.api import AzureApi
-
+        AzureApi = cls._get_azure_api()
         AzureApi.remove_dns_ip(config, ip_address)
 
     @classmethod
     def add_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
         """Add IP to DNS A record."""
         # For now, we'll use Azure DNS even for GCP deployments
-        from yocto.azure.api import AzureApi
-
+        AzureApi = cls._get_azure_api()
         AzureApi.add_dns_ip(config, ip_address)
 
     @classmethod

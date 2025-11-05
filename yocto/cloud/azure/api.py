@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from yocto.azure.defaults import (
+from yocto.cloud.azure.defaults import (
     CONSENSUS_PORT,
     DEFAULT_CERTBOT_EMAIL,
     DEFAULT_DOMAIN_NAME,
@@ -21,8 +21,8 @@ from yocto.azure.defaults import (
     DEFAULT_RESOURCE_GROUP,
     DEFAULT_VM_SIZE,
 )
-from yocto.cloud_api import CloudApi
-from yocto.conf.conf import DeployConfigs, VmConfigs
+from yocto.cloud.cloud_api import CloudApi
+from yocto.config import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
 

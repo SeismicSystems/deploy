@@ -7,8 +7,10 @@ Defines the interface that cloud providers (Azure, GCP) must implement.
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from yocto.conf.conf import DeployConfigs
+if TYPE_CHECKING:
+    from yocto.config.deploy_config import DeployConfigs
 
 
 class CloudApi(ABC):
@@ -65,19 +67,19 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def get_existing_dns_ips(cls, config: DeployConfigs) -> list[str]:
+    def get_existing_dns_ips(cls, config: "DeployConfigs") -> list[str]:
         """Get existing DNS A record IPs."""
         pass
 
     @classmethod
     @abstractmethod
-    def remove_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
+    def remove_dns_ip(cls, config: "DeployConfigs", ip_address: str) -> None:
         """Remove IP from DNS A record."""
         pass
 
     @classmethod
     @abstractmethod
-    def add_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
+    def add_dns_ip(cls, config: "DeployConfigs", ip_address: str) -> None:
         """Add IP to DNS A record."""
         pass
 
@@ -85,7 +87,7 @@ class CloudApi(ABC):
     @abstractmethod
     def update_dns_record(
         cls,
-        config: DeployConfigs,
+        config: "DeployConfigs",
         ip_address: str,
         remove_old: bool = True,
     ) -> None:
@@ -94,19 +96,19 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def disk_exists(cls, config: DeployConfigs, image_path: Path) -> bool:
+    def disk_exists(cls, config: "DeployConfigs", image_path: Path) -> bool:
         """Check if disk exists."""
         pass
 
     @classmethod
     @abstractmethod
-    def create_disk(cls, config: DeployConfigs, image_path: Path) -> None:
+    def create_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Create a managed disk for upload."""
         pass
 
     @classmethod
     @abstractmethod
-    def grant_disk_access(cls, config: DeployConfigs, image_path: Path) -> str:
+    def grant_disk_access(cls, config: "DeployConfigs", image_path: Path) -> str:
         """Grant access to disk and return access URI."""
         pass
 
@@ -129,19 +131,19 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def revoke_disk_access(cls, config: DeployConfigs, image_path: Path) -> None:
+    def revoke_disk_access(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Revoke access to disk."""
         pass
 
     @classmethod
     @abstractmethod
-    def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
+    def upload_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Upload disk image to cloud."""
         pass
 
     @classmethod
     @abstractmethod
-    def create_nsg(cls, config: DeployConfigs) -> None:
+    def create_nsg(cls, config: "DeployConfigs") -> None:
         """Create network security group / firewall rules."""
         pass
 
@@ -149,7 +151,7 @@ class CloudApi(ABC):
     @abstractmethod
     def add_nsg_rule(
         cls,
-        config: DeployConfigs,
+        config: "DeployConfigs",
         name: str,
         priority: str,
         port: str,
@@ -161,7 +163,7 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def create_standard_nsg_rules(cls, config: DeployConfigs) -> None:
+    def create_standard_nsg_rules(cls, config: "DeployConfigs") -> None:
         """Add all standard security rules."""
         pass
 
@@ -194,7 +196,7 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def create_user_data_file(cls, config: DeployConfigs) -> str:
+    def create_user_data_file(cls, config: "DeployConfigs") -> str:
         """Create temporary user data file."""
         pass
 
@@ -216,6 +218,6 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def create_vm(cls, config: DeployConfigs, image_path: Path, ip_name: str) -> None:
+    def create_vm(cls, config: "DeployConfigs", image_path: Path, ip_name: str) -> None:
         """Create the virtual machine with user-data."""
         pass

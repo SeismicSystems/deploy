@@ -8,16 +8,16 @@ Genesis mode deployment with persistent IP addresses and node-specific allocatio
 import json
 import logging
 
-from yocto.azure import (
+from yocto.build import maybe_build
+from yocto.cloud.azure import (
     DEFAULT_RESOURCE_GROUP,
     AzureApi,
     confirm,
     create_base_parser,
 )
-from yocto.build import maybe_build
-from yocto.cfg import DeploymentConfig
-from yocto.conf.logs import setup_logging
+from yocto.config import DeploymentConfig
 from yocto.deploy import Deployer
+from yocto.logging_setup import setup_logging
 
 logger = logging.getLogger(__name__)
 

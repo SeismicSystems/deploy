@@ -1,3 +1,5 @@
+"""Deployment configuration for genesis and node deployments."""
+
 import argparse
 import logging
 from dataclasses import dataclass
@@ -5,31 +7,24 @@ from pathlib import Path
 from typing import Any
 
 from yocto.artifact import parse_artifact
-from yocto.azure.defaults import (
+from yocto.cloud.azure.defaults import (
     DEFAULT_CERTBOT_EMAIL,
     DEFAULT_DOMAIN_NAME,
     DEFAULT_DOMAIN_RESOURCE_GROUP,
     DEFAULT_RESOURCE_GROUP,
 )
-from yocto.conf.conf import (
-    Configs,
-    DeployConfigs,
-    DomainConfig,
-    Mode,
-    VmConfigs,
-    get_host_ip,
-)
+from yocto.config.configs import Configs
+from yocto.config.deploy_config import DeployConfigs
+from yocto.config.domain_config import DomainConfig
+from yocto.config.mode import Mode
+from yocto.config.utils import get_host_ip
+from yocto.config.vm_config import VmConfigs
 
 logger = logging.getLogger(__name__)
 
+# Genesis deployment constants
 _DOMAIN_RECORD_PREFIX = "gn"
 _GENESIS_VM_PREFIX = "yocto-genesis"
-
-
-# Disk Operations
-def get_disk_size(disk_path: str) -> int:
-    """Get disk size in bytes."""
-    return Path(disk_path).stat().st_size
 
 
 @dataclass
@@ -66,7 +61,7 @@ class DeploymentConfig:
                     resource_group=self.resource_group,
                     name=self.vm_name,
                     nsg_name=self.nsg_name,
-                    location=self.region,
+                    region=self.region,
                     size=self.vm_size,
                 ),
                 domain=DomainConfig(
@@ -107,7 +102,7 @@ class DeploymentConfig:
         }
 
     @classmethod
-    def parse_deploy_args(cls, args: argparse.Namespace) -> "DeploymentConfig":
+    def parse_deploy_args(cls, args: argparse.Namespace) -> dict[str, Any]:
         if not args.node or args.node < 1:
             raise ValueError("Argument -n is required and cannot be less than 1")
         return {
@@ -117,7 +112,7 @@ class DeploymentConfig:
         }
 
     @classmethod
-    def configure_genesis_node(cls, node: int) -> "DeploymentConfig":
+    def configure_genesis_node(cls, node: int) -> dict[str, Any]:
         if node < 1:
             raise ValueError("Argument --node is required and cannot be less than 1")
         return {

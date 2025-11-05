@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from yocto.artifact import artifact_timestamp
-from yocto.conf.conf import BuildConfigs, Configs
+from yocto.config import BuildConfigs, Configs
 from yocto.git import GitConfigs, update_git_bb
 from yocto.measurements import Measurements, generate_measurements
 from yocto.metadata import load_artifact_measurements, load_metadata, write_metadata

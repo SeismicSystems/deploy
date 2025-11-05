@@ -8,11 +8,11 @@ Uses Azure deployment tools with BOB-specific configuration.
 
 import json
 import logging
+import traceback
 from pathlib import Path
 
-from yocto.azure import AzureApi, create_base_parser
-from yocto.cfg import DeploymentConfig
-from yocto.conf.conf import DeployConfigs
+from yocto.cloud.azure import AzureApi, create_base_parser
+from yocto.config import DeployConfigs, DeploymentConfig, get_host_ip
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -262,8 +262,6 @@ def parse_bob_args():
 
 def main():
     """Main entry point."""
-    from yocto.conf.conf import get_host_ip
-
     args = parse_bob_args()
 
     # Validate VHD exists
@@ -300,8 +298,6 @@ def main():
 
     except Exception as e:
         logger.error(f"Deployment failed: {e}")
-        import traceback
-
         traceback.print_exc()
         exit(1)
 

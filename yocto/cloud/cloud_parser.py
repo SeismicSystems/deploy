@@ -6,7 +6,7 @@ Unified cloud argument parser.
 import argparse
 import sys
 
-from yocto.cloud_config import (
+from yocto.cloud.cloud_config import (
     AZURE_REGIONS,
     GCP_ZONES,
     CloudProvider,
