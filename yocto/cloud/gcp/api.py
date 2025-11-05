@@ -14,6 +14,7 @@ from pathlib import Path
 
 from google.cloud import compute_v1, storage
 
+from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
@@ -72,8 +73,6 @@ class GcpApi(CloudApi):
     @staticmethod
     def _get_azure_api():
         """Get AzureApi for DNS (lazy import to avoid circular dependency)."""
-        from yocto.cloud.azure.api import AzureApi
-
         return AzureApi
 
     @staticmethod
