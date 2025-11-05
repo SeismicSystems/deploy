@@ -5,6 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from yocto.artifact import parse_artifact
+from yocto.azure.defaults import (
+    DEFAULT_CERTBOT_EMAIL,
+    DEFAULT_DOMAIN_NAME,
+    DEFAULT_DOMAIN_RESOURCE_GROUP,
+    DEFAULT_REGION,
+    DEFAULT_RESOURCE_GROUP,
+    DEFAULT_VM_SIZE,
+)
 from yocto.conf.conf import (
     Configs,
     DeployConfigs,
@@ -15,16 +23,6 @@ from yocto.conf.conf import (
 )
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"
-DEFAULT_RESOURCE_GROUP = "tdx-testnet"
-DEFAULT_DOMAIN_NAME = "seismictest.net"
-DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
-
-DEFAULT_REGION = "eastus2"
-# TDX-enabled VM for attestation
-# Also works: Standard_EC4es_v6
-DEFAULT_VM_SIZE = "Standard_DC4es_v6"
 
 _DOMAIN_RECORD_PREFIX = "gn"
 _GENESIS_VM_PREFIX = "yocto-genesis"
