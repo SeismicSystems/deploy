@@ -5,6 +5,9 @@ GCP API functionality using Google Cloud Python SDKs.
 
 import logging
 import os
+import shutil
+import subprocess
+import tarfile
 import tempfile
 import time
 from pathlib import Path
@@ -57,13 +60,69 @@ class GcpApi(CloudApi):
     """GCP implementation of CloudApi."""
 
     @staticmethod
+    def _convert_vhd_to_targz(vhd_path: Path) -> Path:
+        """Convert VHD file to tar.gz format with disk.raw inside.
+
+        GCP's direct image import API requires tar.gz format containing disk.raw,
+        not VHD files directly.
+        """
+        logger.info(f"Converting VHD to tar.gz format for GCP import...")
+
+        # Create temporary directory for conversion
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            raw_path = temp_path / "disk.raw"
+            targz_path = temp_path / f"{vhd_path.stem}.tar.gz"
+
+            # Convert VHD to RAW using qemu-img
+            logger.info("Converting VHD to RAW format...")
+            cmd = [
+                "qemu-img", "convert",
+                "-f", "vpc",  # VHD format
+                "-O", "raw",  # Output format
+                str(vhd_path),
+                str(raw_path)
+            ]
+
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"Failed to convert VHD to RAW:\n"
+                    f"stdout: {result.stdout}\n"
+                    f"stderr: {result.stderr}"
+                )
+
+            logger.info(f"Converted to RAW: {raw_path}")
+
+            # Create tar.gz with disk.raw inside
+            logger.info("Creating tar.gz archive...")
+            with tarfile.open(targz_path, "w:gz") as tar:
+                tar.add(raw_path, arcname="disk.raw")
+
+            logger.info(f"Created tar.gz: {targz_path}")
+
+            # Copy to a permanent location (in the same directory as the original)
+            final_targz = vhd_path.parent / f"{vhd_path.stem}.tar.gz"
+            shutil.copy(targz_path, final_targz)
+
+            logger.info(f"Conversion complete: {final_targz}")
+            return final_targz
+
+    @staticmethod
     def _upload_to_gcs(
         image_path: Path,
         project: str,
         bucket_name: str,
         blob_name: str,
-    ) -> None:
-        """Upload image file to Google Cloud Storage."""
+    ) -> tuple[str, Path]:
+        """Upload image file to Google Cloud Storage.
+
+        If the image is a VHD file, it will be converted to tar.gz first
+        since GCP's direct import API doesn't support VHD format.
+
+        Returns:
+            Tuple of (blob_name uploaded, local file path used)
+        """
         storage_client = storage.Client(project=project)
 
         # Create bucket if it doesn't exist
@@ -74,17 +133,30 @@ class GcpApi(CloudApi):
             logger.info(f"Creating new bucket: {bucket_name}")
             bucket = storage_client.create_bucket(bucket_name, location=DEFAULT_REGION)
 
+        # Convert VHD to tar.gz if needed
+        upload_path = image_path
+        upload_blob_name = blob_name
+
+        if image_path.suffix.lower() in ['.vhd', '.vhdx']:
+            logger.info(f"VHD file detected: {image_path.name}")
+            logger.info("Converting to tar.gz format (required for GCP direct import)")
+            upload_path = GcpApi._convert_vhd_to_targz(image_path)
+            upload_blob_name = upload_path.name
+            logger.info(f"Will upload converted file: {upload_blob_name}")
+
         # Upload the file
-        blob = bucket.blob(blob_name)
+        blob = bucket.blob(upload_blob_name)
 
         # Get file size for progress reporting
-        file_size = image_path.stat().st_size
+        file_size = upload_path.stat().st_size
         file_size_gb = file_size / (1024**3)
         logger.info(f"Uploading {file_size_gb:.2f} GB to Cloud Storage...")
 
-        blob.upload_from_filename(str(image_path), timeout=3600)
+        blob.upload_from_filename(str(upload_path), timeout=3600)
 
-        logger.info(f"Upload complete: gs://{bucket_name}/{blob_name}")
+        logger.info(f"Upload complete: gs://{bucket_name}/{upload_blob_name}")
+
+        return upload_blob_name, upload_path
 
     @staticmethod
     def _create_image_from_gcs(
@@ -95,8 +167,8 @@ class GcpApi(CloudApi):
     ) -> None:
         """Create a GCP image from a Cloud Storage object.
 
-        For VHD files, GCP requires NOT setting the source_type field,
-        allowing GCP to auto-detect the format from the file extension.
+        Uses the gcloud compute images create flow with proper guest OS features
+        for TDX confidential computing.
         """
         image_client = compute_v1.ImagesClient()
 
@@ -108,22 +180,76 @@ class GcpApi(CloudApi):
         except Exception:
             pass
 
+        # Verify the blob exists in GCS
+        storage_client = storage.Client(project=project)
+        try:
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(blob_name)
+            if not blob.exists():
+                raise FileNotFoundError(
+                    f"Blob {blob_name} does not exist in bucket {bucket_name}"
+                )
+            logger.info(f"Verified blob exists: gs://{bucket_name}/{blob_name}")
+        except Exception as e:
+            logger.error(f"Failed to verify blob in GCS: {e}")
+            raise
+
+        logger.info(f"Creating image from gs://{bucket_name}/{blob_name}")
+
         # Create image from Cloud Storage
+        # This matches the gcloud compute images create --source-uri flow
         image = compute_v1.Image()
         image.name = image_name
 
-        # Configure raw disk with VHD container type
+        gcs_uri = f"gs://{bucket_name}/{blob_name}"
+
+        # Configure raw_disk source
+        # For tar.gz files containing disk.raw, don't set container_type
+        # For other formats, set appropriate container_type
         image.raw_disk = compute_v1.RawDisk()
-        # MUST use gs:// URI format, not https:// URLs
-        image.raw_disk.source = f"gs://{bucket_name}/{blob_name}"
-        image.raw_disk.container_type = "VHD"  # Specify VHD format explicitly
+        image.raw_disk.source = gcs_uri
 
-        # Add TDX guest OS feature
-        guest_os_feature = compute_v1.GuestOsFeature()
-        guest_os_feature.type_ = "TDX_CAPABLE"
-        image.guest_os_features = [guest_os_feature]
+        if blob_name.endswith('.tar.gz'):
+            # For tar.gz archives (containing disk.raw), don't set container_type
+            # GCP will auto-detect the raw disk inside
+            logger.info("Using tar.gz format (auto-detected)")
+        elif blob_name.endswith('.vhd') or blob_name.endswith('.vhdx'):
+            # For VHD files (should not happen after conversion, but handle it)
+            image.raw_disk.container_type = "VHD"
+            logger.info("Using VHD container type")
+        # Add other formats as needed
 
-        operation = image_client.insert(project=project, image_resource=image)
+        # Add all required guest OS features for TDX
+        # These match: --guest-os-features=UEFI_COMPATIBLE,VIRTIO_SCSI_MULTIQUEUE,GVNIC,TDX_CAPABLE
+        guest_os_features = [
+            "UEFI_COMPATIBLE",
+            "VIRTIO_SCSI_MULTIQUEUE",
+            "GVNIC",
+            "TDX_CAPABLE"
+        ]
+
+        image.guest_os_features = []
+        for feature_type in guest_os_features:
+            feature = compute_v1.GuestOsFeature()
+            feature.type_ = feature_type
+            image.guest_os_features.append(feature)
+
+        logger.info(f"Guest OS features: {guest_os_features}")
+
+        try:
+            operation = image_client.insert(project=project, image_resource=image)
+        except Exception as e:
+            logger.error(f"Failed to create image: {e}")
+            logger.error(f"GCS URI: {gcs_uri}")
+            logger.error(f"Blob name: {blob_name}")
+            logger.error(
+                "Troubleshooting:\n"
+                "1. Ensure the file exists in GCS\n"
+                "2. For VHD files, container_type must be 'VHD'\n"
+                "3. For tar.gz files, it should contain disk.raw at the root\n"
+                "4. Check that the service account has storage.objects.get permission"
+            )
+            raise
 
         # Wait for operation to complete
         logger.info(f"Waiting for image {image_name} to be created...")
@@ -312,9 +438,9 @@ class GcpApi(CloudApi):
         image_name = f"{config.vm.name}-{image_path.stem}".replace(".", "-")
         blob_name = image_path.name
 
-        # Step 1: Upload to Cloud Storage
+        # Step 1: Upload to Cloud Storage (converts VHD to tar.gz if needed)
         logger.info(f"Uploading {image_path.name} to gs://{bucket_name}/{blob_name}")
-        cls._upload_to_gcs(
+        actual_blob_name, upload_path = cls._upload_to_gcs(
             image_path=image_path,
             project=config.vm.resource_group,
             bucket_name=bucket_name,
@@ -327,7 +453,7 @@ class GcpApi(CloudApi):
             project=config.vm.resource_group,
             image_name=image_name,
             bucket_name=bucket_name,
-            blob_name=blob_name,
+            blob_name=actual_blob_name,  # Use the actual uploaded blob name
         )
 
         # Step 3: Create disk from image
