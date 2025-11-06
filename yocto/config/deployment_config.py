@@ -69,15 +69,24 @@ class DeploymentConfig:
 
     @classmethod
     def parse_base_kwargs(cls, args: argparse.Namespace) -> dict[str, Any]:
-        # Import defaults here to avoid circular imports
-        from yocto.cloud.azure.defaults import (
-            DEFAULT_CERTBOT_EMAIL,
-            DEFAULT_DOMAIN_NAME,
-            DEFAULT_DOMAIN_RESOURCE_GROUP,
-            DEFAULT_REGION,
-            DEFAULT_RESOURCE_GROUP,
-            DEFAULT_VM_SIZE,
+        # Import at runtime to avoid circular imports
+        from yocto.cloud.cloud_config import (
+            CloudProvider,
+            get_default_region,
+            get_default_resource_group,
+            get_default_vm_size,
         )
+
+        # Get cloud provider from parsed args
+        if not hasattr(args, "cloud"):
+            raise ValueError("args must have 'cloud' attribute - use create_base_parser()")
+
+        cloud = CloudProvider(args.cloud)
+
+        # Apply cloud-specific defaults if not provided
+        region = args.region if args.region is not None else get_default_region(cloud)
+        resource_group = args.resource_group if args.resource_group is not None else get_default_resource_group(cloud)
+        vm_size = args.vm_size if args.vm_size is not None else get_default_vm_size(cloud)
 
         source_ip = args.source_ip
         if source_ip is None:
@@ -91,13 +100,13 @@ class DeploymentConfig:
             ),
             "artifact": parse_artifact(args.artifact),
             "ip_only": args.ip_only,
-            "region": args.region or DEFAULT_REGION,
-            "resource_group": args.resource_group or DEFAULT_RESOURCE_GROUP,
-            "vm_size": args.vm_size or DEFAULT_VM_SIZE,
+            "region": region,
+            "resource_group": resource_group,
+            "vm_size": vm_size,
             "source_ip": source_ip,
-            "domain_resource_group": args.domain_resource_group or DEFAULT_DOMAIN_RESOURCE_GROUP,
-            "domain_name": args.domain_name or DEFAULT_DOMAIN_NAME,
-            "certbot_email": args.certbot_email or DEFAULT_CERTBOT_EMAIL,
+            "domain_resource_group": args.domain_resource_group,
+            "domain_name": args.domain_name,
+            "certbot_email": args.certbot_email,
             "show_logs": args.logs,
         }
 

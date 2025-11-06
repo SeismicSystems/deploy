@@ -11,7 +11,6 @@ import logging
 from yocto.build import maybe_build
 from yocto.cloud.azure import DEFAULT_RESOURCE_GROUP, AzureApi
 from yocto.cloud.base_parser import create_base_parser
-from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeploymentConfig
 from yocto.deploy import Deployer
@@ -103,9 +102,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
 
 def parse_genesis_args():
     """Parse genesis-specific command line arguments."""
-    parser = create_base_parser(
-        "Seismic Genesis VM Deployment Tool", cloud=CloudProvider.AZURE
-    )
+    parser = create_base_parser("Seismic Genesis VM Deployment Tool")
     # Genesis-specific node arguments (mutually exclusive)
     node_group = parser.add_mutually_exclusive_group(required=True)
     node_group.add_argument(
