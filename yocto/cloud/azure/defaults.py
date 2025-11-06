@@ -3,10 +3,13 @@ Default values for Azure deployments.
 """
 
 # Resource groups
-DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"
-DEFAULT_RESOURCE_GROUP = "tdx-testnet"
+
+# The resource group that owns the VM, IP, disk, etc.
+DEFAULT_RESOURCE_GROUP = "yocto-testnet"
 
 # Domain configuration
+# The resource group that owns only the domain
+DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"
 DEFAULT_DOMAIN_NAME = "seismictest.net"
 DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
 
