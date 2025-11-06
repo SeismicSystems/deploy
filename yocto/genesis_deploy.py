@@ -63,14 +63,14 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     deploy_cfg = cfg.deploy
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
 
-    api = get_cloud_api(deploy_cfg.vm.cloud)
-    genesis_ip_manager = GenesisIPManager(api, args.resource_group)
+    cloud_api = get_cloud_api(deploy_cfg.vm.cloud)
+    genesis_ip_manager = GenesisIPManager(cloud_api, args.resource_group)
 
     # Check dependencies
-    api.check_dependencies()
+    cloud_api.check_dependencies()
 
     # Create resource group
-    api.ensure_created_resource_group(
+    cloud_api.ensure_created_resource_group(
         name=deploy_cfg.vm.resource_group,
         location=deploy_cfg.vm.location,
     )

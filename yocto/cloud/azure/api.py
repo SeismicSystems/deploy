@@ -26,25 +26,6 @@ class AzureApi(CloudApi):
     """Azure implementation of CloudApi."""
 
     @staticmethod
-    def run_command(
-        cmd: list[str],
-        show_logs: bool = False,
-    ) -> subprocess.CompletedProcess:
-        """Execute an Azure CLI command."""
-        try:
-            result = subprocess.run(
-                cmd,
-                capture_output=not show_logs,
-                text=True,
-                check=True,
-            )
-            return result
-        except subprocess.CalledProcessError as e:
-            logger.info(f"Command failed: {' '.join(cmd)}")
-            logger.info(f"Error: {e.stderr}")
-            raise
-
-    @staticmethod
     def check_dependencies():
         """Check if required tools are installed."""
         tools = ["az", "azcopy"]

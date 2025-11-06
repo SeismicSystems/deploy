@@ -3,7 +3,7 @@
 Base Cloud API abstraction.
 Defines the interface that cloud providers (Azure, GCP) must implement.
 """
-
+import logging
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -12,18 +12,29 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from yocto.config.deploy_config import DeployConfigs
 
+logger = logging.getLogger(__name__)
 
 class CloudApi(ABC):
     """Abstract base class for cloud provider APIs."""
 
     @staticmethod
-    @abstractmethod
     def run_command(
         cmd: list[str],
         show_logs: bool = False,
     ) -> subprocess.CompletedProcess:
-        """Execute a cloud CLI command."""
-        raise NotImplementedError
+        """Execute an Azure CLI command."""
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=not show_logs,
+                text=True,
+                check=True,
+            )
+            return result
+        except subprocess.CalledProcessError as e:
+            logger.info(f"Command failed: {' '.join(cmd)}")
+            logger.info(f"Error: {e.stderr}")
+            raise
 
     @staticmethod
     @abstractmethod

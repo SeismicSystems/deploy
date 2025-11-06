@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from yocto.cloud.azure.api import AzureApi
+from yocto.cloud.cloud_config import CloudProvider
+from yocto.cloud.cloud_factory import get_cloud_api
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs
 from yocto.deployment.proxy import ProxyClient
@@ -43,6 +45,8 @@ def delete_vm(vm_name: str, home: str) -> bool:
     Delete existing resource group if provided.
     Returns True if successful, False otherwise.
     """
+    cloud_api = get_cloud_api(CloudProvider.AZURE)
+
     metadata = load_metadata(home)
     resources = metadata["resources"]
     meta = resources[vm_name]
@@ -73,7 +77,7 @@ def delete_vm(vm_name: str, home: str) -> bool:
     logger.info(f"Successfully deleted {vm_name}:\n{stdout}")
     logger.info("Deleting associated disk...")
     region = meta["vm"]["region"]
-    AzureApi.delete_disk(resource_group, vm_name, meta["artifact"], region)
+    cloud_api.delete_disk(resource_group, vm_name, meta["artifact"], region)
     remove_vm_from_metadata(vm_name, home)
     return True
 
@@ -84,24 +88,25 @@ def deploy_image(
     ip_name: str,
 ) -> str:
     """Deploy image and return public IP. Raises an error if deployment fails."""
+    cloud_api = get_cloud_api(CloudProvider.AZURE)
 
     # Check if image_path exists
     if not image_path.exists():
         raise FileNotFoundError(f"Image path not found: {image_path}")
 
     # Disk
-    if AzureApi.disk_exists(configs, image_path):
+    if cloud_api.disk_exists(configs, image_path):
         logger.error(f"Artifact {image_path.name} already exists for {configs.vm.name}")
 
-    AzureApi.create_disk(configs, image_path)
-    AzureApi.upload_disk(configs, image_path)
+    cloud_api.create_disk(configs, image_path)
+    cloud_api.upload_disk(configs, image_path)
 
     # Security groups
-    AzureApi.create_nsg(configs)
-    AzureApi.create_standard_nsg_rules(configs)
+    cloud_api.create_nsg(configs)
+    cloud_api.create_standard_nsg_rules(configs)
 
     # Actually create the VM
-    AzureApi.create_vm(configs, image_path, ip_name)
+    cloud_api.create_vm(configs, image_path, ip_name)
 
     return get_ip_address(configs.vm.name)
 
