@@ -41,7 +41,7 @@ def artifact_timestamp(artifact: str) -> int:
 
 
 def _artifact_from_timestamp(timestamp: str) -> str:
-    return f"cvm-image-azure-tdx.rootfs-{timestamp}.wic.vhd"
+    return f"{BuildPaths.artifact_prefix()}-{timestamp}.wic.vhd"
 
 
 def parse_artifact(artifact_arg: str | None) -> str | None:
@@ -55,6 +55,13 @@ def parse_artifact(artifact_arg: str | None) -> str | None:
     # Validate that it's correctly named
     timestamp = _extract_timestamp(artifact_arg)
     return _artifact_from_timestamp(timestamp)
+
+
+def expect_artifact(artifact_arg: str) -> str:
+    artifact = parse_artifact(artifact_arg)
+    if artifact is None:
+        raise ValueError("Empty --artifact")
+    return artifact
 
 
 def delete_artifact(artifact: str, home: str):

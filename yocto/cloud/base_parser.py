@@ -7,17 +7,35 @@ import argparse
 
 from yocto.cloud.azure.defaults import (
     DEFAULT_CERTBOT_EMAIL as AZURE_CERTBOT_EMAIL,
+)
+from yocto.cloud.azure.defaults import (
     DEFAULT_DOMAIN_NAME as AZURE_DOMAIN_NAME,
+)
+from yocto.cloud.azure.defaults import (
     DEFAULT_DOMAIN_RESOURCE_GROUP as AZURE_DOMAIN_RG,
+)
+from yocto.cloud.azure.defaults import (
     DEFAULT_REGION as AZURE_REGION,
+)
+from yocto.cloud.azure.defaults import (
     DEFAULT_RESOURCE_GROUP as AZURE_RESOURCE_GROUP,
+)
+from yocto.cloud.azure.defaults import (
     DEFAULT_VM_SIZE as AZURE_VM_SIZE,
+)
+from yocto.cloud.azure.defaults import (
     VALID_REGIONS as AZURE_REGIONS,
 )
 from yocto.cloud.gcp.defaults import (
     DEFAULT_PROJECT as GCP_PROJECT,
+)
+from yocto.cloud.gcp.defaults import (
     DEFAULT_VM_TYPE as GCP_VM_TYPE,
+)
+from yocto.cloud.gcp.defaults import (
     DEFAULT_ZONE as GCP_ZONE,
+)
+from yocto.cloud.gcp.defaults import (
     VALID_ZONES as GCP_ZONES,
 )
 
@@ -67,7 +85,8 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         help=region_help,
     )
 
-    # Resource group / Project with aliases (defaults applied in config based on --cloud)
+    # Resource group / Project with aliases
+    # (defaults applied in config based on --cloud)
     resource_group_help = (
         "Resource group (Azure) or project (GCP). Defaults based on --cloud:\n"
         f"  Azure: {AZURE_RESOURCE_GROUP}\n"
@@ -152,7 +171,8 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         type=str,
         help=(
             "Artifact to deploy (e.g., "
-            "'cvm-image-azure-tdx.rootfs-20241203182636.wic.vhd')"
+            "'cvm-image-azure-tdx.rootfs-20241203182636.wic.vhd'). "
+            "This can also be just a timestamp (e.g. 20241203182636)"
         ),
     )
     deploy_parser.add_argument(

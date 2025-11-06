@@ -133,7 +133,8 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
         type=str,
         help=(
             "Artifact to deploy (e.g., "
-            "'cvm-image-azure-tdx.rootfs-20241203182636.wic.vhd')"
+            "'cvm-image-azure-tdx.rootfs-20241203182636.wic.vhd'). "
+            "This can also be just a timestamp (e.g. 20241203182636)"
         ),
     )
     deploy_parser.add_argument(
@@ -157,8 +158,6 @@ def parse_cloud_args(description: str) -> argparse.Namespace:
     parser = create_cloud_parser(description)
     args = parser.parse_args()
     return args
-
-
 
 
 def confirm(what: str) -> bool:

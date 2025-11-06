@@ -4,7 +4,7 @@ import argparse
 from dataclasses import dataclass
 from typing import Any
 
-from yocto.artifact import parse_artifact
+from yocto.artifact import expect_artifact
 from yocto.config.domain_config import DomainConfig
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
@@ -14,7 +14,7 @@ from yocto.config.vm_config import VmConfigs
 class DeployConfigs:
     vm: VmConfigs
     domain: DomainConfig
-    artifact: str | None
+    artifact: str
     email: str
     source_ip: str
     show_logs: bool = False
@@ -24,7 +24,7 @@ class DeployConfigs:
         return DeployConfigs(
             vm=VmConfigs.from_args(args),
             domain=DomainConfig.from_args(args),
-            artifact=parse_artifact(args.artifact),
+            artifact=expect_artifact(args.artifact),
             email=args.email,
             source_ip=get_host_ip(),
             show_logs=args.logs,

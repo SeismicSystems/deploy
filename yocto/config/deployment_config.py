@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from yocto.artifact import parse_artifact
+from yocto.artifact import expect_artifact
 from yocto.config.configs import Configs
 from yocto.config.deploy_config import DeployConfigs
 from yocto.config.domain_config import DomainConfig
@@ -32,7 +32,7 @@ class DeploymentConfig:
     record_name: str
     source_ip: str
     ip_only: bool
-    artifact: str | None
+    artifact: str
     home: str
     domain_resource_group: str
     domain_name: str
@@ -58,7 +58,7 @@ class DeploymentConfig:
                     resource_group=self.domain_resource_group,
                     name=self.domain_name,
                 ),
-                artifact=self.artifact or "",
+                artifact=self.artifact,
                 email=self.certbot_email,
                 source_ip=self.source_ip,
                 show_logs=self.show_logs,
@@ -79,14 +79,17 @@ class DeploymentConfig:
 
         # Get cloud provider from parsed args
         if not hasattr(args, "cloud"):
-            raise ValueError("args must have 'cloud' attribute - use create_base_parser()")
+            raise ValueError(
+                "args must have 'cloud' attribute - "
+                "use create_base_parser()"
+            )
 
         cloud = CloudProvider(args.cloud)
 
         # Apply cloud-specific defaults if not provided
-        region = args.region if args.region is not None else get_default_region(cloud)
-        resource_group = args.resource_group if args.resource_group is not None else get_default_resource_group(cloud)
-        vm_size = args.vm_size if args.vm_size is not None else get_default_vm_size(cloud)
+        region = args.region or get_default_region(cloud)
+        resource_group = args.resource_group or get_default_resource_group(cloud)
+        vm_size = args.vm_size or get_default_vm_size(cloud)
 
         source_ip = args.source_ip
         if source_ip is None:
@@ -98,7 +101,7 @@ class DeploymentConfig:
             "home": str(
                 Path.home() / args.code_path if args.code_path else Path.home()
             ),
-            "artifact": parse_artifact(args.artifact),
+            "artifact": expect_artifact(args.artifact),
             "ip_only": args.ip_only,
             "region": region,
             "resource_group": resource_group,

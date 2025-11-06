@@ -42,9 +42,9 @@ def build_image(home: str, capture_output: bool = True) -> Path:
         raise RuntimeError(f"Image build failed: {err}")
 
     # Find the latest built image
-    find_cmd = """
+    find_cmd = f"""
     find ~/yocto-manifests/reproducible-build/artifacts \
-    -name 'cvm-image-azure-tdx.rootfs-*.wic.vhd' \
+    -name '{BuildPaths.artifact_prefix()}-*.wic.vhd' \
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """
     find_result = subprocess.run(
