@@ -885,13 +885,21 @@ class GcpApi(CloudApi):
             with open(user_data_file) as f:
                 user_data_content = f.read()
 
-            # Configure network interface
+            # Configure network interface with external IP
             network_interface = compute_v1.NetworkInterface()
             network_interface.network = (
                 f"projects/{config.vm.resource_group}/global/networks/default"
             )
             network_interface.stack_type = "IPV4_ONLY"
             network_interface.nic_type = DEFAULT_NIC_TYPE
+
+            # Add access config for external IP
+            access_config = compute_v1.AccessConfig()
+            access_config.name = "External NAT"
+            access_config.type_ = "ONE_TO_ONE_NAT"
+            # If ip_name is provided, we could potentially use a reserved IP here
+            # For now, let GCP auto-assign an ephemeral external IP
+            network_interface.access_configs = [access_config]
 
             # Configure attached disk
             attached_disk = compute_v1.AttachedDisk()
