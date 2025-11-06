@@ -12,6 +12,8 @@ from yocto.config.domain_config import DomainConfig
 from yocto.config.mode import Mode
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
+# Import here to avoid circular dependency
+from yocto.utils.artifact import expect_artifact
 
 logger = logging.getLogger(__name__)
 
@@ -97,9 +99,6 @@ class DeploymentConfig:
             logger.warning("No --source-ip provided, so fetching IP from ipify.org...")
             source_ip = get_host_ip()
             logger.info(f"Fetched public IP: {source_ip}")
-
-        # Import here to avoid circular dependency
-        from yocto.utils.artifact import expect_artifact
 
         return {
             "home": str(
