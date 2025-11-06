@@ -180,7 +180,7 @@ class GcpApi(CloudApi):
         except Exception:
             pass
 
-        # Verify the blob exists in GCS
+        # Verify the blob exists and grant permissions
         storage_client = storage.Client(project=project)
         try:
             bucket = storage_client.bucket(bucket_name)
@@ -190,6 +190,43 @@ class GcpApi(CloudApi):
                     f"Blob {blob_name} does not exist in bucket {bucket_name}"
                 )
             logger.info(f"Verified blob exists: gs://{bucket_name}/{blob_name}")
+
+            # Grant the Compute Engine service account access to the bucket
+            # The service account format is: [PROJECT_NUMBER]@cloudservices.gserviceaccount.com
+            # and [PROJECT_NUMBER]-compute@developer.gserviceaccount.com
+
+            # Get project number
+            rm_client = resourcemanager_v3.ProjectsClient()
+            try:
+                project_resource = rm_client.get_project(name=f"projects/{project}")
+                project_number = project_resource.name.split('/')[-1]
+
+                # Grant storage.objectViewer role to Compute Engine service accounts
+                compute_sa = f"{project_number}-compute@developer.gserviceaccount.com"
+                cloud_sa = f"{project_number}@cloudservices.gserviceaccount.com"
+
+                logger.info(f"Granting storage access to: {compute_sa}")
+
+                # Get current IAM policy
+                policy = bucket.get_iam_policy(requested_policy_version=3)
+
+                # Add storage.objectViewer role for both service accounts
+                policy.bindings.append({
+                    "role": "roles/storage.objectViewer",
+                    "members": {
+                        f"serviceAccount:{compute_sa}",
+                        f"serviceAccount:{cloud_sa}",
+                    }
+                })
+
+                # Set the updated policy
+                bucket.set_iam_policy(policy)
+                logger.info("Granted Compute Engine service accounts access to bucket")
+
+            except Exception as e:
+                logger.warning(f"Failed to grant IAM permissions (may already exist): {e}")
+                # Continue anyway - permissions might already be set
+
         except Exception as e:
             logger.error(f"Failed to verify blob in GCS: {e}")
             raise
