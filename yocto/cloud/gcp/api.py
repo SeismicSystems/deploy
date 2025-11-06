@@ -271,22 +271,19 @@ class GcpApi(CloudApi):
         image = compute_v1.Image()
         image.name = image_name
 
-        gcs_uri = f"gs://{bucket_name}/{blob_name}"
+        # CRITICAL: Use the Storage API URL format, not gs:// URI
+        # Format: https://storage.googleapis.com/storage/v1/b/BUCKET/o/OBJECT
+        storage_api_url = f"https://storage.googleapis.com/storage/v1/b/{bucket_name}/o/{blob_name}"
 
-        # Configure raw_disk source
-        # IMPORTANT: container_type is the format used to encode the disk image
+        # Configure raw_disk source with Storage API URL
         image.raw_disk = compute_v1.RawDisk()
-        image.raw_disk.source = gcs_uri
+        image.raw_disk.source = storage_api_url
 
-        if blob_name.endswith('.tar.gz'):
-            # For tar.gz archives containing disk.raw, use TAR container type
-            image.raw_disk.container_type = "TAR"
-            logger.info("Using TAR container type for tar.gz file")
-        elif blob_name.endswith('.vhd') or blob_name.endswith('.vhdx'):
-            # For VHD files (should not happen after conversion, but handle it)
-            image.raw_disk.container_type = "VHD"
-            logger.info("Using VHD container type")
-        # Add other formats as needed
+        # Set sourceType to RAW (required by gcloud flow)
+        image.source_type = "RAW"
+
+        logger.info(f"Using Storage API URL: {storage_api_url}")
+        logger.info(f"Source type: RAW")
 
         # Add all required guest OS features for TDX
         # These match: --guest-os-features=UEFI_COMPATIBLE,VIRTIO_SCSI_MULTIQUEUE,GVNIC,TDX_CAPABLE
