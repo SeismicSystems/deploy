@@ -258,7 +258,7 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=config.show_logs)
 
     @classmethod
-    def grant_disk_access(cls, config: DeployConfigs, image_path: Path) -> str:
+    def _grant_disk_access(cls, config: DeployConfigs, image_path: Path) -> str:
         # Grant access
         logger.info("Granting access")
         cmd = [
@@ -331,7 +331,7 @@ class AzureApi(CloudApi):
     @classmethod
     def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
         """Upload disk image to Azure."""
-        sas_uri = cls.grant_disk_access(config, image_path)
+        sas_uri = cls._grant_disk_access(config, image_path)
         cls.copy_disk(image_path, sas_uri, show_logs=config.show_logs)
         cls.revoke_disk_access(config, image_path)
 

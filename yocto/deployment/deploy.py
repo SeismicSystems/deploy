@@ -7,7 +7,6 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_factory import get_cloud_api
 from yocto.cloud.cloud_parser import confirm

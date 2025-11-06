@@ -4,7 +4,6 @@ import tempfile
 from pathlib import Path
 
 from yocto.cloud.azure import CONSENSUS_PORT
-from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
 from yocto.config import DOMAIN_RECORD_PREFIX, GENESIS_VM_PREFIX
 from yocto.utils.metadata import load_metadata

@@ -119,12 +119,6 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def grant_disk_access(cls, config: "DeployConfigs", image_path: Path) -> str:
-        """Grant access to disk and return access URI."""
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
     def delete_disk(cls, resource_group: str, vm_name: str, artifact: str, zone: str):
         """Delete a disk."""
         raise NotImplementedError

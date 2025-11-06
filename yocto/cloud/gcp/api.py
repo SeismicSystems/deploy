@@ -336,15 +336,8 @@ class GcpApi(CloudApi):
         )
 
     @classmethod
-    def grant_disk_access(cls, config: DeployConfigs, image_path: Path) -> str:
-        """Grant access to disk and return access URI.
-        Note: Not needed for GCP workflow.
-        """
-        raise NotImplementedError("grant_disk_access not needed for GCP")
-
-    @classmethod
     def delete_disk(
-        cls, resource_group: str, vm_name: str, artifact: str, zone: str
+        cls, resource_group: str, vm_name: str, artifact: str, zone: str,
     ):
         """Delete a disk."""
         disk_name = VmConfigs.get_disk_name(vm_name, artifact)
