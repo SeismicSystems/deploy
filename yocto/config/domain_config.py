@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 @dataclass
 class DomainConfig:
-    record: str = "yocto-0"
-    resource_group: str = "devnet2"
-    name: str = "seismicdev.net"
+    record: str
+    resource_group: str
+    name: str
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "DomainConfig":
