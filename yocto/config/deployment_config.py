@@ -12,6 +12,7 @@ from yocto.config.domain_config import DomainConfig
 from yocto.config.mode import Mode
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
+
 # Import here to avoid circular dependency
 from yocto.utils.artifact import expect_artifact
 

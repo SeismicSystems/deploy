@@ -5,6 +5,11 @@ Unified cloud argument parser.
 
 import argparse
 
+from yocto.cloud.azure.defaults import (
+    DEFAULT_CERTBOT_EMAIL,
+    DEFAULT_DOMAIN_NAME,
+    DEFAULT_DOMAIN_RESOURCE_GROUP,
+)
 from yocto.cloud.base_parser import create_base_parser
 from yocto.cloud.cloud_config import (
     AZURE_REGIONS,
@@ -14,7 +19,6 @@ from yocto.cloud.cloud_config import (
     get_default_resource_group,
     get_default_vm_size,
 )
-from yocto.cloud.azure.defaults import DEFAULT_DOMAIN_RESOURCE_GROUP, DEFAULT_DOMAIN_NAME, DEFAULT_CERTBOT_EMAIL
 
 # Re-export for backwards compatibility
 __all__ = ["create_cloud_parser", "parse_cloud_args", "create_base_parser", "confirm"]

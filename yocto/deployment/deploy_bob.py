@@ -13,8 +13,7 @@ import traceback
 from pathlib import Path
 
 from yocto.cloud.azure.api import AzureApi
-from yocto.cloud.azure.defaults import DEFAULT_REGION, DEFAULT_VM_SIZE
-from yocto.config import DeployConfigs, DeploymentConfig, get_host_ip
+
 # Import defaults here to avoid circular imports
 from yocto.cloud.azure.defaults import (
     DEFAULT_CERTBOT_EMAIL,
@@ -24,6 +23,7 @@ from yocto.cloud.azure.defaults import (
     DEFAULT_RESOURCE_GROUP,
     DEFAULT_VM_SIZE,
 )
+from yocto.config import DeployConfigs, DeploymentConfig, get_host_ip
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
