@@ -12,7 +12,6 @@ from yocto.config.domain_config import DomainConfig
 from yocto.config.mode import Mode
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
-from yocto.utils.artifact import expect_artifact
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +22,10 @@ _GENESIS_VM_PREFIX = "yocto-genesis"
 
 @dataclass
 class DeploymentConfig:
-    """Configuration for Azure VM deployment."""
+    """Configuration for VM deployment (cloud-agnostic)."""
 
     vm_name: str
+    cloud: str  # Cloud provider: "azure" or "gcp"
     region: str
     vm_size: str
     node: int
@@ -50,6 +50,7 @@ class DeploymentConfig:
                     resource_group=self.resource_group,
                     name=self.vm_name,
                     nsg_name=self.nsg_name,
+                    cloud=self.cloud,
                     region=self.region,
                     size=self.vm_size,
                 ),
@@ -97,12 +98,16 @@ class DeploymentConfig:
             source_ip = get_host_ip()
             logger.info(f"Fetched public IP: {source_ip}")
 
+        # Import here to avoid circular dependency
+        from yocto.utils.artifact import expect_artifact
+
         return {
             "home": str(
                 Path.home() / args.code_path if args.code_path else Path.home()
             ),
             "artifact": expect_artifact(args.artifact),
             "ip_only": args.ip_only,
+            "cloud": args.cloud,
             "region": region,
             "resource_group": resource_group,
             "vm_size": vm_size,

@@ -1,8 +1,11 @@
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from yocto.image.measurements import Measurements
 from yocto.utils.paths import BuildPaths
+
+if TYPE_CHECKING:
+    from yocto.image.measurements import Measurements
 
 
 def load_metadata(home: str) -> dict[str, dict]:
@@ -35,7 +38,7 @@ def remove_artifact_from_metadata(name: str, home: str):
     write_metadata(metadata, home)
 
 
-def load_artifact_measurements(artifact: str, home: str) -> tuple[Path, Measurements]:
+def load_artifact_measurements(artifact: str, home: str) -> tuple[Path, "Measurements"]:
     artifacts = load_metadata(home).get("artifacts", {})
     if artifact not in artifacts:
         raise ValueError(
@@ -49,3 +52,25 @@ def load_artifact_measurements(artifact: str, home: str) -> tuple[Path, Measurem
             "but the corresponding file was not found on the machine"
         )
     return image_path, artifact["image"]
+
+
+def filter_resources_by_cloud(home: str, cloud: str) -> dict[str, dict]:
+    """Filter resources by cloud provider.
+
+    Args:
+        home: Home directory path
+        cloud: Cloud provider to filter by ("azure" or "gcp")
+
+    Returns:
+        Dictionary of resources filtered by cloud provider
+    """
+    metadata = load_metadata(home)
+    resources = metadata.get("resources", {})
+
+    filtered = {}
+    for name, resource in resources.items():
+        vm_info = resource.get("vm", {})
+        if vm_info.get("cloud") == cloud:
+            filtered[name] = resource
+
+    return filtered

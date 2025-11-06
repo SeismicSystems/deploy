@@ -10,6 +10,7 @@ class VmConfigs:
     resource_group: str
     name: str
     nsg_name: str
+    cloud: str  # Cloud provider: "azure" or "gcp"
     region: str = "eastus"  # Azure region or GCP zone
     size: str = "Standard_EC4es_v5"
     api_port: int = 7878
@@ -52,6 +53,7 @@ class VmConfigs:
             resource_group=resource_group,
             name=resource_group,
             nsg_name=resource_group,
+            cloud=args.cloud,  # Store the cloud provider
             region=region,
             size=vm_size,
         )
@@ -61,6 +63,7 @@ class VmConfigs:
             "resourceGroup": self.resource_group,
             "name": self.name,
             "nsgName": self.nsg_name,
+            "cloud": self.cloud,
             "region": self.region,
             "size": self.size,
         }

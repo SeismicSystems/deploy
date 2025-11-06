@@ -7,7 +7,6 @@ from typing import Any
 from yocto.config.domain_config import DomainConfig
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
-from yocto.utils.artifact import expect_artifact
 
 
 @dataclass
@@ -21,6 +20,9 @@ class DeployConfigs:
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "DeployConfigs":
+        # Import here to avoid circular dependency
+        from yocto.utils.artifact import expect_artifact
+
         return DeployConfigs(
             vm=VmConfigs.from_args(args),
             domain=DomainConfig.from_args(args),
