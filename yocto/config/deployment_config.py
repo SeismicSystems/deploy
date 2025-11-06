@@ -32,7 +32,7 @@ class DeploymentConfig:
     """Configuration for VM deployment (cloud-agnostic)."""
 
     vm_name: str
-    cloud: str  # Cloud provider: "azure" or "gcp"
+    cloud: CloudProvider  # Cloud provider enum
     region: str
     vm_size: str
     node: int
@@ -103,7 +103,7 @@ class DeploymentConfig:
             ),
             "artifact": expect_artifact(args.artifact),
             "ip_only": args.ip_only,
-            "cloud": args.cloud,
+            "cloud": cloud,  # Use the parsed CloudProvider enum
             "region": region,
             "resource_group": resource_group,
             "vm_size": vm_size,

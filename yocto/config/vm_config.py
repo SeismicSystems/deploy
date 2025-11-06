@@ -18,7 +18,7 @@ class VmConfigs:
     resource_group: str
     name: str
     nsg_name: str
-    cloud: str
+    cloud: CloudProvider
     region: str
     size: str
     api_port: int = 7878
@@ -52,7 +52,7 @@ class VmConfigs:
             resource_group=resource_group,
             name=resource_group,
             nsg_name=resource_group,
-            cloud=args.cloud,  # Store the cloud provider
+            cloud=cloud,  # Store the parsed CloudProvider enum
             region=region,
             size=vm_size,
         )
@@ -62,7 +62,7 @@ class VmConfigs:
             "resourceGroup": self.resource_group,
             "name": self.name,
             "nsgName": self.nsg_name,
-            "cloud": self.cloud,
+            "cloud": self.cloud.value,  # Serialize enum to string
             "region": self.region,
             "size": self.size,
         }
