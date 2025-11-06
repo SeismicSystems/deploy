@@ -60,6 +60,8 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     deploy_cfg = cfg.deploy
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
 
+    print(args.domain_resource_group)
+    assert False
     genesis_ip_manager = GenesisIPManager(args.domain_resource_group)
 
     # Check dependencies
