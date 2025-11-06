@@ -114,9 +114,8 @@ class GcpApi(CloudApi):
 
         # Configure raw disk with VHD container type
         image.raw_disk = compute_v1.RawDisk()
-        image.raw_disk.source = (
-            f"https://storage.googleapis.com/{bucket_name}/{blob_name}"
-        )
+        # MUST use gs:// URI format, not https:// URLs
+        image.raw_disk.source = f"gs://{bucket_name}/{blob_name}"
         image.raw_disk.container_type = "VHD"  # Specify VHD format explicitly
 
         # Add TDX guest OS feature
