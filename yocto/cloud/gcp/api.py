@@ -178,9 +178,11 @@ class GcpApi(CloudApi):
         organization permissions.
         """
         raise RuntimeError(
-            f"GCP projects cannot be created via CLI without organization "
-            f"access. Please create project {name} manually if it doesn't "
-            f"exist."
+            f"The project {name} does not exist. "
+            "GCP projects cannot be created via CLI "
+            "without organization access. "
+            f"Please create project {name} manually "
+            "if it doesn't exist."
         )
 
     @classmethod
