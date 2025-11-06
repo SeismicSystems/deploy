@@ -8,7 +8,7 @@ Genesis mode deployment with persistent IP addresses and node-specific allocatio
 import json
 import logging
 
-from yocto.cloud.azure import DEFAULT_RESOURCE_GROUP
+from yocto.cloud.azure import DEFAULT_DOMAIN_RESOURCE_GROUP
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.base_parser import create_base_parser
 from yocto.cloud.cloud_parser import confirm
@@ -24,7 +24,7 @@ class GenesisIPManager:
     """Manages persistent IP addresses for genesis nodes."""
 
     def __init__(self):
-        self.genesis_rg = DEFAULT_RESOURCE_GROUP
+        self.genesis_rg = DEFAULT_DOMAIN_RESOURCE_GROUP
 
     def ensure_genesis_resource_group(self, region: str) -> None:
         AzureApi.ensure_created_resource_group(self.genesis_rg, region)
