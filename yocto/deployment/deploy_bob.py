@@ -15,6 +15,15 @@ from pathlib import Path
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.azure.defaults import DEFAULT_REGION, DEFAULT_VM_SIZE
 from yocto.config import DeployConfigs, DeploymentConfig, get_host_ip
+# Import defaults here to avoid circular imports
+from yocto.cloud.azure.defaults import (
+    DEFAULT_CERTBOT_EMAIL,
+    DEFAULT_DOMAIN_NAME,
+    DEFAULT_DOMAIN_RESOURCE_GROUP,
+    DEFAULT_REGION,
+    DEFAULT_RESOURCE_GROUP,
+    DEFAULT_VM_SIZE,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -325,16 +334,6 @@ def main():
         logger.info(f"Detected source IP: {source_ip}")
 
     try:
-        # Import defaults here to avoid circular imports
-        from yocto.cloud.azure.defaults import (
-            DEFAULT_CERTBOT_EMAIL,
-            DEFAULT_DOMAIN_NAME,
-            DEFAULT_DOMAIN_RESOURCE_GROUP,
-            DEFAULT_REGION,
-            DEFAULT_RESOURCE_GROUP,
-            DEFAULT_VM_SIZE,
-        )
-
         # Create config (similar to genesis but without domain/DNS)
         config = DeploymentConfig(
             vm_name=args.name,

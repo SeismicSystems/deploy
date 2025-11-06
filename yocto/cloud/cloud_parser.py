@@ -14,6 +14,7 @@ from yocto.cloud.cloud_config import (
     get_default_resource_group,
     get_default_vm_size,
 )
+from yocto.cloud.azure.defaults import DEFAULT_DOMAIN_RESOURCE_GROUP, DEFAULT_DOMAIN_NAME, DEFAULT_CERTBOT_EMAIL
 
 # Re-export for backwards compatibility
 __all__ = ["create_cloud_parser", "parse_cloud_args", "create_base_parser", "confirm"]
@@ -83,22 +84,22 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
     parser.add_argument(
         "--domain-resource-group",
         type=str,
-        default="yocto-testnet",
-        help="Domain resource group (default: yocto-testnet)",
+        default=DEFAULT_DOMAIN_RESOURCE_GROUP,
+        help=f"Domain resource group (default: {DEFAULT_DOMAIN_RESOURCE_GROUP})",
     )
     parser.add_argument(
         "--domain-name",
         type=str,
-        default="seismictest.net",
-        help="Domain name (default: seismictest.net)",
+        default=DEFAULT_DOMAIN_NAME,
+        help=f"Domain name (default: {DEFAULT_DOMAIN_NAME})",
     )
 
     # SSL configuration
     parser.add_argument(
         "--certbot-email",
         type=str,
-        default="c@seismic.systems",
-        help="Certbot email (default: c@seismic.systems)",
+        default=DEFAULT_CERTBOT_EMAIL,
+        help=f"Certbot email (default: {DEFAULT_CERTBOT_EMAIL})",
     )
 
     # Network configuration
