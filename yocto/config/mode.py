@@ -3,6 +3,8 @@
 import argparse
 from dataclasses import dataclass
 
+from yocto.utils.artifact import parse_artifact
+
 
 @dataclass
 class Mode:
@@ -13,9 +15,6 @@ class Mode:
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "Mode":
-        # Import here to avoid circular dependency
-        from yocto.utils.artifact import parse_artifact
-
         mode = Mode(
             build=args.build,
             deploy=args.deploy,

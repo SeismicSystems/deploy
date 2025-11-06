@@ -7,6 +7,7 @@ from pathlib import Path
 from yocto.config import BuildConfigs, Configs
 from yocto.image.git import GitConfigs, update_git_bb
 from yocto.image.measurements import Measurements, generate_measurements
+from yocto.utils.artifact import artifact_timestamp
 from yocto.utils.metadata import (
     load_artifact_measurements,
     load_metadata,
@@ -62,9 +63,6 @@ def build_image(home: str, capture_output: bool = True) -> Path:
     image_path_str = find_result.stdout.strip()
     if not image_path_str:
         raise FileNotFoundError("No image file found in the expected directory")
-
-    # Import here to avoid circular dependency
-    from yocto.utils.artifact import artifact_timestamp
 
     ts = artifact_timestamp(image_path_str)
     if (

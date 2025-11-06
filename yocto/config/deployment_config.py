@@ -6,14 +6,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from yocto.cloud.cloud_config import (
+    CloudProvider,
+    get_default_region,
+    get_default_resource_group,
+    get_default_vm_size,
+)
 from yocto.config.configs import Configs
 from yocto.config.deploy_config import DeployConfigs
 from yocto.config.domain_config import DomainConfig
 from yocto.config.mode import Mode
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
-
-# Import here to avoid circular dependency
 from yocto.utils.artifact import expect_artifact
 
 logger = logging.getLogger(__name__)
@@ -73,14 +77,6 @@ class DeploymentConfig:
 
     @classmethod
     def parse_base_kwargs(cls, args: argparse.Namespace) -> dict[str, Any]:
-        # Import at runtime to avoid circular imports
-        from yocto.cloud.cloud_config import (
-            CloudProvider,
-            get_default_region,
-            get_default_resource_group,
-            get_default_vm_size,
-        )
-
         # Get cloud provider from parsed args
         if not hasattr(args, "cloud"):
             raise ValueError(

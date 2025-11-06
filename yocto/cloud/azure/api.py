@@ -15,6 +15,7 @@ from yocto.cloud.azure.defaults import (
     CONSENSUS_PORT,
 )
 from yocto.cloud.cloud_api import CloudApi
+from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
@@ -78,9 +79,6 @@ class AzureApi(CloudApi):
         if cls.resource_group_exists(name):
             logger.info(f"Resource group {name} already exists")
         else:
-            # Import here to avoid circular import
-            from yocto.cloud.cloud_parser import confirm
-
             confirm(f"create genesis resource group: {name} in {location}")
             logger.info(f"Creating genesis IP resource group: {name} in {location}")
             cls.create_resource_group(name, location)
