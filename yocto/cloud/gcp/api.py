@@ -166,7 +166,7 @@ class GcpApi(CloudApi):
         """Check if project exists (GCP equivalent of resource group)."""
         try:
             client = resourcemanager_v3.ProjectsClient()
-            client.get_project(name=name)
+            client.get_project(name=f"projects/{name}")
             return True
         except Exception:
             return False
