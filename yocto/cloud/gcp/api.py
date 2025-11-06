@@ -241,15 +241,14 @@ class GcpApi(CloudApi):
         gcs_uri = f"gs://{bucket_name}/{blob_name}"
 
         # Configure raw_disk source
-        # For tar.gz files containing disk.raw, don't set container_type
-        # For other formats, set appropriate container_type
+        # IMPORTANT: container_type is the format used to encode the disk image
         image.raw_disk = compute_v1.RawDisk()
         image.raw_disk.source = gcs_uri
 
         if blob_name.endswith('.tar.gz'):
-            # For tar.gz archives (containing disk.raw), don't set container_type
-            # GCP will auto-detect the raw disk inside
-            logger.info("Using tar.gz format (auto-detected)")
+            # For tar.gz archives containing disk.raw, use TAR container type
+            image.raw_disk.container_type = "TAR"
+            logger.info("Using TAR container type for tar.gz file")
         elif blob_name.endswith('.vhd') or blob_name.endswith('.vhdx'):
             # For VHD files (should not happen after conversion, but handle it)
             image.raw_disk.container_type = "VHD"
