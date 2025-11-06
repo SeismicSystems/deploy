@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 class GenesisIPManager:
     """Manages persistent IP addresses for genesis nodes."""
 
-    def __init__(self, domain_rg: str):
-        self.domain_rg = domain_rg
+    def __init__(self, ip_rg: str):
+        self.ip_rg = ip_rg
 
     def ensure_genesis_resource_group(self, region: str) -> None:
-        AzureApi.ensure_created_resource_group(self.domain_rg, region)
+        AzureApi.ensure_created_resource_group(self.ip_rg, region)
 
     def get_or_create_node_ip(self, node_number: int, region: str) -> tuple[str, str]:
         """Get or create persistent IP for a specific node number."""
@@ -35,7 +35,7 @@ class GenesisIPManager:
         ip_name = f"genesis-node-{node_number}"
 
         # Check if IP already exists
-        existing_ip = AzureApi.get_existing_public_ip(ip_name, self.domain_rg)
+        existing_ip = AzureApi.get_existing_public_ip(ip_name, self.ip_rg)
         if existing_ip:
             logger.info(f"Using existing IP {existing_ip} for node {node_number}")
             return (existing_ip, ip_name)
@@ -43,7 +43,7 @@ class GenesisIPManager:
         # Create new IP
         logger.info(f"Creating new IP for node {node_number}")
         confirm(f"create new IP for node {node_number} @ {ip_name}")
-        ip_address = AzureApi.create_public_ip(ip_name, self.domain_rg)
+        ip_address = AzureApi.create_public_ip(ip_name, self.ip_rg)
         logger.info(f"Created IP {ip_address} for node {node_number}")
         return (ip_address, ip_name)
 
@@ -61,8 +61,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
 
     print(args.domain_resource_group)
-    assert False
-    genesis_ip_manager = GenesisIPManager(args.domain_resource_group)
+    genesis_ip_manager = GenesisIPManager(args.resource_group)
 
     # Check dependencies
     AzureApi.check_dependencies()

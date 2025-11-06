@@ -34,7 +34,6 @@ def main() -> int:
         configs=configs.deploy,
         image_path=image_path,
         measurements=measurements,
-        # TODO: old
         ip_name=configs.deploy.vm.resource_group,
         home=configs.home,
         show_logs=configs.show_logs,
