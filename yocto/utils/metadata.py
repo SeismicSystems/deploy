@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from yocto.build.measurements import Measurements
+from yocto.image.measurements import Measurements
 from yocto.utils.paths import BuildPaths
 
 

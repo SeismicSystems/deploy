@@ -10,7 +10,7 @@ from pathlib import Path
 from yocto.cloud.azure import AzureApi
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs
-from yocto.build.measurements import Measurements, write_measurements_tmpfile
+from yocto.image.measurements import Measurements, write_measurements_tmpfile
 from yocto.utils.metadata import (
     load_metadata,
     remove_vm_from_metadata,

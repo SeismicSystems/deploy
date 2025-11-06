@@ -4,7 +4,7 @@ import sys
 import traceback
 
 from yocto.utils.artifact import delete_artifact
-from yocto.build.build import maybe_build
+from yocto.image.build import maybe_build
 from yocto.config import Configs
 from yocto.deployment.deploy import Deployer, delete_vm
 from yocto.utils.logging_setup import setup_logging

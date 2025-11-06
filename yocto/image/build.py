@@ -6,8 +6,8 @@ from pathlib import Path
 
 from yocto.utils.artifact import artifact_timestamp
 from yocto.config import BuildConfigs, Configs
-from yocto.build.git import GitConfigs, update_git_bb
-from yocto.build.measurements import Measurements, generate_measurements
+from yocto.image.git import GitConfigs, update_git_bb
+from yocto.image.measurements import Measurements, generate_measurements
 from yocto.utils.metadata import load_artifact_measurements, load_metadata, write_metadata
 from yocto.utils.paths import BuildPaths
 

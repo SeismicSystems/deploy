@@ -4,7 +4,7 @@ import argparse
 from dataclasses import dataclass
 from typing import Any
 
-from yocto.build.git import GitConfigs
+from yocto.image.git import GitConfigs
 
 
 @dataclass
