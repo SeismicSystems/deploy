@@ -3,30 +3,27 @@
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
-
+from yocto.cloud.cloud_config import (
+    CloudProvider,
+    get_default_region,
+    get_default_resource_group,
+    get_default_vm_size,
+    validate_region,
+)
 
 @dataclass
 class VmConfigs:
     resource_group: str
     name: str
     nsg_name: str
-    cloud: str  # Cloud provider: "azure" or "gcp"
-    region: str = "eastus"  # Azure region or GCP zone
-    size: str = "Standard_EC4es_v5"
+    cloud: str
+    region: str
+    size: str
     api_port: int = 7878
     client_proxy_port: int = 8080
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "VmConfigs":
-        # Import at runtime to avoid circular import
-        from yocto.cloud.cloud_config import (
-            CloudProvider,
-            get_default_region,
-            get_default_resource_group,
-            get_default_vm_size,
-            validate_region,
-        )
-
         # Get cloud provider (should be set by parser or passed in)
         if not hasattr(args, "cloud"):
             raise ValueError("args must have 'cloud' attribute set")

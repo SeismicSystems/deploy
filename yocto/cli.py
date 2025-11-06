@@ -12,7 +12,7 @@ from yocto.utils.logging_setup import setup_logging
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> int:
     setup_logging()
 
     configs = Configs.parse()
