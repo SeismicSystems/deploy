@@ -97,7 +97,7 @@ def deploy_image(
     if cloud_api.disk_exists(configs, image_path):
         logger.error(f"Artifact {image_path.name} already exists for {configs.vm.name}")
 
-    cloud_api.create_disk(configs, image_path)
+    disk_name = cloud_api.create_disk(configs, image_path)
     cloud_api.upload_disk(configs, image_path)
 
     # Security groups
@@ -105,7 +105,7 @@ def deploy_image(
     cloud_api.create_standard_nsg_rules(configs)
 
     # Actually create the VM
-    cloud_api.create_vm(configs, image_path, ip_name)
+    cloud_api.create_vm(configs, image_path, ip_name, disk_name)
 
     return get_ip_address(configs.vm.name)
 

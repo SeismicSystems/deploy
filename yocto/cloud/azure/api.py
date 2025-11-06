@@ -227,9 +227,14 @@ class AzureApi(CloudApi):
         return any(config.vm.disk_name(image_path) == d["name"] for d in disks)
 
     @classmethod
-    def create_disk(cls, config: DeployConfigs, image_path: Path) -> None:
-        """Create a managed disk for upload."""
+    def create_disk(cls, config: DeployConfigs, image_path: Path) -> str:
+        """Create a managed disk for upload.
+
+        Returns:
+            The disk name that was created
+        """
         disk_size = image_path.stat().st_size
+        disk_name = config.vm.disk_name(image_path)
 
         logger.info("Creating disk")
         cmd = [
@@ -237,7 +242,7 @@ class AzureApi(CloudApi):
             "disk",
             "create",
             "-n",
-            config.vm.disk_name(image_path),
+            disk_name,
             "-g",
             config.vm.resource_group,
             "-l",
@@ -256,6 +261,7 @@ class AzureApi(CloudApi):
             "V2",
         ]
         cls.run_command(cmd, show_logs=config.show_logs)
+        return disk_name
 
     @classmethod
     def _grant_disk_access(cls, config: DeployConfigs, image_path: Path) -> str:

@@ -509,8 +509,12 @@ class GcpApi(CloudApi):
 
     @classmethod
     def disk_exists(cls, config: DeployConfigs, image_path: Path) -> bool:
-        """Check if disk exists."""
-        disk_name = config.vm.disk_name(image_path)
+        """Check if disk exists.
+
+        Uses the sanitized disk name to match what create_disk creates.
+        """
+        raw_disk_name = config.vm.disk_name(image_path)
+        disk_name = cls._sanitize_gcp_name(raw_disk_name)
         try:
             disk_client = compute_v1.DisksClient()
             disk_client.get(
@@ -523,10 +527,13 @@ class GcpApi(CloudApi):
             return False
 
     @classmethod
-    def create_disk(cls, config: DeployConfigs, image_path: Path) -> None:
+    def create_disk(cls, config: DeployConfigs, image_path: Path) -> str:
         """Create a managed disk from image.
         This uploads the image to Cloud Storage, creates a GCP image, then
         creates a disk.
+
+        Returns:
+            The sanitized disk name that was created
         """
         # Sanitize names for GCP (lowercase, no underscores, etc.)
         raw_disk_name = config.vm.disk_name(image_path)
@@ -569,13 +576,24 @@ class GcpApi(CloudApi):
             disk_type=DEFAULT_DISK_TYPE,
         )
 
+        return disk_name
+
     @classmethod
     def delete_disk(
-        cls, resource_group: str, vm_name: str, artifact: str, zone: str,
+        cls,
+        resource_group: str,
+        vm_name: str,
+        artifact: str,
+        zone: str,
     ):
-        """Delete a disk."""
-        disk_name = VmConfigs.get_disk_name(vm_name, artifact)
-        logger.info(f"Deleting disk {disk_name} from project {resource_group}")
+        """Delete a disk.
+
+        The disk name is derived from vm_name and artifact, then sanitized
+        to match GCP naming requirements (same as in create_disk).
+        """
+        raw_disk_name = VmConfigs.get_disk_name(vm_name, artifact)
+        disk_name = cls._sanitize_gcp_name(raw_disk_name)
+        logger.info(f"Deleting disk {disk_name} (from {raw_disk_name}) from project {resource_group}")
 
         disk_client = compute_v1.DisksClient()
         operation = disk_client.delete(
@@ -833,8 +851,17 @@ class GcpApi(CloudApi):
         logger.info(f"VM {vm_name} created successfully")
 
     @classmethod
-    def create_vm(cls, config: DeployConfigs, image_path: Path, ip_name: str) -> None:
-        """Create the virtual machine with user-data."""
+    def create_vm(
+        cls, config: DeployConfigs, image_path: Path, ip_name: str, disk_name: str = None
+    ) -> None:
+        """Create the virtual machine with user-data.
+
+        Args:
+            config: Deployment configuration
+            image_path: Path to the image file
+            ip_name: Name of the IP address
+            disk_name: Optional sanitized disk name (if None, will be computed and sanitized)
+        """
         user_data_file = cls.create_user_data_file(config)
 
         try:
@@ -860,7 +887,12 @@ class GcpApi(CloudApi):
             attached_disk.auto_delete = True
             attached_disk.mode = "READ_WRITE"
             attached_disk.device_name = config.vm.name
-            disk_name = config.vm.disk_name(image_path)
+
+            # Use provided disk_name or compute and sanitize it
+            if disk_name is None:
+                raw_disk_name = config.vm.disk_name(image_path)
+                disk_name = cls._sanitize_gcp_name(raw_disk_name)
+
             attached_disk.source = (
                 f"projects/{config.vm.resource_group}/zones/"
                 f"{config.vm.location}/disks/{disk_name}"
