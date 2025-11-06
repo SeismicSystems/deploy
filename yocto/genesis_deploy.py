@@ -84,7 +84,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
         region=deploy_cfg.vm.location,
     )
 
-    # Note: only use Azure for domain
+    # NOTE: only use Azure for domain
     AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=False)
 
     if args.ip_only:

@@ -87,7 +87,7 @@ def deploy_image(
     ip_name: str,
 ) -> str:
     """Deploy image and return public IP. Raises an error if deployment fails."""
-    cloud_api = get_cloud_api(CloudProvider.AZURE)
+    cloud_api = get_cloud_api(configs.vm.cloud)
 
     # Check if image_path exists
     if not image_path.exists():
