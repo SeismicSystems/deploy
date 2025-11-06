@@ -9,11 +9,8 @@ This package contains all GCP-specific functionality including:
 from yocto.cloud.gcp.api import GcpApi
 from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
-    DEFAULT_CERTBOT_EMAIL,
     DEFAULT_DISK_SIZE_GB,
     DEFAULT_DISK_TYPE,
-    DEFAULT_DOMAIN_NAME,
-    DEFAULT_DOMAIN_RESOURCE_GROUP,
     DEFAULT_NETWORK_TIER,
     DEFAULT_NIC_TYPE,
     DEFAULT_PROJECT,
@@ -28,11 +25,8 @@ __all__ = [
     "GcpApi",
     # Default constants
     "CONSENSUS_PORT",
-    "DEFAULT_CERTBOT_EMAIL",
     "DEFAULT_DISK_SIZE_GB",
     "DEFAULT_DISK_TYPE",
-    "DEFAULT_DOMAIN_NAME",
-    "DEFAULT_DOMAIN_RESOURCE_GROUP",
     "DEFAULT_NIC_TYPE",
     "DEFAULT_NETWORK_TIER",
     "DEFAULT_PROJECT",

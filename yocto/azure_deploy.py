@@ -6,7 +6,8 @@ A modular Python replacement for deploy.sh that handles Azure VM deployment.
 """
 
 from yocto.cloud.azure import AzureApi
-from yocto.cloud.cloud_parser import create_base_parser
+from yocto.cloud.base_parser import create_base_parser
+from yocto.cloud.cloud_config import CloudProvider
 from yocto.config import DeploymentConfig
 
 
@@ -41,7 +42,7 @@ def deploy_vm(config: DeploymentConfig) -> None:
 def main():
     """Main entry point."""
     try:
-        parser = create_base_parser("Azure VM Deployment Tool")
+        parser = create_base_parser("Azure VM Deployment Tool", cloud=CloudProvider.AZURE)
         parser.add_argument(
             "--node",
             type=int,

@@ -6,15 +6,14 @@ Note on regions/zones:
 - For compatibility with Azure's location field, we use DEFAULT_ZONE as the
   default value for config.vm.location
 - DEFAULT_REGION is used for regional resources (like IP addresses, buckets)
+
+Note on domain configuration:
+- Domain/DNS management is always done through Azure regardless of cloud provider
+- GCP deployments will use Azure API for domain record mapping
 """
 
 # Resource groups / Projects
 DEFAULT_PROJECT = "testnet-477314"
-DEFAULT_DOMAIN_RESOURCE_GROUP = "yocto-testnet"  # For compatibility with Azure DNS
-
-# Domain configuration
-DEFAULT_DOMAIN_NAME = "seismictest.net"
-DEFAULT_CERTBOT_EMAIL = "c@seismic.systems"
 
 # VM configuration
 DEFAULT_REGION = "us-central1"  # Used for regional resources (IPs, buckets)
