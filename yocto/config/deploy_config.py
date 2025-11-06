@@ -4,10 +4,10 @@ import argparse
 from dataclasses import dataclass
 from typing import Any
 
-from yocto.utils.artifact import expect_artifact
 from yocto.config.domain_config import DomainConfig
 from yocto.config.utils import get_host_ip
 from yocto.config.vm_config import VmConfigs
+from yocto.utils.artifact import expect_artifact
 
 
 @dataclass

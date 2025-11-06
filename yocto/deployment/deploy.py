@@ -10,6 +10,7 @@ from pathlib import Path
 from yocto.cloud.azure import AzureApi
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs
+from yocto.deployment.proxy import ProxyClient
 from yocto.image.measurements import Measurements, write_measurements_tmpfile
 from yocto.utils.metadata import (
     load_metadata,
@@ -17,7 +18,6 @@ from yocto.utils.metadata import (
     write_metadata,
 )
 from yocto.utils.paths import BuildPaths
-from yocto.deployment.proxy import ProxyClient
 
 logger = logging.getLogger(__name__)
 

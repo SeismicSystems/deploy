@@ -1,8 +1,8 @@
 """Deployment module for VM deployment operations."""
 
 from yocto.deployment.deploy import (
-    DeployOutput,
     Deployer,
+    DeployOutput,
     delete_vm,
     deploy_image,
     get_ip_address,
