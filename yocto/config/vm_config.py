@@ -2,7 +2,6 @@
 
 import argparse
 from dataclasses import dataclass
-from pathlib import Path
 
 from yocto.cloud.cloud_config import (
     CloudProvider,

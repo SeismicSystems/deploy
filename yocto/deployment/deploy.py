@@ -1,84 +1,40 @@
 import glob
-import json
 import logging
 import os
-import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_factory import get_cloud_api
-from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs
 from yocto.deployment.proxy import ProxyClient
 from yocto.image.measurements import Measurements, write_measurements_tmpfile
-from yocto.utils.metadata import (
-    load_metadata,
-    remove_vm_from_metadata,
-    write_metadata,
-)
+from yocto.utils.metadata import load_metadata, write_metadata
 from yocto.utils.paths import BuildPaths
 
 logger = logging.getLogger(__name__)
 
 
-def get_ip_address(vm_name: str) -> str:
-    """Get IP address of deployed VM. Raises an error if IP cannot be retrieved."""
-    result = subprocess.run(
-        ["az", "vm", "list-ip-addresses", "--name", vm_name],
-        capture_output=True,
-        text=True,
-    )
-
-    if result.returncode != 0:
-        raise RuntimeError(f"Failed to get IP address: {result.stderr.strip()}")
-
-    # Parse and return the IP address
-    vm_info = json.loads(result.stdout)
-    return vm_info[0]["virtualMachine"]["network"]["publicIpAddresses"][0]["ipAddress"]
-
-
 def delete_vm(vm_name: str, home: str) -> bool:
     """
-    Delete existing resource group if provided.
+    Delete existing VM using cloud-specific API.
     Returns True if successful, False otherwise.
     """
-    cloud_api = get_cloud_api(CloudProvider.AZURE)
-
     metadata = load_metadata(home)
-    resources = metadata["resources"]
+    resources = metadata.get("resources", {})
+    if vm_name not in resources:
+        logger.error(f"VM {vm_name} not found in metadata")
+        return False
+
     meta = resources[vm_name]
     resource_group = meta["vm"]["resourceGroup"]
-    prompt = f"Are you sure you want to delete VM {vm_name}"
-    if not confirm(prompt):
-        return False
-
-    logger.info(
-        f"Deleting VM {vm_name} in resource group {resource_group}. "
-        "This takes a few minutes..."
-    )
-    # az vm delete -g yocto-testnet -n yocto-genesis-1
-    cmd = ["az", "vm", "delete", "-g", resource_group, "--name", vm_name, "--yes"]
-    process = subprocess.Popen(
-        args=" ".join(cmd),
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    stdout, stderr = process.communicate()
-
-    if process.returncode != 0:
-        logger.error(f"Error when deleting VM:\n{stderr.strip()}")
-        return False
-
-    logger.info(f"Successfully deleted {vm_name}:\n{stdout}")
-    logger.info("Deleting associated disk...")
     region = meta["vm"]["region"]
-    cloud_api.delete_disk(resource_group, vm_name, meta["artifact"], region)
-    remove_vm_from_metadata(vm_name, home)
-    return True
+    artifact = meta["artifact"]
+    cloud_provider = CloudProvider(meta["vm"]["cloud"])
+
+    cloud_api = get_cloud_api(cloud_provider)
+    return cloud_api.delete_vm(vm_name, resource_group, region, artifact, home)
 
 
 def deploy_image(
@@ -95,7 +51,10 @@ def deploy_image(
 
     # Disk
     if cloud_api.disk_exists(configs, image_path):
-        logger.warning(f"Disk for artifact {image_path.name} already exists for {configs.vm.name}, skipping creation")
+        logger.warning(
+            f"Disk for artifact {image_path.name} already exists for "
+            f"{configs.vm.name}, skipping creation"
+        )
         # Get the disk name without creating it (for passing to create_vm)
         disk_name = cloud_api.get_disk_name(configs, image_path)
     else:
@@ -109,7 +68,12 @@ def deploy_image(
     # Actually create the VM
     cloud_api.create_vm(configs, image_path, ip_name, disk_name)
 
-    return get_ip_address(configs.vm.name)
+    # Get the VM's IP address
+    return cloud_api.get_vm_ip(
+        vm_name=configs.vm.name,
+        resource_group=configs.vm.resource_group,
+        location=configs.vm.location,
+    )
 
 
 @dataclass

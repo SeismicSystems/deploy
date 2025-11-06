@@ -8,7 +8,6 @@ import os
 import re
 import shutil
 import subprocess
-import tarfile
 import tempfile
 import time
 from pathlib import Path
@@ -98,7 +97,7 @@ class GcpApi(CloudApi):
         GCP's direct image import API requires tar.gz format containing disk.raw,
         not VHD files directly.
         """
-        logger.info(f"Converting VHD to tar.gz format for GCP import...")
+        logger.info("Converting VHD to tar.gz format for GCP import...")
 
         # Create temporary directory for conversion
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -315,10 +314,11 @@ class GcpApi(CloudApi):
         image.source_type = "RAW"
 
         logger.info(f"Using Storage API URL: {storage_api_url}")
-        logger.info(f"Source type: RAW")
+        logger.info("Source type: RAW")
 
         # Add all required guest OS features for TDX
-        # These match: --guest-os-features=UEFI_COMPATIBLE,VIRTIO_SCSI_MULTIQUEUE,GVNIC,TDX_CAPABLE
+        # These match: --guest-os-features=UEFI_COMPATIBLE,
+        # VIRTIO_SCSI_MULTIQUEUE,GVNIC,TDX_CAPABLE
         guest_os_features = [
             "UEFI_COMPATIBLE",
             "VIRTIO_SCSI_MULTIQUEUE",
@@ -338,7 +338,7 @@ class GcpApi(CloudApi):
             operation = image_client.insert(project=project, image_resource=image)
         except Exception as e:
             logger.error(f"Failed to create image: {e}")
-            logger.error(f"GCS URI: {gcs_uri}")
+            logger.error(f"Storage API URL: {storage_api_url}")
             logger.error(f"Blob name: {blob_name}")
             logger.error(
                 "Troubleshooting:\n"
@@ -600,9 +600,12 @@ class GcpApi(CloudApi):
         The disk name is derived from vm_name and artifact, then sanitized
         to match GCP naming requirements (same as in create_disk).
         """
-        raw_disk_name = VmConfigs.get_disk_name(vm_name, artifact)
+        raw_disk_name = cls.get_raw_disk_name(vm_name, artifact)
         disk_name = cls._sanitize_gcp_name(raw_disk_name)
-        logger.info(f"Deleting disk {disk_name} (from {raw_disk_name}) from project {resource_group}")
+        logger.info(
+            f"Deleting disk {disk_name} (from {raw_disk_name}) "
+            f"from project {resource_group}"
+        )
 
         disk_client = compute_v1.DisksClient()
         operation = disk_client.delete(
@@ -861,7 +864,7 @@ class GcpApi(CloudApi):
 
     @classmethod
     def create_vm(
-        cls, config: DeployConfigs, image_path: Path, ip_name: str, disk_name: str = None
+        cls, config: DeployConfigs, image_path: Path, ip_name: str, disk_name: str
     ) -> None:
         """Create the virtual machine with user-data.
 
@@ -869,7 +872,7 @@ class GcpApi(CloudApi):
             config: Deployment configuration
             image_path: Path to the image file
             ip_name: Name of the IP address
-            disk_name: Optional sanitized disk name (if None, will be computed and sanitized)
+            disk_name: Sanitized disk name to use for the VM
         """
         user_data_file = cls.create_user_data_file(config)
 
@@ -896,11 +899,6 @@ class GcpApi(CloudApi):
             attached_disk.auto_delete = True
             attached_disk.mode = "READ_WRITE"
             attached_disk.device_name = config.vm.name
-
-            # Use provided disk_name or compute it
-            if disk_name is None:
-                disk_name = cls.get_disk_name(config, image_path)
-
             attached_disk.source = (
                 f"projects/{config.vm.resource_group}/zones/"
                 f"{config.vm.location}/disks/{disk_name}"
@@ -952,5 +950,107 @@ class GcpApi(CloudApi):
         finally:
             os.unlink(user_data_file)
             logger.info(f"Deleted temporary user-data file: {user_data_file}")
+
+    @classmethod
+    def get_vm_ip(cls, vm_name: str, resource_group: str, location: str) -> str:
+        """Get the public IP address of a VM with retry logic.
+
+        GCP may take a few moments after VM creation to populate IP info.
+        """
+        from google.cloud import compute_v1
+
+        max_retries = 10
+        retry_delay = 3  # seconds
+
+        for attempt in range(max_retries):
+            try:
+                instance_client = compute_v1.InstancesClient()
+                instance = instance_client.get(
+                    project=resource_group, zone=location, instance=vm_name
+                )
+
+                # Get the external IP from the first network interface
+                if (
+                    instance.network_interfaces
+                    and instance.network_interfaces[0].access_configs
+                ):
+                    nat_ip = instance.network_interfaces[0].access_configs[0].nat_i_p
+                    if nat_ip:
+                        return nat_ip
+
+                # IP not available yet
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"IP address not available yet, retrying in {retry_delay}s... "
+                        f"(attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(retry_delay)
+                    continue
+
+                raise RuntimeError(
+                    f"VM {vm_name} has no external IP after {max_retries} attempts"
+                )
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"Failed to get VM info, retrying in {retry_delay}s... "
+                        f"(attempt {attempt + 1}/{max_retries}): {e}"
+                    )
+                    time.sleep(retry_delay)
+                    continue
+                raise RuntimeError(
+                    f"Failed to get IP address for {vm_name}: {e}"
+                ) from e
+
+        raise RuntimeError(f"Failed to get IP address for {vm_name}")
+
+    @classmethod
+    def delete_vm(
+        cls, vm_name: str, resource_group: str, location: str, artifact: str, home: str
+    ) -> bool:
+        """Delete a VM and its associated resources.
+
+        Returns True if successful, False otherwise.
+        """
+        from google.cloud import compute_v1
+
+        from yocto.cloud.cloud_parser import confirm
+        from yocto.utils.metadata import load_metadata, remove_vm_from_metadata
+
+        metadata = load_metadata(home)
+        resources = metadata.get("resources", {})
+        if vm_name not in resources:
+            logger.error(f"VM {vm_name} not found in metadata")
+            return False
+
+        meta = resources[vm_name]
+        vm_resource_group = meta["vm"]["resourceGroup"]
+        region = meta["vm"]["region"]
+
+        prompt = f"Are you sure you want to delete VM {vm_name}"
+        if not confirm(prompt):
+            return False
+
+        logger.info(
+            f"Deleting VM {vm_name} in project {vm_resource_group}. "
+            "This takes a few minutes..."
+        )
+
+        try:
+            instance_client = compute_v1.InstancesClient()
+            operation = instance_client.delete(
+                project=vm_resource_group, zone=region, instance=vm_name
+            )
+            wait_for_extended_operation(operation, "VM deletion")
+            logger.info(f"Successfully deleted VM {vm_name}")
+        except Exception as e:
+            logger.error(f"Error when deleting VM: {e}")
+            return False
+
+        logger.info("Deleting associated disk...")
+        cls.delete_disk(vm_resource_group, vm_name, artifact, region)
+        remove_vm_from_metadata(vm_name, home)
+        return True
 
 

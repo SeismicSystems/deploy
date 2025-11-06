@@ -234,6 +234,54 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def create_vm(cls, config: "DeployConfigs", image_path: Path, ip_name: str) -> None:
+    def create_vm(
+        cls,
+        config: "DeployConfigs",
+        image_path: Path,
+        ip_name: str,
+        disk_name: str,
+    ) -> None:
         """Create the virtual machine with user-data."""
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def get_vm_ip(cls, vm_name: str, resource_group: str, location: str) -> str:
+        """Get the public IP address of a VM.
+
+        Args:
+            vm_name: Name of the VM
+            resource_group: Resource group containing the VM
+            location: Region/zone where the VM is located
+
+        Returns:
+            The public IP address as a string
+
+        Raises:
+            RuntimeError: If IP cannot be retrieved
+        """
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def delete_vm(
+        cls,
+        vm_name: str,
+        resource_group: str,
+        location: str,
+        artifact: str,
+        home: str,
+    ) -> bool:
+        """Delete a VM and its associated resources.
+
+        Args:
+            vm_name: Name of the VM to delete
+            resource_group: Resource group containing the VM
+            location: Region/zone where the VM is located
+            artifact: Artifact name (for disk deletion)
+            home: Home directory path (for metadata updates)
+
+        Returns:
+            True if successful, False otherwise
+        """
         raise NotImplementedError

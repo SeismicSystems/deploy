@@ -9,6 +9,7 @@ import logging
 import os
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 from yocto.cloud.azure.defaults import (
@@ -561,7 +562,9 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=show_logs)
 
     @classmethod
-    def create_vm(cls, config: DeployConfigs, image_path: Path, ip_name: str) -> None:
+    def create_vm(
+        cls, config: DeployConfigs, image_path: Path, ip_name: str, disk_name: str
+    ) -> None:
         """Create the virtual machine with user-data."""
         user_data_file = cls.create_user_data_file(config)
 
@@ -600,6 +603,121 @@ class AzureApi(CloudApi):
         finally:
             os.unlink(user_data_file)
             logger.info(f"Deleted temporary user-data file: {user_data_file}")
+
+    @classmethod
+    def get_vm_ip(cls, vm_name: str, resource_group: str, location: str) -> str:
+        """Get the public IP address of a VM with retry logic.
+
+        Azure may take a few moments after VM creation to populate IP info.
+        """
+        max_retries = 10
+        retry_delay = 3  # seconds
+
+        for attempt in range(max_retries):
+            result = subprocess.run(
+                ["az", "vm", "list-ip-addresses", "--name", vm_name],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode != 0:
+                raise RuntimeError(f"Failed to get IP address: {result.stderr.strip()}")
+
+            # Parse and return the IP address
+            vm_info = json.loads(result.stdout)
+
+            # Check if we got valid VM info
+            if not vm_info:
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"VM info not available yet, retrying in {retry_delay}s... "
+                        f"(attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(retry_delay)
+                    continue
+                raise RuntimeError(
+                    f"Failed to get VM info for {vm_name} after {max_retries} attempts"
+                )
+
+            # Check if IP address is available
+            try:
+                return vm_info[0]["virtualMachine"]["network"]["publicIpAddresses"][0][
+                    "ipAddress"
+                ]
+            except (KeyError, IndexError) as e:
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"IP address not available yet, retrying in {retry_delay}s... "
+                        f"(attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(retry_delay)
+                    continue
+                raise RuntimeError(
+                    f"Failed to get IP address for {vm_name} after "
+                    f"{max_retries} attempts: {e}"
+                ) from e
+
+        raise RuntimeError(f"Failed to get IP address for {vm_name}")
+
+    @classmethod
+    def delete_vm(
+        cls, vm_name: str, resource_group: str, location: str, artifact: str, home: str
+    ) -> bool:
+        """Delete a VM and its associated resources.
+
+        Returns True if successful, False otherwise.
+        """
+        from yocto.cloud.cloud_parser import confirm
+        from yocto.utils.metadata import load_metadata, remove_vm_from_metadata
+
+        metadata = load_metadata(home)
+        resources = metadata.get("resources", {})
+        if vm_name not in resources:
+            logger.error(f"VM {vm_name} not found in metadata")
+            return False
+
+        meta = resources[vm_name]
+        vm_resource_group = meta["vm"]["resourceGroup"]
+
+        prompt = f"Are you sure you want to delete VM {vm_name}"
+        if not confirm(prompt):
+            return False
+
+        logger.info(
+            f"Deleting VM {vm_name} in resource group {vm_resource_group}. "
+            "This takes a few minutes..."
+        )
+
+        cmd = [
+            "az",
+            "vm",
+            "delete",
+            "-g",
+            vm_resource_group,
+            "--name",
+            vm_name,
+            "--yes",
+        ]
+        process = subprocess.Popen(
+            args=" ".join(cmd),
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        stdout, stderr = process.communicate()
+
+        if process.returncode != 0:
+            logger.error(f"Error when deleting VM:\n{stderr.strip()}")
+            return False
+
+        logger.info(f"Successfully deleted {vm_name}:\n{stdout}")
+        logger.info("Deleting associated disk...")
+
+        region = meta["vm"]["region"]
+        cls.delete_disk(vm_resource_group, vm_name, artifact, region)
+        remove_vm_from_metadata(vm_name, home)
+        return True
 
 
 # Common Argument Parser
