@@ -125,23 +125,6 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def copy_disk(
-        cls,
-        image_path: Path,
-        access_uri: str,
-        show_logs: bool = False,
-    ) -> None:
-        """Copy disk to cloud storage."""
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
-    def revoke_disk_access(cls, config: "DeployConfigs", image_path: Path) -> None:
-        """Revoke access to disk."""
-        raise NotImplementedError
-
-    @classmethod
-    @abstractmethod
     def upload_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Upload disk image to cloud."""
         raise NotImplementedError

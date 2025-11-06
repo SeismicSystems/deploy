@@ -302,7 +302,7 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=True)
 
     @classmethod
-    def copy_disk(
+    def _copy_disk(
         cls,
         image_path: Path,
         sas_uri: str,
@@ -314,7 +314,7 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=show_logs)
 
     @classmethod
-    def revoke_disk_access(cls, config: DeployConfigs, image_path: Path) -> None:
+    def _revoke_disk_access(cls, config: DeployConfigs, image_path: Path) -> None:
         # Revoke access
         logger.info("Revoking access")
         cmd = [
@@ -332,8 +332,8 @@ class AzureApi(CloudApi):
     def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
         """Upload disk image to Azure."""
         sas_uri = cls._grant_disk_access(config, image_path)
-        cls.copy_disk(image_path, sas_uri, show_logs=config.show_logs)
-        cls.revoke_disk_access(config, image_path)
+        cls._copy_disk(image_path, sas_uri, show_logs=config.show_logs)
+        cls._revoke_disk_access(config, image_path)
 
     @classmethod
     def create_nsg(cls, config: DeployConfigs) -> None:

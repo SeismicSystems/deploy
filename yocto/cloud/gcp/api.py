@@ -354,25 +354,6 @@ class GcpApi(CloudApi):
         logger.info(f"Disk {disk_name} deleted successfully")
 
     @classmethod
-    def copy_disk(
-        cls,
-        image_path: Path,
-        sas_uri: str,
-        show_logs: bool = False,
-    ) -> None:
-        """Copy disk to cloud storage.
-        Note: Not needed for GCP workflow.
-        """
-        raise NotImplementedError("copy_disk not needed for GCP")
-
-    @classmethod
-    def revoke_disk_access(cls, config: DeployConfigs, image_path: Path) -> None:
-        """Revoke access to disk.
-        Note: Not needed for GCP workflow.
-        """
-        raise NotImplementedError("revoke_disk_access not needed for GCP")
-
-    @classmethod
     def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
         """Upload disk image to GCP.
         Note: This is handled in create_disk for GCP.
