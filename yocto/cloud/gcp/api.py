@@ -112,12 +112,12 @@ class GcpApi(CloudApi):
         image = compute_v1.Image()
         image.name = image_name
 
-        # Don't set source_type for VHD files - let GCP auto-detect from file extension
-        # Setting source_type="RAW" only works for actual raw disk images
+        # Configure raw disk with VHD container type
         image.raw_disk = compute_v1.RawDisk()
         image.raw_disk.source = (
             f"https://storage.googleapis.com/{bucket_name}/{blob_name}"
         )
+        image.raw_disk.container_type = "VHD"  # Specify VHD format explicitly
 
         # Add TDX guest OS feature
         guest_os_feature = compute_v1.GuestOsFeature()
