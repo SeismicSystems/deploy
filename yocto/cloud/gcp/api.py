@@ -191,41 +191,57 @@ class GcpApi(CloudApi):
                 )
             logger.info(f"Verified blob exists: gs://{bucket_name}/{blob_name}")
 
-            # Grant the Compute Engine service account access to the bucket
-            # The service account format is: [PROJECT_NUMBER]@cloudservices.gserviceaccount.com
-            # and [PROJECT_NUMBER]-compute@developer.gserviceaccount.com
-
-            # Get project number
-            rm_client = resourcemanager_v3.ProjectsClient()
+            # Grant the Compute Engine service account access to read from the bucket
             try:
+                rm_client = resourcemanager_v3.ProjectsClient()
                 project_resource = rm_client.get_project(name=f"projects/{project}")
                 project_number = project_resource.name.split('/')[-1]
 
-                # Grant storage.objectViewer role to Compute Engine service accounts
                 compute_sa = f"{project_number}-compute@developer.gserviceaccount.com"
                 cloud_sa = f"{project_number}@cloudservices.gserviceaccount.com"
 
-                logger.info(f"Granting storage access to: {compute_sa}")
+                logger.info(f"Granting storage.objectViewer to: {compute_sa}")
 
-                # Get current IAM policy
+                # Get current bucket IAM policy
                 policy = bucket.get_iam_policy(requested_policy_version=3)
 
-                # Add storage.objectViewer role for both service accounts
-                policy.bindings.append({
-                    "role": "roles/storage.objectViewer",
-                    "members": {
-                        f"serviceAccount:{compute_sa}",
-                        f"serviceAccount:{cloud_sa}",
-                    }
-                })
+                # Check if the role binding already exists
+                role_exists = False
+                for binding in policy.bindings:
+                    if binding["role"] == "roles/storage.objectViewer":
+                        # Add service accounts to existing binding
+                        binding["members"].add(f"serviceAccount:{compute_sa}")
+                        binding["members"].add(f"serviceAccount:{cloud_sa}")
+                        role_exists = True
+                        break
 
-                # Set the updated policy
+                if not role_exists:
+                    # Create new binding
+                    policy.bindings.append({
+                        "role": "roles/storage.objectViewer",
+                        "members": {
+                            f"serviceAccount:{compute_sa}",
+                            f"serviceAccount:{cloud_sa}",
+                        }
+                    })
+
+                # Update the bucket policy
                 bucket.set_iam_policy(policy)
-                logger.info("Granted Compute Engine service accounts access to bucket")
+                logger.info("Granted Compute Engine service accounts bucket access")
+
+                # Wait a moment for IAM permissions to propagate
+                import time
+                time.sleep(2)
+                logger.info("Waiting for IAM permissions to propagate...")
 
             except Exception as e:
-                logger.warning(f"Failed to grant IAM permissions (may already exist): {e}")
-                # Continue anyway - permissions might already be set
+                logger.error(f"Failed to grant service account permissions: {e}")
+                logger.error(
+                    f"Manual fix: Run this command:\n"
+                    f"  gsutil iam ch serviceAccount:{compute_sa}:objectViewer "
+                    f"gs://{bucket_name}"
+                )
+                raise
 
         except Exception as e:
             logger.error(f"Failed to verify blob in GCS: {e}")
