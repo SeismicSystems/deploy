@@ -6,7 +6,6 @@ This package contains all Azure-specific functionality including:
 - api: Azure API wrapper and deployment functions
 """
 
-from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.azure.defaults import (
     CONSENSUS_PORT,
     DEFAULT_CERTBOT_EMAIL,
@@ -18,8 +17,6 @@ from yocto.cloud.azure.defaults import (
 )
 
 __all__ = [
-    # API functions and classes
-    "AzureApi",
     # Default constants
     "CONSENSUS_PORT",
     "DEFAULT_CERTBOT_EMAIL",

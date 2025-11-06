@@ -12,7 +12,7 @@ import logging
 import traceback
 from pathlib import Path
 
-from yocto.cloud.azure import AzureApi
+from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.azure.defaults import DEFAULT_REGION, DEFAULT_VM_SIZE
 from yocto.config import DeployConfigs, DeploymentConfig, get_host_ip
 

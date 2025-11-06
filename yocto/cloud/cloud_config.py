@@ -6,7 +6,6 @@ Cloud provider configuration and validation.
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.azure.defaults import (
     DEFAULT_REGION as AZURE_DEFAULT_REGION,
 )
@@ -18,7 +17,6 @@ from yocto.cloud.azure.defaults import (
 )
 from yocto.cloud.azure.defaults import VALID_REGIONS as AZURE_REGIONS
 from yocto.cloud.azure.defaults import validate_region as validate_azure_region
-from yocto.cloud.gcp.api import GcpApi
 from yocto.cloud.gcp.defaults import (
     DEFAULT_PROJECT as GCP_DEFAULT_PROJECT,
 )
@@ -51,7 +49,6 @@ __all__ = [
     "get_default_region",
     "get_default_resource_group",
     "get_default_vm_size",
-    "get_cloud_api",
 ]
 
 
@@ -124,18 +121,3 @@ def get_default_vm_size(cloud: CloudProvider) -> str:
         raise ValueError(f"Unknown cloud provider: {cloud}")
 
 
-def get_cloud_api(cloud: CloudProvider) -> "type[CloudApi]":
-    """Get the appropriate CloudApi implementation for a cloud provider.
-
-    Args:
-        cloud: The cloud provider
-
-    Returns:
-        The CloudApi class for that provider
-    """
-    if cloud == CloudProvider.AZURE:
-        return AzureApi
-    elif cloud == CloudProvider.GCP:
-        return GcpApi
-    else:
-        raise ValueError(f"Unknown cloud provider: {cloud}")

@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from yocto.cloud.azure import AzureApi
+from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs
 from yocto.deployment.proxy import ProxyClient
