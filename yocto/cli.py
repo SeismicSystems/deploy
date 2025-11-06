@@ -3,11 +3,11 @@ import signal
 import sys
 import traceback
 
-from yocto.artifact import delete_artifact
-from yocto.build import maybe_build
+from yocto.utils.artifact import delete_artifact
+from yocto.build.build import maybe_build
 from yocto.config import Configs
-from yocto.deploy import Deployer, delete_vm
-from yocto.logging_setup import setup_logging
+from yocto.deployment.deploy import Deployer, delete_vm
+from yocto.utils.logging_setup import setup_logging
 
 logger = logging.getLogger(__name__)
 

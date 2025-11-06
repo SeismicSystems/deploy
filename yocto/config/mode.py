@@ -3,7 +3,7 @@
 import argparse
 from dataclasses import dataclass
 
-from yocto.artifact import parse_artifact
+from yocto.utils.artifact import parse_artifact
 
 
 @dataclass

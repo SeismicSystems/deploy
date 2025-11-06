@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from yocto.artifact import expect_artifact
+from yocto.utils.artifact import expect_artifact
 from yocto.config.configs import Configs
 from yocto.config.deploy_config import DeployConfigs
 from yocto.config.domain_config import DomainConfig

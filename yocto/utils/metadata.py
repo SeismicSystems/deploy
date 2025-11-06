@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from yocto.measurements import Measurements
-from yocto.paths import BuildPaths
+from yocto.build.measurements import Measurements
+from yocto.utils.paths import BuildPaths
 
 
 def load_metadata(home: str) -> dict[str, dict]:

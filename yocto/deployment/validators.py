@@ -5,8 +5,8 @@ from pathlib import Path
 
 from yocto.cloud.azure import CONSENSUS_PORT, AzureApi
 from yocto.config import _DOMAIN_RECORD_PREFIX, _GENESIS_VM_PREFIX
-from yocto.metadata import load_metadata
-from yocto.summit_client import SummitClient
+from yocto.utils.metadata import load_metadata
+from yocto.utils.summit_client import SummitClient
 
 
 def _genesis_vm_name(node: int) -> str:

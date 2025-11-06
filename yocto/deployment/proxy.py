@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 
-from yocto.paths import BuildPaths
+from yocto.utils.paths import BuildPaths
 
 logger = logging.getLogger(__name__)
 

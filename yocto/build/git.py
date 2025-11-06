@@ -4,7 +4,7 @@ from argparse import Namespace
 from dataclasses import dataclass
 from pathlib import Path
 
-from yocto.paths import BuildPaths
+from yocto.utils.paths import BuildPaths
 
 logger = logging.getLogger(__name__)
 

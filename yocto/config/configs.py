@@ -7,7 +7,7 @@ from typing import Any
 from yocto.config.build_config import BuildConfigs
 from yocto.config.deploy_config import DeployConfigs
 from yocto.config.mode import Mode
-from yocto.parser import parse_args
+from yocto.utils.parser import parse_args
 
 
 @dataclass

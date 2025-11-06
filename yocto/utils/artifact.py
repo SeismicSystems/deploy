@@ -4,8 +4,8 @@ import logging
 import os
 import re
 
-from yocto.metadata import load_metadata, remove_artifact_from_metadata
-from yocto.paths import BuildPaths
+from yocto.utils.metadata import load_metadata, remove_artifact_from_metadata
+from yocto.utils.paths import BuildPaths
 
 logger = logging.getLogger(__name__)
 

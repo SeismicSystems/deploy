@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from yocto.paths import BuildPaths
+from yocto.utils.paths import BuildPaths
 
 logger = logging.getLogger(__name__)
 
