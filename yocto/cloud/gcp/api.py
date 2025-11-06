@@ -93,7 +93,11 @@ class GcpApi(CloudApi):
         bucket_name: str,
         blob_name: str,
     ) -> None:
-        """Create a GCP image from a Cloud Storage object."""
+        """Create a GCP image from a Cloud Storage object.
+
+        For VHD files, GCP requires NOT setting the source_type field,
+        allowing GCP to auto-detect the format from the file extension.
+        """
         image_client = compute_v1.ImagesClient()
 
         # Check if image already exists
@@ -107,7 +111,9 @@ class GcpApi(CloudApi):
         # Create image from Cloud Storage
         image = compute_v1.Image()
         image.name = image_name
-        image.source_type = "RAW"
+
+        # Don't set source_type for VHD files - let GCP auto-detect from file extension
+        # Setting source_type="RAW" only works for actual raw disk images
         image.raw_disk = compute_v1.RawDisk()
         image.raw_disk.source = (
             f"https://storage.googleapis.com/{bucket_name}/{blob_name}"
@@ -115,7 +121,7 @@ class GcpApi(CloudApi):
 
         # Add TDX guest OS feature
         guest_os_feature = compute_v1.GuestOsFeature()
-        guest_os_feature.type_ = "TDX"
+        guest_os_feature.type_ = "TDX_CAPABLE"
         image.guest_os_features = [guest_os_feature]
 
         operation = image_client.insert(project=project, image_resource=image)
