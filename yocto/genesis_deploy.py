@@ -8,7 +8,6 @@ Genesis mode deployment with persistent IP addresses and node-specific allocatio
 import json
 import logging
 
-from yocto.cloud.azure import DEFAULT_DOMAIN_RESOURCE_GROUP
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.base_parser import create_base_parser
 from yocto.cloud.cloud_parser import confirm
@@ -23,11 +22,11 @@ logger = logging.getLogger(__name__)
 class GenesisIPManager:
     """Manages persistent IP addresses for genesis nodes."""
 
-    def __init__(self):
-        self.genesis_rg = DEFAULT_DOMAIN_RESOURCE_GROUP
+    def __init__(self, domain_rg: str):
+        self.domain_rg = domain_rg
 
     def ensure_genesis_resource_group(self, region: str) -> None:
-        AzureApi.ensure_created_resource_group(self.genesis_rg, region)
+        AzureApi.ensure_created_resource_group(self.domain_rg, region)
 
     def get_or_create_node_ip(self, node_number: int, region: str) -> tuple[str, str]:
         """Get or create persistent IP for a specific node number."""
@@ -36,7 +35,7 @@ class GenesisIPManager:
         ip_name = f"genesis-node-{node_number}"
 
         # Check if IP already exists
-        existing_ip = AzureApi.get_existing_public_ip(ip_name, self.genesis_rg)
+        existing_ip = AzureApi.get_existing_public_ip(ip_name, self.domain_rg)
         if existing_ip:
             logger.info(f"Using existing IP {existing_ip} for node {node_number}")
             return (existing_ip, ip_name)
@@ -44,7 +43,7 @@ class GenesisIPManager:
         # Create new IP
         logger.info(f"Creating new IP for node {node_number}")
         confirm(f"create new IP for node {node_number} @ {ip_name}")
-        ip_address = AzureApi.create_public_ip(ip_name, self.genesis_rg)
+        ip_address = AzureApi.create_public_ip(ip_name, self.domain_rg)
         logger.info(f"Created IP {ip_address} for node {node_number}")
         return (ip_address, ip_name)
 
@@ -61,7 +60,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     deploy_cfg = cfg.deploy
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
 
-    genesis_ip_manager = GenesisIPManager()
+    genesis_ip_manager = GenesisIPManager(args.domain_resource_group)
 
     # Check dependencies
     AzureApi.check_dependencies()
