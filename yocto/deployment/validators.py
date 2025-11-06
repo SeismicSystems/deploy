@@ -3,19 +3,20 @@ import json
 import tempfile
 from pathlib import Path
 
-from yocto.cloud.azure import CONSENSUS_PORT, AzureApi
-from yocto.config import _DOMAIN_RECORD_PREFIX, _GENESIS_VM_PREFIX
+from yocto.cloud.azure import CONSENSUS_PORT
+from yocto.cloud.azure.api import AzureApi
+from yocto.config import DOMAIN_RECORD_PREFIX, GENESIS_VM_PREFIX
 from yocto.utils.metadata import load_metadata
 from yocto.utils.summit_client import SummitClient
 
 
 def _genesis_vm_name(node: int) -> str:
-    return f"{_GENESIS_VM_PREFIX}-{node}"
+    return f"{GENESIS_VM_PREFIX}-{node}"
 
 
 def _genesis_client(node: int) -> SummitClient:
     return SummitClient(
-        f"https://{_DOMAIN_RECORD_PREFIX}-{node}.seismictest.net/summit"
+        f"https://{DOMAIN_RECORD_PREFIX}-{node}.seismictest.net/summit"
     )
 
 

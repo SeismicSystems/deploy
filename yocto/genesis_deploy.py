@@ -8,7 +8,8 @@ Genesis mode deployment with persistent IP addresses and node-specific allocatio
 import json
 import logging
 
-from yocto.cloud.azure import DEFAULT_RESOURCE_GROUP, AzureApi
+from yocto.cloud.azure import DEFAULT_RESOURCE_GROUP
+from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.base_parser import create_base_parser
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeploymentConfig

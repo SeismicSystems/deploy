@@ -3,6 +3,7 @@
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
+
 from yocto.cloud.cloud_config import (
     CloudProvider,
     get_default_region,
@@ -10,6 +11,7 @@ from yocto.cloud.cloud_config import (
     get_default_vm_size,
     validate_region,
 )
+
 
 @dataclass
 class VmConfigs:

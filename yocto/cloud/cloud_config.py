@@ -30,7 +30,7 @@ from yocto.cloud.gcp.defaults import VALID_ZONES as GCP_ZONES
 from yocto.cloud.gcp.defaults import validate_region as validate_gcp_region
 
 if TYPE_CHECKING:
-    from yocto.cloud.cloud_api import CloudApi
+    pass
 
 
 class CloudProvider(str, Enum):

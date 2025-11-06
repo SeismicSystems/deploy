@@ -16,8 +16,8 @@ from yocto.config.vm_config import VmConfigs
 logger = logging.getLogger(__name__)
 
 # Genesis deployment constants
-_DOMAIN_RECORD_PREFIX = "gn"
-_GENESIS_VM_PREFIX = "yocto-genesis"
+DOMAIN_RECORD_PREFIX = "gn"
+GENESIS_VM_PREFIX = "yocto-genesis"
 
 
 @dataclass
@@ -134,10 +134,10 @@ class DeploymentConfig:
     def configure_genesis_node(cls, node: int) -> dict[str, Any]:
         if node < 1:
             raise ValueError("Argument --node is required and cannot be less than 1")
-        vm_name = f"{_GENESIS_VM_PREFIX}-{node}"
+        vm_name = f"{GENESIS_VM_PREFIX}-{node}"
         return {
             "node": node,
-            "record_name": f"{_DOMAIN_RECORD_PREFIX}-{node}",
+            "record_name": f"{DOMAIN_RECORD_PREFIX}-{node}",
             "vm_name": vm_name,
             "nsg_name": vm_name,
         }
