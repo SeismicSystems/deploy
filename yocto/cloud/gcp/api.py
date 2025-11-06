@@ -24,7 +24,7 @@ from yocto.cloud.gcp.defaults import (
     DEFAULT_PROVISIONING_MODEL,
     DEFAULT_REGION,
 )
-from yocto.config import DeployConfigs, VmConfigs
+from yocto.config import DeployConfigs
 
 logger = logging.getLogger(__name__)
 
@@ -810,13 +810,19 @@ class GcpApi(CloudApi):
 
         instance_client = compute_v1.InstancesClient()
 
-        # Configure network interface
+        # Configure network interface with external IP
         network_interface = compute_v1.NetworkInterface()
         network_interface.network = (
             f"projects/{resource_group}/global/networks/default"
         )
         network_interface.stack_type = "IPV4_ONLY"
         network_interface.nic_type = DEFAULT_NIC_TYPE
+
+        # Add access config for external IP
+        access_config = compute_v1.AccessConfig()
+        access_config.name = "External NAT"
+        access_config.type_ = "ONE_TO_ONE_NAT"
+        network_interface.access_configs = [access_config]
 
         # Configure attached disk
         attached_disk = compute_v1.AttachedDisk()
