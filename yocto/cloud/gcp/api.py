@@ -5,6 +5,7 @@ GCP API functionality using Google Cloud Python SDKs.
 
 import logging
 import os
+import re
 import shutil
 import subprocess
 import tarfile
@@ -58,6 +59,37 @@ def wait_for_extended_operation(
 
 class GcpApi(CloudApi):
     """GCP implementation of CloudApi."""
+
+    @staticmethod
+    def _sanitize_gcp_name(name: str) -> str:
+        """Sanitize a name to be valid for GCP resources.
+
+        GCP resource names must:
+        - Start with a lowercase letter
+        - Contain only lowercase letters, numbers, and hyphens
+        - Be 1-63 characters long
+        """
+        # Convert to lowercase
+        name = name.lower()
+
+        # Replace underscores and dots with hyphens
+        name = name.replace("_", "-").replace(".", "-")
+
+        # Remove any other invalid characters
+        name = re.sub(r'[^a-z0-9-]', '', name)
+
+        # Ensure it starts with a letter
+        if name and not name[0].isalpha():
+            name = "disk-" + name
+
+        # Trim to 63 characters
+        if len(name) > 63:
+            name = name[:63]
+
+        # Remove trailing hyphens
+        name = name.rstrip('-')
+
+        return name
 
     @staticmethod
     def _convert_vhd_to_targz(vhd_path: Path) -> Path:
@@ -496,13 +528,18 @@ class GcpApi(CloudApi):
         This uploads the image to Cloud Storage, creates a GCP image, then
         creates a disk.
         """
-        disk_name = config.vm.disk_name(image_path)
-        logger.info(f"Creating disk {disk_name}")
+        # Sanitize names for GCP (lowercase, no underscores, etc.)
+        raw_disk_name = config.vm.disk_name(image_path)
+        disk_name = cls._sanitize_gcp_name(raw_disk_name)
+        logger.info(f"Creating disk {disk_name} (sanitized from {raw_disk_name})")
 
         # Setup
         bucket_name = f"{config.vm.resource_group}-images"
-        image_name = f"{config.vm.name}-{image_path.stem}".replace(".", "-")
+        raw_image_name = f"{config.vm.name}-{image_path.stem}"
+        image_name = cls._sanitize_gcp_name(raw_image_name)
         blob_name = image_path.name
+
+        logger.info(f"Image name: {image_name} (sanitized from {raw_image_name})")
 
         # Step 1: Upload to Cloud Storage (converts VHD to tar.gz if needed)
         logger.info(f"Uploading {image_path.name} to gs://{bucket_name}/{blob_name}")
