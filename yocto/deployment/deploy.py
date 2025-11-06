@@ -95,9 +95,11 @@ def deploy_image(
 
     # Disk
     if cloud_api.disk_exists(configs, image_path):
-        logger.error(f"Artifact {image_path.name} already exists for {configs.vm.name}")
-
-    disk_name = cloud_api.create_disk(configs, image_path)
+        logger.warning(f"Disk for artifact {image_path.name} already exists for {configs.vm.name}, skipping creation")
+        # Get the disk name without creating it (for passing to create_vm)
+        disk_name = cloud_api.get_disk_name(configs, image_path)
+    else:
+        disk_name = cloud_api.create_disk(configs, image_path)
     cloud_api.upload_disk(configs, image_path)
 
     # Security groups

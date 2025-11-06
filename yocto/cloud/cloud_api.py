@@ -113,8 +113,35 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def create_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
-        """Create a managed disk for upload."""
+    def create_disk(cls, config: "DeployConfigs", image_path: Path) -> str:
+        """Create a managed disk for upload.
+
+        Returns:
+            The disk name that was created (may be sanitized for cloud requirements)
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def get_raw_disk_name(vm_name: str, artifact: str) -> str:
+        """Generate the raw disk name in standard format.
+
+        Format: {vm_name}_{artifact}
+
+        This is the base format before any cloud-specific transformations.
+        """
+        return f"{vm_name}_{artifact}"
+
+    @classmethod
+    @abstractmethod
+    def get_disk_name(cls, config: "DeployConfigs", image_path: Path) -> str:
+        """Get the disk name for a given config and image path.
+
+        This returns the actual disk name that would be used in the cloud,
+        including any sanitization or transformations required.
+
+        Returns:
+            The disk name (sanitized if needed)
+        """
         raise NotImplementedError
 
     @classmethod

@@ -72,10 +72,3 @@ class VmConfigs:
     def location(self) -> str:
         """Alias for region (backwards compatibility)."""
         return self.region
-
-    @staticmethod
-    def get_disk_name(vm_name: str, artifact: str) -> str:
-        return f"{vm_name}_{artifact}"
-
-    def disk_name(self, image_path: Path) -> str:
-        return self.get_disk_name(self.name, image_path.name)

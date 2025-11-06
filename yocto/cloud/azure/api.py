@@ -214,7 +214,16 @@ class AzureApi(CloudApi):
         cls.add_dns_ip(config, ip_address)
 
     @classmethod
+    def get_disk_name(cls, config: DeployConfigs, image_path: Path) -> str:
+        """Get the disk name for a given config and image path.
+
+        For Azure, no sanitization is needed, so we use the raw disk name directly.
+        """
+        return cls.get_raw_disk_name(config.vm.name, image_path.name)
+
+    @classmethod
     def disk_exists(cls, config: DeployConfigs, image_path: Path) -> bool:
+        disk_name = cls.get_disk_name(config, image_path)
         cmd = [
             "az",
             "disk",
@@ -224,7 +233,7 @@ class AzureApi(CloudApi):
         ]
         result = cls.run_command(cmd, show_logs=False)
         disks = json.loads(result.stdout)
-        return any(config.vm.disk_name(image_path) == d["name"] for d in disks)
+        return any(disk_name == d["name"] for d in disks)
 
     @classmethod
     def create_disk(cls, config: DeployConfigs, image_path: Path) -> str:
@@ -234,7 +243,7 @@ class AzureApi(CloudApi):
             The disk name that was created
         """
         disk_size = image_path.stat().st_size
-        disk_name = config.vm.disk_name(image_path)
+        disk_name = cls.get_disk_name(config, image_path)
 
         logger.info("Creating disk")
         cmd = [
@@ -272,7 +281,7 @@ class AzureApi(CloudApi):
             "disk",
             "grant-access",
             "-n",
-            config.vm.disk_name(image_path),
+            cls.get_disk_name(config, image_path),
             "-g",
             config.vm.resource_group,
             "--access-level",
@@ -328,7 +337,7 @@ class AzureApi(CloudApi):
             "disk",
             "revoke-access",
             "-n",
-            config.vm.disk_name(image_path),
+            cls.get_disk_name(config, image_path),
             "-g",
             config.vm.resource_group,
         ]
@@ -569,7 +578,7 @@ class AzureApi(CloudApi):
                 "--resource-group",
                 config.vm.resource_group,
                 "--attach-os-disk",
-                config.vm.disk_name(image_path),
+                disk_name,
                 "--security-type",
                 "ConfidentialVM",
                 "--enable-vtpm",

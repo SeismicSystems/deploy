@@ -163,7 +163,7 @@ def deploy_bob_vm(
     # Check if disk already exists and delete it to allow fresh upload
     if az_cli.disk_exists(deploy_cfg, image_path):
         logger.warning("    Disk already exists, deleting to allow fresh upload...")
-        disk_name = deploy_cfg.vm.disk_name(image_path)
+        disk_name = az_cli.get_disk_name(deploy_cfg, image_path)
         az_cli.delete_disk(
             deploy_cfg.vm.resource_group,
             deploy_cfg.vm.name,
@@ -200,7 +200,7 @@ def deploy_bob_vm(
         vm_size=deploy_cfg.vm.size,
         resource_group=deploy_cfg.vm.resource_group,
         location=deploy_cfg.vm.location,
-        os_disk_name=deploy_cfg.vm.disk_name(image_path),
+        os_disk_name=az_cli.get_disk_name(deploy_cfg, image_path),
         nsg_name=deploy_cfg.vm.nsg_name,
         ip_name=ip_name,
         show_logs=cfg.show_logs,

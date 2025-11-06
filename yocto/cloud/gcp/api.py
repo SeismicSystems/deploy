@@ -508,13 +508,22 @@ class GcpApi(CloudApi):
         cls.add_dns_ip(config, ip_address)
 
     @classmethod
+    def get_disk_name(cls, config: DeployConfigs, image_path: Path) -> str:
+        """Get the disk name for a given config and image path.
+
+        Returns the sanitized GCP-compliant disk name.
+        Gets the raw disk name and sanitizes it for GCP requirements.
+        """
+        raw_disk_name = cls.get_raw_disk_name(config.vm.name, image_path.name)
+        return cls._sanitize_gcp_name(raw_disk_name)
+
+    @classmethod
     def disk_exists(cls, config: DeployConfigs, image_path: Path) -> bool:
         """Check if disk exists.
 
         Uses the sanitized disk name to match what create_disk creates.
         """
-        raw_disk_name = config.vm.disk_name(image_path)
-        disk_name = cls._sanitize_gcp_name(raw_disk_name)
+        disk_name = cls.get_disk_name(config, image_path)
         try:
             disk_client = compute_v1.DisksClient()
             disk_client.get(
@@ -535,9 +544,9 @@ class GcpApi(CloudApi):
         Returns:
             The sanitized disk name that was created
         """
-        # Sanitize names for GCP (lowercase, no underscores, etc.)
-        raw_disk_name = config.vm.disk_name(image_path)
-        disk_name = cls._sanitize_gcp_name(raw_disk_name)
+        # Get sanitized disk name
+        disk_name = cls.get_disk_name(config, image_path)
+        raw_disk_name = cls.get_raw_disk_name(config.vm.name, image_path.name)
         logger.info(f"Creating disk {disk_name} (sanitized from {raw_disk_name})")
 
         # Setup
@@ -888,10 +897,9 @@ class GcpApi(CloudApi):
             attached_disk.mode = "READ_WRITE"
             attached_disk.device_name = config.vm.name
 
-            # Use provided disk_name or compute and sanitize it
+            # Use provided disk_name or compute it
             if disk_name is None:
-                raw_disk_name = config.vm.disk_name(image_path)
-                disk_name = cls._sanitize_gcp_name(raw_disk_name)
+                disk_name = cls.get_disk_name(config, image_path)
 
             attached_disk.source = (
                 f"projects/{config.vm.resource_group}/zones/"
