@@ -95,9 +95,26 @@ class GcpApi(CloudApi):
             logger.info(f"Converted to RAW: {raw_path}")
 
             # Create tar.gz with disk.raw inside
+            # IMPORTANT: GCP requires the tar to be created with --format=oldgnu
             logger.info("Creating tar.gz archive...")
-            with tarfile.open(targz_path, "w:gz") as tar:
-                tar.add(raw_path, arcname="disk.raw")
+
+            # Use subprocess with tar command to ensure proper format
+            # GCP requires: gzip compressed, oldgnu format, contains disk.raw
+            tar_cmd = [
+                "tar",
+                "--format=oldgnu",  # Required by GCP
+                "-czf", str(targz_path),
+                "-C", str(temp_path),  # Change to temp dir
+                "disk.raw"  # Add only disk.raw (not the full path)
+            ]
+
+            result = subprocess.run(tar_cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"Failed to create tar.gz:\n"
+                    f"stdout: {result.stdout}\n"
+                    f"stderr: {result.stderr}"
+                )
 
             logger.info(f"Created tar.gz: {targz_path}")
 
