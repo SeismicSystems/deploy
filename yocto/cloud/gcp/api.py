@@ -177,7 +177,7 @@ class GcpApi(CloudApi):
         Note: In GCP, projects need to be created through console or with
         organization permissions.
         """
-        logger.warning(
+        raise RuntimeError(
             f"GCP projects cannot be created via CLI without organization "
             f"access. Please create project {name} manually if it doesn't "
             f"exist."
