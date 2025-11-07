@@ -870,6 +870,18 @@ class GcpApi(CloudApi):
         access_config = compute_v1.AccessConfig()
         access_config.name = "External NAT"
         access_config.type_ = "ONE_TO_ONE_NAT"
+
+        # Get the reserved IP address if ip_name is provided
+        if ip_name:
+            reserved_ip = cls.get_existing_public_ip(ip_name, resource_group)
+            if reserved_ip:
+                access_config.nat_i_p = reserved_ip
+                logger.info(f"Using reserved IP: {reserved_ip}")
+            else:
+                logger.warning(
+                    f"Reserved IP {ip_name} not found, using ephemeral IP"
+                )
+
         network_interface.access_configs = [access_config]
 
         # Configure attached disk
@@ -955,8 +967,21 @@ class GcpApi(CloudApi):
             access_config = compute_v1.AccessConfig()
             access_config.name = "External NAT"
             access_config.type_ = "ONE_TO_ONE_NAT"
-            # If ip_name is provided, could use a reserved IP here
-            # For now, let GCP auto-assign ephemeral external IP
+
+            # Get the reserved IP address if ip_name is provided
+            if ip_name:
+                reserved_ip = cls.get_existing_public_ip(
+                    ip_name, config.vm.resource_group
+                )
+                if reserved_ip:
+                    access_config.nat_i_p = reserved_ip
+                    logger.info(f"Using reserved IP: {reserved_ip}")
+                else:
+                    logger.warning(
+                        f"Reserved IP {ip_name} not found, "
+                        "using ephemeral IP"
+                    )
+
             network_interface.access_configs = [access_config]
 
             # Configure attached disk
@@ -1033,13 +1058,13 @@ class GcpApi(CloudApi):
         # Get the external IP from the first network interface
         if not instance.network_interfaces:
             raise ValueError("Instance has no network instances")
-        access_cfg = instance.network_interfaces[0].access_configs
-        if not access_cfg:
+        access_configs = instance.network_interfaces[0].access_configs
+        if not access_configs:
             raise ValueError("Instance network interface has no access config")
 
-        nat_ip = access_cfg.nat_i_p
+        nat_ip = access_configs[0].nat_i_p
         if not nat_ip:
-            raise ValueError("Instance network interface has no nat_i_p")
+            raise ValueError("Instance network interface has no nat_ip")
         return nat_ip
 
     @classmethod
