@@ -971,57 +971,33 @@ class GcpApi(CloudApi):
 
         GCP may take a few moments after VM creation to populate IP info.
         """
-        from google.cloud import compute_v1
+        instance_client = compute_v1.InstancesClient()
+        instance = instance_client.get(
+            project=resource_group,
+            zone=location,
+            instance=vm_name,
+        )
 
-        max_retries = 10
-        retry_delay = 3  # seconds
+        # Get the external IP from the first network interface
+        if not instance.network_interfaces:
+            raise ValueError("Instance has no network instances")
+        access_cfg = instance.network_interfaces[0].access_configs
+        if not access_cfg:
+            raise ValueError("Instance network interface has no access config")
 
-        for attempt in range(max_retries):
-            try:
-                instance_client = compute_v1.InstancesClient()
-                instance = instance_client.get(
-                    project=resource_group, zone=location, instance=vm_name
-                )
-
-                # Get the external IP from the first network interface
-                if (
-                    instance.network_interfaces
-                    and instance.network_interfaces[0].access_configs
-                ):
-                    nat_ip = instance.network_interfaces[0].access_configs[0].nat_i_p
-                    if nat_ip:
-                        return nat_ip
-
-                # IP not available yet
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"IP address not available yet, retrying in {retry_delay}s... "
-                        f"(attempt {attempt + 1}/{max_retries})"
-                    )
-                    time.sleep(retry_delay)
-                    continue
-
-                raise RuntimeError(
-                    f"VM {vm_name} has no external IP after {max_retries} attempts"
-                )
-
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"Failed to get VM info, retrying in {retry_delay}s... "
-                        f"(attempt {attempt + 1}/{max_retries}): {e}"
-                    )
-                    time.sleep(retry_delay)
-                    continue
-                raise RuntimeError(
-                    f"Failed to get IP address for {vm_name}: {e}"
-                ) from e
-
-        raise RuntimeError(f"Failed to get IP address for {vm_name}")
+        nat_ip = access_cfg.nat_i_p
+        if not nat_ip:
+            raise ValueError("Instance network interface has no nat_i_p")
+        return nat_ip
 
     @classmethod
     def delete_vm(
-        cls, vm_name: str, resource_group: str, location: str, artifact: str, home: str
+        cls,
+        vm_name: str,
+        resource_group: str,
+        location: str,
+        artifact: str,
+        home: str,
     ) -> bool:
         """Delete a VM and its associated resources.
 
