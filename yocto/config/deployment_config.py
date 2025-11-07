@@ -23,8 +23,17 @@ from yocto.utils.artifact import expect_artifact
 logger = logging.getLogger(__name__)
 
 # Genesis deployment constants
-DOMAIN_RECORD_PREFIX = "gn"
 GENESIS_VM_PREFIX = "yocto-genesis"
+
+
+def get_domain_record_prefix(cloud: CloudProvider) -> str:
+    """Get cloud-specific domain record prefix."""
+    if cloud == CloudProvider.AZURE:
+        return "az"
+    elif cloud == CloudProvider.GCP:
+        return "gcp"
+    else:
+        raise ValueError(f"Unsupported cloud provider: {cloud}")
 
 
 @dataclass
@@ -132,15 +141,18 @@ class DeploymentConfig:
         }
 
     @classmethod
-    def configure_genesis_node(cls, node: int) -> dict[str, Any]:
+    def configure_genesis_node(
+        cls, node: int, cloud: CloudProvider
+    ) -> dict[str, Any]:
         if node < 1:
             raise ValueError(
                 "Argument --node is required and cannot be less than 1"
             )
         vm_name = f"{GENESIS_VM_PREFIX}-{node}"
+        prefix = get_domain_record_prefix(cloud)
         return {
             "node": node,
-            "record_name": f"{DOMAIN_RECORD_PREFIX}-{node}",
+            "record_name": f"{prefix}-{node}",
             "vm_name": vm_name,
             "nsg_name": vm_name,
         }
@@ -158,5 +170,7 @@ class DeploymentConfig:
     ) -> "DeploymentConfig":
         """Create config from parsed arguments with optional overrides."""
         config_kwargs = cls.parse_base_kwargs(args)
-        config_kwargs.update(cls.configure_genesis_node(node))
+        # Get cloud provider from parsed kwargs
+        cloud = CloudProvider(config_kwargs["cloud"])
+        config_kwargs.update(cls.configure_genesis_node(node, cloud))
         return cls(**config_kwargs)
