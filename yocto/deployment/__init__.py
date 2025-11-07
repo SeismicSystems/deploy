@@ -5,7 +5,6 @@ from yocto.deployment.deploy import (
     DeployOutput,
     delete_vm,
     deploy_image,
-    get_ip_address,
 )
 from yocto.deployment.proxy import ProxyClient
 
@@ -14,6 +13,5 @@ __all__ = [
     "Deployer",
     "delete_vm",
     "deploy_image",
-    "get_ip_address",
     "ProxyClient",
 ]
