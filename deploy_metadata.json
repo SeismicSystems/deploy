@@ -18,6 +18,24 @@
           "region": "eastus",
           "size": "Standard_DC4es_v6"
         }
+      },
+      "az-genesis-18": {
+        "artifact": "cvm-image-azure-tdx.rootfs-20251106191317.wic.vhd",
+        "public_ip": "172.210.114.213",
+        "domain": {
+          "url": "https://az-18.seismictest.net",
+          "record": "az-18",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-18",
+          "nsgName": "az-genesis-18",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        }
       }
     }
   },
