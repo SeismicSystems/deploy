@@ -51,7 +51,9 @@ class GenesisIPManager:
         # Create new IP
         logger.info(f"Creating new IP for node {node_number}")
         confirm(f"create new IP for node {node_number} @ {ip_name}")
-        ip_address = self.cloud_api.create_public_ip(ip_name, self.ip_rg)
+        ip_address = self.cloud_api.create_public_ip(
+            ip_name, self.ip_rg, region
+        )
         logger.info(f"Created IP {ip_address} for node {node_number}")
         return (ip_address, ip_name)
 

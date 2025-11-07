@@ -5,7 +5,7 @@ Default values for Azure deployments.
 # Resource groups
 
 # The resource group that owns the VM, IP, disk, etc.
-DEFAULT_RESOURCE_GROUP = "yocto-testnet"
+DEFAULT_RESOURCE_GROUP = "tdx-testnet"
 
 # Domain configuration
 # The resource group that owns only the domain

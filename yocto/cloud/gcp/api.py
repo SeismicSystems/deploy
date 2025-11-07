@@ -454,8 +454,13 @@ class GcpApi(CloudApi):
             )
 
     @classmethod
-    def create_public_ip(cls, name: str, resource_group: str) -> str:
-        """Create a static public IP address and return it."""
+    def create_public_ip(
+        cls, name: str, resource_group: str, location: str
+    ) -> str:
+        """Create a static public IP address and return it.
+
+        Note: location parameter is ignored for GCP as it uses DEFAULT_REGION.
+        """
         logger.info(f"Creating static public IP address: {name}")
 
         address_client = compute_v1.AddressesClient()

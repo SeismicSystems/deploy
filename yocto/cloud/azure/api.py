@@ -70,7 +70,9 @@ class AzureApi(CloudApi):
             cls.create_resource_group(name, location)
 
     @classmethod
-    def create_public_ip(cls, name: str, resource_group: str) -> str:
+    def create_public_ip(
+        cls, name: str, resource_group: str, location: str
+    ) -> str:
         """Create a static public IP address and return it."""
         logger.info(f"Creating static public IP address: {name}")
         cmd = [
@@ -82,6 +84,8 @@ class AzureApi(CloudApi):
             resource_group,
             "--name",
             name,
+            "--location",
+            location,
             "--version",
             "IPv4",
             "--sku",

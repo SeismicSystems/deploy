@@ -64,7 +64,9 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def create_public_ip(cls, name: str, resource_group: str) -> str:
+    def create_public_ip(
+        cls, name: str, resource_group: str, location: str
+    ) -> str:
         """Create a static public IP address and return it."""
         raise NotImplementedError
 

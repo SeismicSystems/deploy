@@ -164,7 +164,7 @@ def deploy_bob_vm(
     else:
         logger.info("    Creating new public IP...")
         ip_address = az_cli.create_public_ip(
-            ip_name, deploy_cfg.vm.resource_group
+            ip_name, deploy_cfg.vm.resource_group, deploy_cfg.vm.location
         )
         logger.info(f"    Created public IP: {ip_address}")
 
