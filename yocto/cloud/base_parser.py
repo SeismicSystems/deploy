@@ -57,13 +57,13 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    # Cloud provider selection (required)
+    # Cloud provider selection (defaults to azure)
     parser.add_argument(
         "--cloud",
         type=str,
         choices=["azure", "gcp"],
-        required=True,
-        help="Cloud provider to use (azure or gcp)",
+        default="azure",
+        help="Cloud provider to use (default: azure)",
     )
 
     # Region/Zone/Location with aliases
