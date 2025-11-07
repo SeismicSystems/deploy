@@ -16,6 +16,7 @@ from google.cloud import compute_v1, resourcemanager_v3, storage
 
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
+from yocto.cloud.cloud_parser import confirm
 from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
     DEFAULT_DISK_TYPE,
@@ -25,6 +26,7 @@ from yocto.cloud.gcp.defaults import (
     DEFAULT_REGION,
 )
 from yocto.config import DeployConfigs
+from yocto.utils.metadata import load_metadata, remove_vm_from_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,9 @@ def wait_for_extended_operation(
 
     while not operation.done():
         if time.time() - start_time > timeout:
-            raise TimeoutError(f"{operation_name} timed out after {timeout} seconds")
+            raise TimeoutError(
+                f"{operation_name} timed out after {timeout} seconds"
+            )
 
         time.sleep(5)
         logger.info(f"Waiting for {operation_name}...")
@@ -75,7 +79,7 @@ class GcpApi(CloudApi):
         name = name.replace("_", "-").replace(".", "-")
 
         # Remove any other invalid characters
-        name = re.sub(r'[^a-z0-9-]', '', name)
+        name = re.sub(r"[^a-z0-9-]", "", name)
 
         # Ensure it starts with a letter
         if name and not name[0].isalpha():
@@ -86,7 +90,7 @@ class GcpApi(CloudApi):
             name = name[:63]
 
         # Remove trailing hyphens
-        name = name.rstrip('-')
+        name = name.rstrip("-")
 
         return name
 
@@ -108,11 +112,14 @@ class GcpApi(CloudApi):
             # Convert VHD to RAW using qemu-img
             logger.info("Converting VHD to RAW format...")
             cmd = [
-                "qemu-img", "convert",
-                "-f", "vpc",  # VHD format
-                "-O", "raw",  # Output format
+                "qemu-img",
+                "convert",
+                "-f",
+                "vpc",  # VHD format
+                "-O",
+                "raw",  # Output format
                 str(vhd_path),
-                str(raw_path)
+                str(raw_path),
             ]
 
             result = subprocess.run(cmd, capture_output=True, text=True)
@@ -134,9 +141,11 @@ class GcpApi(CloudApi):
             tar_cmd = [
                 "tar",
                 "--format=oldgnu",  # Required by GCP
-                "-czf", str(targz_path),
-                "-C", str(temp_path),  # Change to temp dir
-                "disk.raw"  # Add only disk.raw (not the full path)
+                "-czf",
+                str(targz_path),
+                "-C",
+                str(temp_path),  # Change to temp dir
+                "disk.raw",  # Add only disk.raw (not the full path)
             ]
 
             result = subprocess.run(tar_cmd, capture_output=True, text=True)
@@ -179,15 +188,19 @@ class GcpApi(CloudApi):
             logger.info(f"Using existing bucket: {bucket_name}")
         except Exception:
             logger.info(f"Creating new bucket: {bucket_name}")
-            bucket = storage_client.create_bucket(bucket_name, location=DEFAULT_REGION)
+            bucket = storage_client.create_bucket(
+                bucket_name, location=DEFAULT_REGION
+            )
 
         # Convert VHD to tar.gz if needed
         upload_path = image_path
         upload_blob_name = blob_name
 
-        if image_path.suffix.lower() in ['.vhd', '.vhdx']:
+        if image_path.suffix.lower() in [".vhd", ".vhdx"]:
             logger.info(f"VHD file detected: {image_path.name}")
-            logger.info("Converting to tar.gz format (required for GCP direct import)")
+            logger.info(
+                "Converting to tar.gz format (required for GCP direct import)"
+            )
             upload_path = GcpApi._convert_vhd_to_targz(image_path)
             upload_blob_name = upload_path.name
             logger.info(f"Will upload converted file: {upload_blob_name}")
@@ -242,10 +255,14 @@ class GcpApi(CloudApi):
             # Grant the Compute Engine service account access to read from the bucket
             try:
                 rm_client = resourcemanager_v3.ProjectsClient()
-                project_resource = rm_client.get_project(name=f"projects/{project}")
-                project_number = project_resource.name.split('/')[-1]
+                project_resource = rm_client.get_project(
+                    name=f"projects/{project}"
+                )
+                project_number = project_resource.name.split("/")[-1]
 
-                compute_sa = f"{project_number}-compute@developer.gserviceaccount.com"
+                compute_sa = (
+                    f"{project_number}-compute@developer.gserviceaccount.com"
+                )
                 cloud_sa = f"{project_number}@cloudservices.gserviceaccount.com"
 
                 logger.info(f"Granting storage.objectViewer to: {compute_sa}")
@@ -265,25 +282,32 @@ class GcpApi(CloudApi):
 
                 if not role_exists:
                     # Create new binding
-                    policy.bindings.append({
-                        "role": "roles/storage.objectViewer",
-                        "members": {
-                            f"serviceAccount:{compute_sa}",
-                            f"serviceAccount:{cloud_sa}",
+                    policy.bindings.append(
+                        {
+                            "role": "roles/storage.objectViewer",
+                            "members": {
+                                f"serviceAccount:{compute_sa}",
+                                f"serviceAccount:{cloud_sa}",
+                            },
                         }
-                    })
+                    )
 
                 # Update the bucket policy
                 bucket.set_iam_policy(policy)
-                logger.info("Granted Compute Engine service accounts bucket access")
+                logger.info(
+                    "Granted Compute Engine service accounts bucket access"
+                )
 
                 # Wait a moment for IAM permissions to propagate
                 import time
+
                 time.sleep(2)
                 logger.info("Waiting for IAM permissions to propagate...")
 
             except Exception as e:
-                logger.error(f"Failed to grant service account permissions: {e}")
+                logger.error(
+                    f"Failed to grant service account permissions: {e}"
+                )
                 logger.error(
                     f"Manual fix: Run this command:\n"
                     f"  gsutil iam ch serviceAccount:{compute_sa}:objectViewer "
@@ -323,7 +347,7 @@ class GcpApi(CloudApi):
             "UEFI_COMPATIBLE",
             "VIRTIO_SCSI_MULTIQUEUE",
             "GVNIC",
-            "TDX_CAPABLE"
+            "TDX_CAPABLE",
         ]
 
         image.guest_os_features = []
@@ -335,7 +359,9 @@ class GcpApi(CloudApi):
         logger.info(f"Guest OS features: {guest_os_features}")
 
         try:
-            operation = image_client.insert(project=project, image_resource=image)
+            operation = image_client.insert(
+                project=project, image_resource=image
+            )
         except Exception as e:
             logger.error(f"Failed to create image: {e}")
             logger.error(f"Storage API URL: {storage_api_url}")
@@ -547,7 +573,9 @@ class GcpApi(CloudApi):
         # Get sanitized disk name
         disk_name = cls.get_disk_name(config, image_path)
         raw_disk_name = cls.get_raw_disk_name(config.vm.name, image_path.name)
-        logger.info(f"Creating disk {disk_name} (sanitized from {raw_disk_name})")
+        logger.info(
+            f"Creating disk {disk_name} (sanitized from {raw_disk_name})"
+        )
 
         # Setup
         bucket_name = f"{config.vm.resource_group}-images"
@@ -555,10 +583,14 @@ class GcpApi(CloudApi):
         image_name = cls._sanitize_gcp_name(raw_image_name)
         blob_name = image_path.name
 
-        logger.info(f"Image name: {image_name} (sanitized from {raw_image_name})")
+        logger.info(
+            f"Image name: {image_name} (sanitized from {raw_image_name})"
+        )
 
         # Step 1: Upload to Cloud Storage (converts VHD to tar.gz if needed)
-        logger.info(f"Uploading {image_path.name} to gs://{bucket_name}/{blob_name}")
+        logger.info(
+            f"Uploading {image_path.name} to gs://{bucket_name}/{blob_name}"
+        )
         actual_blob_name, upload_path = cls._upload_to_gcs(
             image_path=image_path,
             project=config.vm.resource_group,
@@ -681,8 +713,22 @@ class GcpApi(CloudApi):
         """Add all standard security rules."""
         rules = [
             ("AllowSSH", "100", "22", "tcp", config.source_ip, "SSH rule"),
-            ("AllowAnyHTTPInbound", "101", "80", "tcp", "*", "HTTP rule (TCP 80)"),
-            ("AllowAnyHTTPSInbound", "102", "443", "tcp", "*", "HTTPS rule (TCP 443)"),
+            (
+                "AllowAnyHTTPInbound",
+                "101",
+                "80",
+                "tcp",
+                "*",
+                "HTTP rule (TCP 80)",
+            ),
+            (
+                "AllowAnyHTTPSInbound",
+                "102",
+                "443",
+                "tcp",
+                "*",
+                "HTTPS rule (TCP 443)",
+            ),
             ("TCP7878", "115", "7878", "tcp", "*", "TCP 7878 rule"),
             ("TCP7936", "116", "7936", "tcp", "*", "TCP 7936 rule"),
             ("TCP8545", "110", "8545", "tcp", "*", "TCP 8545 rule"),
@@ -725,7 +771,9 @@ class GcpApi(CloudApi):
         disk = compute_v1.Disk()
         disk.name = disk_name
         disk.size_gb = size_gb
-        disk.type_ = f"projects/{resource_group}/zones/{location}/diskTypes/{sku}"
+        disk.type_ = (
+            f"projects/{resource_group}/zones/{location}/diskTypes/{sku}"
+        )
 
         operation = disk_client.insert(
             project=resource_group,
@@ -733,7 +781,9 @@ class GcpApi(CloudApi):
             disk_resource=disk,
         )
 
-        wait_for_extended_operation(operation, f"data disk creation for {disk_name}")
+        wait_for_extended_operation(
+            operation, f"data disk creation for {disk_name}"
+        )
         logger.info(f"Data disk {disk_name} created successfully")
 
     @classmethod
@@ -767,7 +817,9 @@ class GcpApi(CloudApi):
             attached_disk_resource=attached_disk,
         )
 
-        wait_for_extended_operation(operation, f"disk attachment for {disk_name}")
+        wait_for_extended_operation(
+            operation, f"disk attachment for {disk_name}"
+        )
         logger.info(f"Disk {disk_name} attached to {vm_name} successfully")
 
     @classmethod
@@ -870,7 +922,11 @@ class GcpApi(CloudApi):
 
     @classmethod
     def create_vm(
-        cls, config: DeployConfigs, image_path: Path, ip_name: str, disk_name: str
+        cls,
+        config: DeployConfigs,
+        image_path: Path,
+        ip_name: str,
+        disk_name: str,
     ) -> None:
         """Create the virtual machine with user-data.
 
@@ -1003,11 +1059,6 @@ class GcpApi(CloudApi):
 
         Returns True if successful, False otherwise.
         """
-        from google.cloud import compute_v1
-
-        from yocto.cloud.cloud_parser import confirm
-        from yocto.utils.metadata import load_metadata, remove_vm_from_metadata
-
         metadata = load_metadata(home)
         resources = metadata.get("resources", {})
         if vm_name not in resources:
@@ -1042,5 +1093,3 @@ class GcpApi(CloudApi):
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
         remove_vm_from_metadata(vm_name, home)
         return True
-
-

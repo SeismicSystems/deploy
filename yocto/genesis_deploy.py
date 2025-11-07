@@ -31,7 +31,9 @@ class GenesisIPManager:
     def ensure_genesis_resource_group(self, region: str) -> None:
         self.cloud_api.ensure_created_resource_group(self.ip_rg, region)
 
-    def get_or_create_node_ip(self, node_number: int, region: str) -> tuple[str, str]:
+    def get_or_create_node_ip(
+        self, node_number: int, region: str
+    ) -> tuple[str, str]:
         """Get or create persistent IP for a specific node number."""
         self.ensure_genesis_resource_group(region)
 
@@ -40,7 +42,9 @@ class GenesisIPManager:
         # Check if IP already exists
         existing_ip = self.cloud_api.get_existing_public_ip(ip_name, self.ip_rg)
         if existing_ip:
-            logger.info(f"Using existing IP {existing_ip} for node {node_number}")
+            logger.info(
+                f"Using existing IP {existing_ip} for node {node_number}"
+            )
             return (existing_ip, ip_name)
 
         # Create new IP

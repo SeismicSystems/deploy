@@ -42,7 +42,11 @@ def build_image(home: str, capture_output: bool = True) -> Path:
         text=True,
     )
     if build_result.returncode != 0:
-        err = build_result.stderr.strip() if build_result.stderr else "Unknown error"
+        err = (
+            build_result.stderr.strip()
+            if build_result.stderr
+            else "Unknown error"
+        )
         raise RuntimeError(f"Image build failed: {err}")
 
     # Find the latest built image
@@ -67,7 +71,8 @@ def build_image(home: str, capture_output: bool = True) -> Path:
     ts = artifact_timestamp(image_path_str)
     if (
         ts
-        < datetime.datetime.now().timestamp() - _MAX_ARTIFACT_AGE * _ONE_HOUR_IN_SECONDS
+        < datetime.datetime.now().timestamp()
+        - _MAX_ARTIFACT_AGE * _ONE_HOUR_IN_SECONDS
     ):
         raise RuntimeError(
             f"Most recently built image more than {_MAX_ARTIFACT_AGE} hours old"
@@ -96,7 +101,9 @@ class BuildOutput:
 
 
 class Builder:
-    def __init__(self, configs: BuildConfigs, home: str, show_logs: bool = True):
+    def __init__(
+        self, configs: BuildConfigs, home: str, show_logs: bool = True
+    ):
         self.configs = configs
         self.show_logs = show_logs
         self.home = home

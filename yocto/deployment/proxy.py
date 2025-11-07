@@ -37,7 +37,9 @@ class ProxyClient:
             self.process = subprocess.Popen(
                 proxy_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
-            logger.info(f"Starting proxy client to https://{self.public_ip}:7936")
+            logger.info(
+                f"Starting proxy client to https://{self.public_ip}:7936"
+            )
 
             # Wait for the process to confirm startup or timeout after 5 seconds
             try:
@@ -80,13 +82,17 @@ class ProxyClient:
 
                 # Look for attestation validation message
                 if "Successfully validated attestation document" in output:
-                    logger.info("Proxy server validated attestation successfully")
+                    logger.info(
+                        "Proxy server validated attestation successfully"
+                    )
                     request_thread.join()  # Ensure HTTP request thread has completed
                     return True
 
                 # Timeout after 30 seconds if no validation message is found
                 if time.time() - start_time > 30:
-                    logger.error("Timeout: Attestation validation message not found")
+                    logger.error(
+                        "Timeout: Attestation validation message not found"
+                    )
                     self.stop()
                     raise TimeoutError(
                         "Timeout: Attestation validation message not found."
@@ -100,7 +106,8 @@ class ProxyClient:
         time.sleep(5)
         try:
             response = requests.get(
-                "http://localhost:8080/genesis/data", headers={"Host": "localhost"}
+                "http://localhost:8080/genesis/data",
+                headers={"Host": "localhost"},
             )
             response.raise_for_status()
             logger.info(
@@ -108,7 +115,9 @@ class ProxyClient:
             )
         except requests.RequestException as e:
             logger.error(f"HTTP request failed: {e}")
-            raise ConnectionError(f"HTTP request to proxy server failed: {e}") from e
+            raise ConnectionError(
+                f"HTTP request to proxy server failed: {e}"
+            ) from e
 
     def stop(self):
         """Stop the proxy client"""

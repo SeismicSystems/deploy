@@ -119,5 +119,3 @@ def get_default_vm_size(cloud: CloudProvider) -> str:
         return GCP_DEFAULT_VM_TYPE
     else:
         raise ValueError(f"Unknown cloud provider: {cloud}")
-
-

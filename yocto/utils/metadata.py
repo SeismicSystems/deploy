@@ -38,7 +38,9 @@ def remove_artifact_from_metadata(name: str, home: str):
     write_metadata(metadata, home)
 
 
-def load_artifact_measurements(artifact: str, home: str) -> tuple[Path, "Measurements"]:
+def load_artifact_measurements(
+    artifact: str, home: str
+) -> tuple[Path, "Measurements"]:
     artifacts = load_metadata(home).get("artifacts", {})
     if artifact not in artifacts:
         raise ValueError(

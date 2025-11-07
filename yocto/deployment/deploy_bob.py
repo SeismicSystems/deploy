@@ -66,7 +66,14 @@ def create_bob_nsg_rules(config: DeployConfigs, az_cli: AzureApi) -> None:
             "Port 10022 - Container SSH",
         ),
         # Searcher service ports (open to all)
-        ("AllowAttestation", "110", "8745", "Tcp", "*", "Port 8745 - CVM attestation"),
+        (
+            "AllowAttestation",
+            "110",
+            "8745",
+            "Tcp",
+            "*",
+            "Port 8745 - CVM attestation",
+        ),
         (
             "AllowSearcherInput",
             "111",
@@ -148,13 +155,17 @@ def deploy_bob_vm(
     ip_name = f"{deploy_cfg.vm.name}-ip"
 
     # Check if IP already exists
-    existing_ip = az_cli.get_existing_public_ip(ip_name, deploy_cfg.vm.resource_group)
+    existing_ip = az_cli.get_existing_public_ip(
+        ip_name, deploy_cfg.vm.resource_group
+    )
     if existing_ip:
         logger.info(f"    Using existing public IP: {existing_ip}")
         ip_address = existing_ip
     else:
         logger.info("    Creating new public IP...")
-        ip_address = az_cli.create_public_ip(ip_name, deploy_cfg.vm.resource_group)
+        ip_address = az_cli.create_public_ip(
+            ip_name, deploy_cfg.vm.resource_group
+        )
         logger.info(f"    Created public IP: {ip_address}")
 
     # Step 4: Create and upload OS disk
@@ -162,7 +173,9 @@ def deploy_bob_vm(
 
     # Check if disk already exists and delete it to allow fresh upload
     if az_cli.disk_exists(deploy_cfg, image_path):
-        logger.warning("    Disk already exists, deleting to allow fresh upload...")
+        logger.warning(
+            "    Disk already exists, deleting to allow fresh upload..."
+        )
         disk_name = az_cli.get_disk_name(deploy_cfg, image_path)
         az_cli.delete_disk(
             deploy_cfg.vm.resource_group,
@@ -174,7 +187,9 @@ def deploy_bob_vm(
 
     az_cli.create_disk(deploy_cfg, image_path)
 
-    logger.info("\n==> Step 5/9: Uploading VHD (this may take several minutes)...")
+    logger.info(
+        "\n==> Step 5/9: Uploading VHD (this may take several minutes)..."
+    )
     az_cli.upload_disk(deploy_cfg, image_path)
 
     # Step 6: Create persistent data disk
@@ -220,7 +235,9 @@ def deploy_bob_vm(
     return ip_address
 
 
-def print_next_steps(vm_name: str, ip_address: str, resource_group: str) -> None:
+def print_next_steps(
+    vm_name: str, ip_address: str, resource_group: str
+) -> None:
     """Print post-deployment instructions."""
     logger.info("\n" + "=" * 70)
     logger.info("DEPLOYMENT SUCCESSFUL! 🚀")
@@ -229,7 +246,9 @@ def print_next_steps(vm_name: str, ip_address: str, resource_group: str) -> None
     logger.info(f"  Name:       {vm_name}")
     logger.info(f"  Public IP:  {ip_address}")
     logger.info("\nNext Steps:")
-    logger.info("\n1. Wait for VM to boot (~2 minutes), then register your SSH key:")
+    logger.info(
+        "\n1. Wait for VM to boot (~2 minutes), then register your SSH key:"
+    )
     logger.info(
         f"   curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://{ip_address}:8080"
     )
@@ -323,7 +342,9 @@ def main():
     vhd_path = Path(args.artifact).expanduser()
     if not vhd_path.exists():
         logger.error(f"VHD file not found: {vhd_path}")
-        logger.error("Build it first: cd ~/flashbots-images && make build IMAGE=bob-l1")
+        logger.error(
+            "Build it first: cd ~/flashbots-images && make build IMAGE=bob-l1"
+        )
         exit(1)
 
     # Auto-detect source IP if not provided

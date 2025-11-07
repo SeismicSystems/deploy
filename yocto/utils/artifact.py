@@ -67,7 +67,9 @@ def expect_artifact(artifact_arg: str) -> str:
 def delete_artifact(artifact: str, home: str):
     resources = load_metadata(home).get("resources", {})
     deployed_to = [
-        rg for rg, resource in resources.items() if resource["artifact"] == artifact
+        rg
+        for rg, resource in resources.items()
+        if resource["artifact"] == artifact
     ]
     if deployed_to:
         confirm = input(
@@ -92,5 +94,7 @@ def delete_artifact(artifact: str, home: str):
         logger.warning("Found no files associated with this artifact")
         return
 
-    logger.info(f"Deleted {files_deleted} files associated with artifact {artifact}")
+    logger.info(
+        f"Deleted {files_deleted} files associated with artifact {artifact}"
+    )
     remove_artifact_from_metadata(artifact, home)

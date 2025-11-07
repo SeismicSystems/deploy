@@ -80,20 +80,23 @@ class DeploymentConfig:
         # Get cloud provider from parsed args
         if not hasattr(args, "cloud"):
             raise ValueError(
-                "args must have 'cloud' attribute - "
-                "use create_base_parser()"
+                "args must have 'cloud' attribute - use create_base_parser()"
             )
 
         cloud = CloudProvider(args.cloud)
 
         # Apply cloud-specific defaults if not provided
         region = args.region or get_default_region(cloud)
-        resource_group = args.resource_group or get_default_resource_group(cloud)
+        resource_group = args.resource_group or get_default_resource_group(
+            cloud
+        )
         vm_size = args.vm_size or get_default_vm_size(cloud)
 
         source_ip = args.source_ip
         if source_ip is None:
-            logger.warning("No --source-ip provided, so fetching IP from ipify.org...")
+            logger.warning(
+                "No --source-ip provided, so fetching IP from ipify.org..."
+            )
             source_ip = get_host_ip()
             logger.info(f"Fetched public IP: {source_ip}")
 
@@ -117,7 +120,9 @@ class DeploymentConfig:
     @classmethod
     def parse_deploy_args(cls, args: argparse.Namespace) -> dict[str, Any]:
         if not args.node or args.node < 1:
-            raise ValueError("Argument -n is required and cannot be less than 1")
+            raise ValueError(
+                "Argument -n is required and cannot be less than 1"
+            )
         vm_name = f"yocto-node-{args.node}"
         return {
             "node": args.node,
@@ -129,7 +134,9 @@ class DeploymentConfig:
     @classmethod
     def configure_genesis_node(cls, node: int) -> dict[str, Any]:
         if node < 1:
-            raise ValueError("Argument --node is required and cannot be less than 1")
+            raise ValueError(
+                "Argument --node is required and cannot be less than 1"
+            )
         vm_name = f"{GENESIS_VM_PREFIX}-{node}"
         return {
             "node": node,

@@ -21,7 +21,12 @@ from yocto.cloud.cloud_config import (
 )
 
 # Re-export for backwards compatibility
-__all__ = ["create_cloud_parser", "parse_cloud_args", "create_base_parser", "confirm"]
+__all__ = [
+    "create_cloud_parser",
+    "parse_cloud_args",
+    "create_base_parser",
+    "confirm",
+]
 
 
 def create_cloud_parser(description: str) -> argparse.ArgumentParser:
@@ -34,7 +39,8 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
         Configured ArgumentParser
     """
     parser = argparse.ArgumentParser(
-        description=description, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=description,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     # Cloud provider selection (required)

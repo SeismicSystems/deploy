@@ -26,7 +26,9 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     paths = BuildPaths(home)
     # Check if measured_boot_path and image_path exist
     if not paths.measured_boot.exists():
-        raise FileNotFoundError(f"Measured boot path not found: {paths.measured_boot}")
+        raise FileNotFoundError(
+            f"Measured boot path not found: {paths.measured_boot}"
+        )
     if not image_path.exists():
         raise FileNotFoundError(f"Image path not found: {image_path}")
 
@@ -47,7 +49,9 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     """
 
     # Run the command without check=True and handle returncode manually
-    result = subprocess.run(measure_cmd, shell=True, capture_output=True, text=True)
+    result = subprocess.run(
+        measure_cmd, shell=True, capture_output=True, text=True
+    )
 
     # Check if the command failed and raise an error if necessary
     if result.returncode != 0:

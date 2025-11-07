@@ -3,6 +3,7 @@
 Base Cloud API abstraction.
 Defines the interface that cloud providers (Azure, GCP) must implement.
 """
+
 import logging
 import subprocess
 from abc import ABC, abstractmethod
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
     from yocto.config.deploy_config import DeployConfigs
 
 logger = logging.getLogger(__name__)
+
 
 class CloudApi(ABC):
     """Abstract base class for cloud provider APIs."""
@@ -146,7 +148,9 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
-    def delete_disk(cls, resource_group: str, vm_name: str, artifact: str, zone: str):
+    def delete_disk(
+        cls, resource_group: str, vm_name: str, artifact: str, zone: str
+    ):
         """Delete a disk."""
         raise NotImplementedError
 

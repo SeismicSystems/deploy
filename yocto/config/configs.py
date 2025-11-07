@@ -30,7 +30,9 @@ class Configs:
                 "If running with --deploy and not --build, "
                 "you must provide an --artifact to deploy"
             )
-        home_path = Path.home() if not args.code_path else Path.home() / args.code_path
+        home_path = (
+            Path.home() if not args.code_path else Path.home() / args.code_path
+        )
         return Configs(
             mode=mode,
             build=build,

@@ -32,7 +32,9 @@ class AzureApi(CloudApi):
         tools = ["az", "azcopy"]
         for tool in tools:
             try:
-                subprocess.run([tool, "--version"], capture_output=True, check=True)
+                subprocess.run(
+                    [tool, "--version"], capture_output=True, check=True
+                )
             except (subprocess.CalledProcessError, FileNotFoundError) as e:
                 raise RuntimeError(
                     f"Error: '{tool}' command not found. Please install {tool}."
@@ -62,7 +64,9 @@ class AzureApi(CloudApi):
             logger.info(f"Resource group {name} already exists")
         else:
             confirm(f"create genesis resource group: {name} in {location}")
-            logger.info(f"Creating genesis IP resource group: {name} in {location}")
+            logger.info(
+                f"Creating genesis IP resource group: {name} in {location}"
+            )
             cls.create_resource_group(name, location)
 
     @classmethod
@@ -144,7 +148,9 @@ class AzureApi(CloudApi):
             "tsv",
         ]
         result = cls.run_command(cmd)
-        return result.stdout.strip().split("\n") if result.stdout.strip() else []
+        return (
+            result.stdout.strip().split("\n") if result.stdout.strip() else []
+        )
 
     @classmethod
     def remove_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
@@ -297,14 +303,18 @@ class AzureApi(CloudApi):
         return sas_data["accessSas"]
 
     @classmethod
-    def delete_disk(cls, resource_group: str, vm_name: str, artifact: str, zone: str):
+    def delete_disk(
+        cls, resource_group: str, vm_name: str, artifact: str, zone: str
+    ):
         """Delete a disk.
 
         Note: zone parameter is unused for Azure, but included for API
         consistency with GCP.
         """
         disk_name = VmConfigs.get_disk_name(vm_name, artifact)
-        logger.info(f"Deleting disk {disk_name} from resource group {resource_group}")
+        logger.info(
+            f"Deleting disk {disk_name} from resource group {resource_group}"
+        )
         cmd = [
             "az",
             "disk",
@@ -330,7 +340,9 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=show_logs)
 
     @classmethod
-    def _revoke_disk_access(cls, config: DeployConfigs, image_path: Path) -> None:
+    def _revoke_disk_access(
+        cls, config: DeployConfigs, image_path: Path
+    ) -> None:
         # Revoke access
         logger.info("Revoking access")
         cmd = [
@@ -410,8 +422,22 @@ class AzureApi(CloudApi):
         """Add all standard security rules."""
         rules = [
             ("AllowSSH", "100", "22", "Tcp", config.source_ip, "SSH rule"),
-            ("AllowAnyHTTPInbound", "101", "80", "Tcp", "*", "HTTP rule (TCP 80)"),
-            ("AllowAnyHTTPSInbound", "102", "443", "Tcp", "*", "HTTPS rule (TCP 443)"),
+            (
+                "AllowAnyHTTPInbound",
+                "101",
+                "80",
+                "Tcp",
+                "*",
+                "HTTP rule (TCP 80)",
+            ),
+            (
+                "AllowAnyHTTPSInbound",
+                "102",
+                "443",
+                "Tcp",
+                "*",
+                "HTTPS rule (TCP 443)",
+            ),
             ("TCP7878", "115", "7878", "Tcp", "*", "TCP 7878 rule"),
             ("TCP7936", "116", "7936", "Tcp", "*", "TCP 7936 rule"),
             ("TCP8545", "110", "8545", "Tcp", "*", "TCP 8545 rule"),
@@ -480,7 +506,9 @@ class AzureApi(CloudApi):
         Note: zone parameter is unused for Azure, but included for API
         consistency with GCP.
         """
-        logger.info(f"Attaching data disk {disk_name} to {vm_name} at LUN {lun}")
+        logger.info(
+            f"Attaching data disk {disk_name} to {vm_name} at LUN {lun}"
+        )
         cmd = [
             "az",
             "vm",
@@ -563,7 +591,11 @@ class AzureApi(CloudApi):
 
     @classmethod
     def create_vm(
-        cls, config: DeployConfigs, image_path: Path, ip_name: str, disk_name: str
+        cls,
+        config: DeployConfigs,
+        image_path: Path,
+        ip_name: str,
+        disk_name: str,
     ) -> None:
         """Create the virtual machine with user-data."""
         user_data_file = cls.create_user_data_file(config)
@@ -621,7 +653,9 @@ class AzureApi(CloudApi):
             )
 
             if result.returncode != 0:
-                raise RuntimeError(f"Failed to get IP address: {result.stderr.strip()}")
+                raise RuntimeError(
+                    f"Failed to get IP address: {result.stderr.strip()}"
+                )
 
             # Parse and return the IP address
             vm_info = json.loads(result.stdout)
@@ -641,9 +675,9 @@ class AzureApi(CloudApi):
 
             # Check if IP address is available
             try:
-                return vm_info[0]["virtualMachine"]["network"]["publicIpAddresses"][0][
-                    "ipAddress"
-                ]
+                return vm_info[0]["virtualMachine"]["network"][
+                    "publicIpAddresses"
+                ][0]["ipAddress"]
             except (KeyError, IndexError) as e:
                 if attempt < max_retries - 1:
                     logger.warning(
@@ -661,7 +695,12 @@ class AzureApi(CloudApi):
 
     @classmethod
     def delete_vm(
-        cls, vm_name: str, resource_group: str, location: str, artifact: str, home: str
+        cls,
+        vm_name: str,
+        resource_group: str,
+        location: str,
+        artifact: str,
+        home: str,
     ) -> bool:
         """Delete a VM and its associated resources.
 

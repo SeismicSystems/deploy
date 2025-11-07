@@ -21,7 +21,9 @@ class Mode:
             delete_vm=args.delete_vm,
             delete_artifact=parse_artifact(args.delete_artifact),
         )
-        if not (mode.build or mode.deploy or mode.delete_vm or mode.delete_artifact):
+        if not (
+            mode.build or mode.deploy or mode.delete_vm or mode.delete_artifact
+        ):
             raise ValueError(
                 "Invalid arguments. Must specify at least one of: "
                 "--build, "

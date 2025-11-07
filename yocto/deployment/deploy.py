@@ -141,11 +141,14 @@ class Deployer:
     def find_latest_image(self) -> Path:
         """Find the most recently built image"""
         pattern = str(
-            BuildPaths(self.home).artifacts / "cvm-image-azure-tdx.rootfs-*.wic.vhd"
+            BuildPaths(self.home).artifacts
+            / "cvm-image-azure-tdx.rootfs-*.wic.vhd"
         )
         image_files = glob.glob(pattern)
         if not image_files:
-            raise FileNotFoundError("No existing images found in artifacts directory")
+            raise FileNotFoundError(
+                "No existing images found in artifacts directory"
+            )
 
         latest_image = max(image_files, key=lambda x: Path(x).stat().st_mtime)
         logger.info(f"Found latest image: {latest_image}")
