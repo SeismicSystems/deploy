@@ -1,5 +1,24 @@
 {
-  "resources": {},
+  "resources": {
+    "yocto-genesis-3": {
+      "artifact": "cvm-image-azure-tdx.rootfs-20251106191317.wic.vhd",
+      "public_ip": "34.16.112.41",
+      "domain": {
+        "url": "https://gn-3.seismictest.net",
+        "record": "gn-3",
+        "name": "seismictest.net",
+        "resource_group": "yocto-testnet"
+      },
+      "vm": {
+        "resourceGroup": "testnet-477314",
+        "name": "yocto-genesis-3",
+        "nsgName": "yocto-genesis-3",
+        "cloud": "gcp",
+        "region": "us-central1-a",
+        "size": "c3-standard-4"
+      }
+    }
+  },
   "artifacts": {
     "cvm-image-azure-tdx.rootfs-20251106191317.wic.vhd": {
       "repos": {
