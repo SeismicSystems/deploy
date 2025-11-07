@@ -321,7 +321,7 @@ class AzureApi(CloudApi):
         Note: zone parameter is unused for Azure, but included for API
         consistency with GCP.
         """
-        disk_name = VmConfigs.get_disk_name(vm_name, artifact)
+        disk_name = cls.get_raw_disk_name(vm_name, artifact)
         logger.info(
             f"Deleting disk {disk_name} from resource group {resource_group}"
         )
