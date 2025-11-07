@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 
 def load_metadata(home: str) -> dict[str, dict]:
+    """Load metadata from deploy metadata file."""
     with open(BuildPaths(home).deploy_metadata) as f:
         return json.load(f)
 
@@ -18,12 +19,21 @@ def write_metadata(metadata: dict[str, dict], home: str):
         json.dump(metadata, f, indent=2)
 
 
-def remove_vm_from_metadata(name: str, home: str):
+def remove_vm_from_metadata(name: str, home: str, cloud: str):
+    """Remove VM from metadata.
+
+    Args:
+        name: VM name
+        home: Home directory
+        cloud: Cloud provider ("azure" or "gcp")
+    """
     metadata = load_metadata(home)
     resources = metadata.get("resources", {})
-    if name not in resources:
+    cloud_resources = resources.get(cloud, {})
+    if name not in cloud_resources:
         return
-    resources.pop(name)
+    cloud_resources.pop(name)
+    resources[cloud] = cloud_resources
     metadata["resources"] = resources
     write_metadata(metadata, home)
 
@@ -56,23 +66,25 @@ def load_artifact_measurements(
     return image_path, artifact["image"]
 
 
-def filter_resources_by_cloud(home: str, cloud: str) -> dict[str, dict]:
-    """Filter resources by cloud provider.
+def get_cloud_resources(home: str, cloud: str) -> dict[str, dict]:
+    """Get resources for a specific cloud provider.
 
     Args:
         home: Home directory path
-        cloud: Cloud provider to filter by ("azure" or "gcp")
+        cloud: Cloud provider ("azure" or "gcp")
 
     Returns:
-        Dictionary of resources filtered by cloud provider
+        Dictionary of resources for the specified cloud
     """
     metadata = load_metadata(home)
     resources = metadata.get("resources", {})
+    return resources.get(cloud, {})
 
-    filtered = {}
-    for name, resource in resources.items():
-        vm_info = resource.get("vm", {})
-        if vm_info.get("cloud") == cloud:
-            filtered[name] = resource
 
-    return filtered
+def filter_resources_by_cloud(home: str, cloud: str) -> dict[str, dict]:
+    """Filter resources by cloud provider.
+
+    Deprecated: Use get_cloud_resources() instead.
+    This function is kept for backward compatibility.
+    """
+    return get_cloud_resources(home, cloud)

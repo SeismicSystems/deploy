@@ -23,11 +23,20 @@ def delete_vm(vm_name: str, home: str) -> bool:
     """
     metadata = load_metadata(home)
     resources = metadata.get("resources", {})
-    if vm_name not in resources:
+
+    # Search for VM in all clouds
+    meta = None
+    cloud_str = None
+    for cloud_key, cloud_resources in resources.items():
+        if vm_name in cloud_resources:
+            meta = cloud_resources[vm_name]
+            cloud_str = cloud_key
+            break
+
+    if not meta:
         logger.error(f"VM {vm_name} not found in metadata")
         return False
 
-    meta = resources[vm_name]
     resource_group = meta["vm"]["resourceGroup"]
     region = meta["vm"]["region"]
     artifact = meta["artifact"]
@@ -89,8 +98,13 @@ class DeployOutput:
     def update_deploy_metadata(self):
         metadata = load_metadata(self.home)
         if "resources" not in metadata:
-            metadata["resources"] = {}
-        metadata["resources"][self.configs.vm.name] = {
+            metadata["resources"] = {"azure": {}, "gcp": {}}
+
+        cloud = self.configs.vm.cloud
+        if cloud not in metadata["resources"]:
+            metadata["resources"][cloud] = {}
+
+        metadata["resources"][cloud][self.configs.vm.name] = {
             "artifact": self.artifact,
             "public_ip": self.public_ip,
             "domain": self.configs.domain.to_dict(),

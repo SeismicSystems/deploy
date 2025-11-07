@@ -23,7 +23,24 @@ from yocto.utils.artifact import expect_artifact
 logger = logging.getLogger(__name__)
 
 # Genesis deployment constants
-GENESIS_VM_PREFIX = "yocto-genesis"
+GENESIS_VM_PREFIX = "yocto-genesis"  # Deprecated, use get_genesis_vm_prefix
+
+
+def get_genesis_vm_prefix(cloud: CloudProvider) -> str:
+    """Get cloud-specific genesis VM prefix.
+
+    Args:
+        cloud: CloudProvider enum
+
+    Returns:
+        Cloud-specific prefix (e.g., "az-genesis" or "gcp-genesis")
+    """
+    if cloud == CloudProvider.AZURE:
+        return "az-genesis"
+    elif cloud == CloudProvider.GCP:
+        return "gcp-genesis"
+    else:
+        raise ValueError(f"Unsupported cloud provider: {cloud}")
 
 
 def get_domain_record_prefix(cloud: CloudProvider) -> str:
@@ -142,17 +159,36 @@ class DeploymentConfig:
 
     @classmethod
     def configure_genesis_node(
-        cls, node: int, cloud: CloudProvider
+        cls,
+        node: int,
+        cloud: CloudProvider,
+        manual_name: str | None = None,
     ) -> dict[str, Any]:
+        """Configure genesis node with cloud-specific naming.
+
+        Args:
+            node: Node number
+            cloud: Cloud provider
+            manual_name: Optional manual override for VM name
+
+        Returns:
+            Dictionary with node configuration
+        """
         if node < 1:
             raise ValueError(
                 "Argument --node is required and cannot be less than 1"
             )
-        vm_name = f"{GENESIS_VM_PREFIX}-{node}"
-        prefix = get_domain_record_prefix(cloud)
+
+        if manual_name:
+            vm_name = manual_name
+        else:
+            prefix = get_genesis_vm_prefix(cloud)
+            vm_name = f"{prefix}-{node}"
+
+        domain_prefix = get_domain_record_prefix(cloud)
         return {
             "node": node,
-            "record_name": f"{prefix}-{node}",
+            "record_name": f"{domain_prefix}-{node}",
             "vm_name": vm_name,
             "nsg_name": vm_name,
         }
@@ -172,5 +208,8 @@ class DeploymentConfig:
         config_kwargs = cls.parse_base_kwargs(args)
         # Get cloud provider from parsed kwargs
         cloud = CloudProvider(config_kwargs["cloud"])
-        config_kwargs.update(cls.configure_genesis_node(node, cloud))
+        manual_name = getattr(args, "name", None)
+        config_kwargs.update(
+            cls.configure_genesis_node(node, cloud, manual_name)
+        )
         return cls(**config_kwargs)

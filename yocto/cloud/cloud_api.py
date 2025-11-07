@@ -10,6 +10,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from yocto.cloud.cloud_config import CloudProvider
+
 if TYPE_CHECKING:
     from yocto.config.deploy_config import DeployConfigs
 
@@ -18,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 class CloudApi(ABC):
     """Abstract base class for cloud provider APIs."""
+
+    @classmethod
+    @abstractmethod
+    def get_cloud_provider(cls) -> CloudProvider:
+        """Return the CloudProvider enum for this API."""
+        raise NotImplementedError
 
     @staticmethod
     def run_command(

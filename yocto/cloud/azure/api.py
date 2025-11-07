@@ -16,6 +16,7 @@ from yocto.cloud.azure.defaults import (
     CONSENSUS_PORT,
 )
 from yocto.cloud.cloud_api import CloudApi
+from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
 from yocto.config import DeployConfigs, VmConfigs
 
@@ -25,6 +26,11 @@ logger = logging.getLogger(__name__)
 # Disk Operations
 class AzureApi(CloudApi):
     """Azure implementation of CloudApi."""
+
+    @classmethod
+    def get_cloud_provider(cls) -> CloudProvider:
+        """Return the CloudProvider enum for this API."""
+        return CloudProvider.AZURE
 
     @staticmethod
     def check_dependencies():
@@ -724,11 +730,15 @@ class AzureApi(CloudApi):
 
         metadata = load_metadata(home)
         resources = metadata.get("resources", {})
-        if vm_name not in resources:
-            logger.error(f"VM {vm_name} not found in metadata")
+
+        # Search for VM in azure cloud resources
+        cloud_key = cls.get_cloud_provider().value
+        cloud_resources = resources.get(cloud_key, {})
+        if vm_name not in cloud_resources:
+            logger.error(f"VM {vm_name} not found in {cloud_key} metadata")
             return False
 
-        meta = resources[vm_name]
+        meta = cloud_resources[vm_name]
         vm_resource_group = meta["vm"]["resourceGroup"]
 
         prompt = f"Are you sure you want to delete VM {vm_name}"
@@ -768,7 +778,7 @@ class AzureApi(CloudApi):
 
         region = meta["vm"]["region"]
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
-        remove_vm_from_metadata(vm_name, home)
+        remove_vm_from_metadata(vm_name, home, cls.get_cloud_provider().value)
         return True
 
 

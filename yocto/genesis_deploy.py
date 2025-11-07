@@ -130,6 +130,11 @@ def parse_genesis_args():
         type=int,
         help="Specific node number to deploy",
     )
+    parser.add_argument(
+        "--name",
+        type=str,
+        help="Manual VM name override (default: cloud-specific prefix + node number)",
+    )
     return parser.parse_args()
 
 

@@ -7,6 +7,7 @@ from yocto.config.deployment_config import (
     GENESIS_VM_PREFIX,
     DeploymentConfig,
     get_domain_record_prefix,
+    get_genesis_vm_prefix,
 )
 from yocto.config.domain_config import DomainConfig
 from yocto.config.mode import Mode
@@ -25,6 +26,7 @@ __all__ = [
     # Genesis constants
     "GENESIS_VM_PREFIX",
     "get_domain_record_prefix",
+    "get_genesis_vm_prefix",
     # Utilities
     "get_host_ip",
     "get_disk_size",

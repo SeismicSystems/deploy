@@ -6,13 +6,15 @@ from pathlib import Path
 from yocto.cloud.azure import CONSENSUS_PORT
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
-from yocto.config import GENESIS_VM_PREFIX, get_domain_record_prefix
+from yocto.config import get_domain_record_prefix, get_genesis_vm_prefix
 from yocto.utils.metadata import load_metadata
 from yocto.utils.summit_client import SummitClient
 
 
-def _genesis_vm_name(node: int) -> str:
-    return f"{GENESIS_VM_PREFIX}-{node}"
+def _genesis_vm_name(node: int, cloud: CloudProvider) -> str:
+    """Get genesis VM name for the given node and cloud provider."""
+    prefix = get_genesis_vm_prefix(cloud)
+    return f"{prefix}-{node}"
 
 
 def _genesis_client(node: int, cloud: CloudProvider) -> SummitClient:
@@ -45,13 +47,20 @@ def _parse_args() -> argparse.Namespace:
 def _get_pubkeys(
     home: Path,
     node_clients: list[tuple[int, SummitClient]],
+    cloud: str,
+    cloud_provider: CloudProvider,
 ) -> tuple[list[dict[str, str]], dict[int, str]]:
-    resources = load_metadata(str(home))["resources"]
+    metadata = load_metadata(str(home))
+    cloud_resources = metadata["resources"].get(cloud, {})
 
     validators = []
     node_to_pubkey = {}
     for node, client in node_clients:
-        meta = resources[_genesis_vm_name(node)]
+        vm_name = _genesis_vm_name(node, cloud_provider)
+        if vm_name not in cloud_resources:
+            raise ValueError(f"VM {vm_name} not found in {cloud} metadata")
+
+        meta = cloud_resources[vm_name]
         ip_address = meta["public_ip"]
         try:
             pubkey = client.get_public_key()
@@ -109,7 +118,9 @@ def main():
     summit_genesis_target = f"{summit_path}/target/debug/genesis"
     summit_example_genesis = f"{summit_path}/example_genesis.toml"
 
-    validators, node_to_pubkey = _get_pubkeys(home, node_clients)
+    validators, node_to_pubkey = _get_pubkeys(
+        home, node_clients, args.cloud, cloud
+    )
 
     tmp_validators = f"{tmpdir}/validators.json"
     with open(tmp_validators, "w+") as f:

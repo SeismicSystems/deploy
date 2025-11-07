@@ -67,15 +67,18 @@ def expect_artifact(artifact_arg: str) -> str:
 
 def delete_artifact(artifact: str, home: str):
     resources = load_metadata(home).get("resources", {})
-    deployed_to = [
-        rg
-        for rg, resource in resources.items()
-        if resource["artifact"] == artifact
-    ]
+
+    # Iterate over clouds and VMs to find where artifact is deployed
+    deployed_to = []
+    for cloud, cloud_resources in resources.items():
+        for vm_name, resource in cloud_resources.items():
+            if resource.get("artifact") == artifact:
+                deployed_to.append(f"{vm_name} ({cloud})")
+
     if deployed_to:
         confirm = input(
             f'\nThe artifact "{artifact}" is deployed to '
-            f"{len(deployed_to)} resource group(s):"
+            f"{len(deployed_to)} VM(s):"
             f"\n - {'\n - '.join(deployed_to)}\n\n"
             "Are you really sure you want to delete it? "
             "This will not delete the resources (y/n): "

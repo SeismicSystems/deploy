@@ -16,6 +16,7 @@ from google.cloud import compute_v1, resourcemanager_v3, storage
 
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
+from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
 from yocto.cloud.gcp.defaults import (
     CONSENSUS_PORT,
@@ -62,6 +63,11 @@ def wait_for_extended_operation(
 
 class GcpApi(CloudApi):
     """GCP implementation of CloudApi."""
+
+    @classmethod
+    def get_cloud_provider(cls) -> CloudProvider:
+        """Return the CloudProvider enum for this API."""
+        return CloudProvider.GCP
 
     @staticmethod
     def _sanitize_gcp_name(name: str) -> str:
@@ -1100,11 +1106,15 @@ class GcpApi(CloudApi):
         """
         metadata = load_metadata(home)
         resources = metadata.get("resources", {})
-        if vm_name not in resources:
-            logger.error(f"VM {vm_name} not found in metadata")
+
+        # Search for VM in gcp cloud resources
+        cloud_key = cls.get_cloud_provider().value
+        cloud_resources = resources.get(cloud_key, {})
+        if vm_name not in cloud_resources:
+            logger.error(f"VM {vm_name} not found in {cloud_key} metadata")
             return False
 
-        meta = resources[vm_name]
+        meta = cloud_resources[vm_name]
         vm_resource_group = meta["vm"]["resourceGroup"]
         region = meta["vm"]["region"]
 
@@ -1130,5 +1140,5 @@ class GcpApi(CloudApi):
 
         logger.info("Deleting associated disk...")
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
-        remove_vm_from_metadata(vm_name, home)
+        remove_vm_from_metadata(vm_name, home, cls.get_cloud_provider().value)
         return True

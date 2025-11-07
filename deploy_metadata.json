@@ -1,21 +1,23 @@
 {
   "resources": {
-    "yocto-genesis-17": {
-      "artifact": "cvm-image-azure-tdx.rootfs-20251106191317.wic.vhd",
-      "public_ip": "74.179.221.197",
-      "domain": {
-        "url": "https://az-17.seismictest.net",
-        "record": "az-17",
-        "name": "seismictest.net",
-        "resource_group": "yocto-testnet"
-      },
-      "vm": {
-        "resourceGroup": "tdx-testnet",
-        "name": "yocto-genesis-17",
-        "nsgName": "yocto-genesis-17",
-        "cloud": "azure",
-        "region": "eastus",
-        "size": "Standard_DC4es_v6"
+    "azure": {
+      "yocto-genesis-17": {
+        "artifact": "cvm-image-azure-tdx.rootfs-20251106191317.wic.vhd",
+        "public_ip": "74.179.221.197",
+        "domain": {
+          "url": "https://az-17.seismictest.net",
+          "record": "az-17",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "yocto-genesis-17",
+          "nsgName": "yocto-genesis-17",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        }
       }
     }
   },
