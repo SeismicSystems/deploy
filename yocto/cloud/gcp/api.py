@@ -527,13 +527,7 @@ class GcpApi(CloudApi):
         remove_old: bool = True,
     ) -> None:
         """Update DNS A record with new IP address."""
-        if remove_old:
-            previous_ips = cls.get_existing_dns_ips(config)
-            for prev_ip in previous_ips:
-                if prev_ip:
-                    cls.remove_dns_ip(config, prev_ip)
-
-        cls.add_dns_ip(config, ip_address)
+        AzureApi.update_dns_record(config, ip_address, remove_old)
 
     @classmethod
     def get_disk_name(cls, config: DeployConfigs, image_path: Path) -> str:
