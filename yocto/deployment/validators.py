@@ -5,7 +5,8 @@ from pathlib import Path
 
 from yocto.cloud.azure import CONSENSUS_PORT
 from yocto.cloud.cloud_api import CloudApi
-from yocto.config import DOMAIN_RECORD_PREFIX, GENESIS_VM_PREFIX
+from yocto.cloud.cloud_config import CloudProvider
+from yocto.config import GENESIS_VM_PREFIX, get_domain_record_prefix
 from yocto.utils.metadata import load_metadata
 from yocto.utils.summit_client import SummitClient
 
@@ -14,9 +15,11 @@ def _genesis_vm_name(node: int) -> str:
     return f"{GENESIS_VM_PREFIX}-{node}"
 
 
-def _genesis_client(node: int) -> SummitClient:
+def _genesis_client(node: int, cloud: CloudProvider) -> SummitClient:
+    """Create a genesis client for the given node and cloud provider."""
+    prefix = get_domain_record_prefix(cloud)
     return SummitClient(
-        f"https://{DOMAIN_RECORD_PREFIX}-{node}.seismictest.net/summit"
+        f"https://{prefix}-{node}.seismictest.net/summit"
     )
 
 
@@ -28,6 +31,13 @@ def _parse_args() -> argparse.Namespace:
         default="",
         type=str,
         help="path to code relative to $HOME",
+    )
+    parser.add_argument(
+        "--cloud",
+        type=str,
+        default="azure",
+        choices=["azure", "gcp"],
+        help="Cloud provider (azure or gcp)",
     )
     return parser.parse_args()
 
@@ -87,7 +97,10 @@ def _post_shares(
 
 def main():
     args = _parse_args()
-    node_clients = [(n, _genesis_client(n)) for n in range(1, args.nodes + 1)]
+    cloud = CloudProvider(args.cloud)
+    node_clients = [
+        (n, _genesis_client(n, cloud)) for n in range(1, args.nodes + 1)
+    ]
 
     tmpdir = tempfile.mkdtemp()
     home = Path.home() if not args.code_path else Path.home() / args.code_path

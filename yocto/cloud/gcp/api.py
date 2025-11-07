@@ -695,6 +695,9 @@ class GcpApi(CloudApi):
         firewall.allowed = [allowed]
         firewall.source_ranges = [source if source != "*" else "0.0.0.0/0"]
 
+        # Apply firewall rule to VMs with the matching network tag
+        firewall.target_tags = [config.vm.name]
+
         try:
             operation = firewall_client.insert(
                 project=config.vm.resource_group,
@@ -909,6 +912,10 @@ class GcpApi(CloudApi):
         scheduling.on_host_maintenance = "TERMINATE"
         scheduling.provisioning_model = DEFAULT_PROVISIONING_MODEL
 
+        # Configure network tags for firewall rules
+        tags = compute_v1.Tags()
+        tags.items = [vm_name]
+
         # Create instance
         instance = compute_v1.Instance()
         instance.name = vm_name
@@ -918,6 +925,7 @@ class GcpApi(CloudApi):
         instance.shielded_instance_config = shielded_config
         instance.confidential_instance_config = confidential_config
         instance.scheduling = scheduling
+        instance.tags = tags
 
         operation = instance_client.insert(
             project=resource_group,
@@ -1017,6 +1025,10 @@ class GcpApi(CloudApi):
             metadata_item.value = user_data_content
             metadata.items = [metadata_item]
 
+            # Configure network tags for firewall rules
+            tags = compute_v1.Tags()
+            tags.items = [config.vm.name]
+
             # Create instance
             instance = compute_v1.Instance()
             instance.name = config.vm.name
@@ -1029,6 +1041,7 @@ class GcpApi(CloudApi):
             instance.confidential_instance_config = confidential_config
             instance.scheduling = scheduling
             instance.metadata = metadata
+            instance.tags = tags
 
             operation = instance_client.insert(
                 project=config.vm.resource_group,
