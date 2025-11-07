@@ -13,9 +13,11 @@ class DomainConfig:
     @staticmethod
     def from_args(args: argparse.Namespace) -> "DomainConfig":
         if not args.domain_record:
-            raise ValueError(
-                "If passing in --deploy, you must also provide a --domain-record"
+            msg = (
+                "If passing in --deploy, you must also provide "
+                "a --domain-record"
             )
+            raise ValueError(msg)
         return DomainConfig(
             record=args.domain_record,
             resource_group=args.domain_resource_group,

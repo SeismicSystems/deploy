@@ -42,7 +42,10 @@ def deploy_image(
     configs: DeployConfigs,
     ip_name: str,
 ) -> str:
-    """Deploy image and return public IP. Raises an error if deployment fails."""
+    """Deploy image and return public IP.
+
+    Raises an error if deployment fails.
+    """
     cloud_api = get_cloud_api(configs.vm.cloud)
 
     # Check if image_path exists

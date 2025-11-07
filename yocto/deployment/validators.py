@@ -77,9 +77,11 @@ def _post_shares(
         share_file = f"{tmpdir}/node{share_index}/share.pem"
         with open(share_file) as f:
             share = f.read()
-            print(
-                f"Posting share {share} to node {node} @ {ip} / {node_to_pubkey[node]}"
+            msg = (
+                f"Posting share {share} to node {node} @ {ip} "
+                f"/ {node_to_pubkey[node]}"
             )
+            print(msg)
             client.send_share(share)
 
 

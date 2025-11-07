@@ -66,7 +66,8 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         help="Cloud provider to use (azure or gcp)",
     )
 
-    # Region/Zone/Location with aliases (defaults applied in config based on --cloud)
+    # Region/Zone/Location with aliases
+    # (defaults applied in config based on --cloud)
     region_help = (
         "Cloud region/zone. Defaults based on --cloud:\n"
         f"  Azure: {AZURE_REGION} (valid: {', '.join(sorted(AZURE_REGIONS))})\n"
@@ -102,7 +103,8 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         help=resource_group_help,
     )
 
-    # VM size / machine type with aliases (defaults applied in config based on --cloud)
+    # VM size / machine type with aliases
+    # (defaults applied in config based on --cloud)
     vm_size_help = (
         "VM size (Azure) or machine type (GCP). Defaults based on --cloud:\n"
         f"  Azure: {AZURE_VM_SIZE}\n"
@@ -122,7 +124,10 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         "--domain-resource-group",
         type=str,
         default=AZURE_DOMAIN_RG,
-        help=f"Domain resource group for Azure DNS (default: {AZURE_DOMAIN_RG})",
+        help=(
+            "Domain resource group for Azure DNS "
+            f"(default: {AZURE_DOMAIN_RG})"
+        ),
     )
     parser.add_argument(
         "--domain-name",
@@ -136,7 +141,10 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         "--certbot-email",
         type=str,
         default=AZURE_CERTBOT_EMAIL,
-        help=f"Certbot email for SSL certificates (default: {AZURE_CERTBOT_EMAIL})",
+        help=(
+            "Certbot email for SSL certificates "
+            f"(default: {AZURE_CERTBOT_EMAIL})"
+        ),
     )
 
     # Network configuration

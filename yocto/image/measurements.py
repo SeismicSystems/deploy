@@ -45,7 +45,8 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     go build -o measured-boot &&
     ./measured-boot {image_path} ../output.json &&
     cd ~ &&
-    jq '{jq_format}' {paths.measured_boot.parent}/output.json > {measurements_tmpfile}
+    jq '{jq_format}' {paths.measured_boot.parent}/output.json \\
+    > {measurements_tmpfile}
     """
 
     # Run the command without check=True and handle returncode manually

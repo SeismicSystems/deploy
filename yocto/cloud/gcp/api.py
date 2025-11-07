@@ -98,8 +98,8 @@ class GcpApi(CloudApi):
     def _convert_vhd_to_targz(vhd_path: Path) -> Path:
         """Convert VHD file to tar.gz format with disk.raw inside.
 
-        GCP's direct image import API requires tar.gz format containing disk.raw,
-        not VHD files directly.
+        GCP's direct image import API requires tar.gz format containing
+        disk.raw, not VHD files directly.
         """
         logger.info("Converting VHD to tar.gz format for GCP import...")
 
@@ -158,7 +158,8 @@ class GcpApi(CloudApi):
 
             logger.info(f"Created tar.gz: {targz_path}")
 
-            # Copy to a permanent location (in the same directory as the original)
+            # Copy to a permanent location
+            # (in the same directory as the original)
             final_targz = vhd_path.parent / f"{vhd_path.stem}.tar.gz"
             shutil.copy(targz_path, final_targz)
 
@@ -252,7 +253,8 @@ class GcpApi(CloudApi):
                 )
             logger.info(f"Verified blob exists: gs://{bucket_name}/{blob_name}")
 
-            # Grant the Compute Engine service account access to read from the bucket
+            # Grant the Compute Engine service account access
+            # to read from the bucket
             try:
                 rm_client = resourcemanager_v3.ProjectsClient()
                 project_resource = rm_client.get_project(
@@ -370,8 +372,8 @@ class GcpApi(CloudApi):
                 "Troubleshooting:\n"
                 "1. Ensure the file exists in GCS\n"
                 "2. For VHD files, container_type must be 'VHD'\n"
-                "3. For tar.gz files, it should contain disk.raw at the root\n"
-                "4. Check that the service account has storage.objects.get permission"
+                "3. For tar.gz files, it should contain disk.raw at root\n"
+                "4. Check service account has storage.objects.get permission"
             )
             raise
 
@@ -959,8 +961,8 @@ class GcpApi(CloudApi):
             access_config = compute_v1.AccessConfig()
             access_config.name = "External NAT"
             access_config.type_ = "ONE_TO_ONE_NAT"
-            # If ip_name is provided, we could potentially use a reserved IP here
-            # For now, let GCP auto-assign an ephemeral external IP
+            # If ip_name is provided, could use a reserved IP here
+            # For now, let GCP auto-assign ephemeral external IP
             network_interface.access_configs = [access_config]
 
             # Configure attached disk

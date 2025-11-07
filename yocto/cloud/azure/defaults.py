@@ -41,6 +41,8 @@ def validate_region(region: str) -> None:
     """
     if region not in VALID_REGIONS:
         valid_regions = ", ".join(sorted(VALID_REGIONS))
-        raise ValueError(
-            f"Invalid Azure region: {region}. Valid Azure regions are: {valid_regions}"
+        msg = (
+            f"Invalid Azure region: {region}. "
+            f"Valid Azure regions are: {valid_regions}"
         )
+        raise ValueError(msg)

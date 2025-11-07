@@ -181,9 +181,8 @@ class AzureApi(CloudApi):
     @classmethod
     def add_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
         """Add IP to DNS A record."""
-        logger.info(
-            f"Mapping {config.domain.record}.{config.domain.name} to {ip_address}"
-        )
+        domain = f"{config.domain.record}.{config.domain.name}"
+        logger.info(f"Mapping {domain} to {ip_address}")
         cmd = [
             "az",
             "network",
@@ -224,7 +223,8 @@ class AzureApi(CloudApi):
     def get_disk_name(cls, config: DeployConfigs, image_path: Path) -> str:
         """Get the disk name for a given config and image path.
 
-        For Azure, no sanitization is needed, so we use the raw disk name directly.
+        For Azure, no sanitization is needed, so we use the raw disk
+        name directly.
         """
         return cls.get_raw_disk_name(config.vm.name, image_path.name)
 
@@ -556,7 +556,10 @@ class AzureApi(CloudApi):
         ip_name: str,
         show_logs: bool = False,
     ) -> None:
-        """Create a confidential VM without user-data (for BOB-style deployments)."""
+        """Create a confidential VM without user-data.
+
+        For BOB-style deployments.
+        """
         logger.info("Creating TDX-enabled confidential VM...")
         cmd = [
             "az",
@@ -663,15 +666,19 @@ class AzureApi(CloudApi):
             # Check if we got valid VM info
             if not vm_info:
                 if attempt < max_retries - 1:
-                    logger.warning(
-                        f"VM info not available yet, retrying in {retry_delay}s... "
+                    msg = (
+                        f"VM info not available yet, "
+                        f"retrying in {retry_delay}s... "
                         f"(attempt {attempt + 1}/{max_retries})"
                     )
+                    logger.warning(msg)
                     time.sleep(retry_delay)
                     continue
-                raise RuntimeError(
-                    f"Failed to get VM info for {vm_name} after {max_retries} attempts"
+                msg = (
+                    f"Failed to get VM info for {vm_name} "
+                    f"after {max_retries} attempts"
                 )
+                raise RuntimeError(msg)
 
             # Check if IP address is available
             try:
@@ -680,10 +687,12 @@ class AzureApi(CloudApi):
                 ][0]["ipAddress"]
             except (KeyError, IndexError) as e:
                 if attempt < max_retries - 1:
-                    logger.warning(
-                        f"IP address not available yet, retrying in {retry_delay}s... "
+                    msg = (
+                        f"IP address not available yet, "
+                        f"retrying in {retry_delay}s... "
                         f"(attempt {attempt + 1}/{max_retries})"
                     )
+                    logger.warning(msg)
                     time.sleep(retry_delay)
                     continue
                 raise RuntimeError(

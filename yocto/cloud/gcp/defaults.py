@@ -8,7 +8,8 @@ Note on regions/zones:
 - DEFAULT_REGION is used for regional resources (like IP addresses, buckets)
 
 Note on domain configuration:
-- Domain/DNS management is always done through Azure regardless of cloud provider
+- Domain/DNS management is always done through Azure regardless of
+  cloud provider
 - GCP deployments will use Azure API for domain record mapping
 """
 

@@ -367,9 +367,12 @@ def main():
             artifact=args.artifact,
             home=str(Path.home()),
             resource_group=DEFAULT_RESOURCE_GROUP,
-            domain_resource_group=DEFAULT_DOMAIN_RESOURCE_GROUP,  # Not used for BOB
-            domain_name=DEFAULT_DOMAIN_NAME,  # Not used for BOB
-            certbot_email=DEFAULT_CERTBOT_EMAIL,  # Not used for BOB
+            # Not used for BOB
+            domain_resource_group=DEFAULT_DOMAIN_RESOURCE_GROUP,
+            # Not used for BOB
+            domain_name=DEFAULT_DOMAIN_NAME,
+            # Not used for BOB
+            certbot_email=DEFAULT_CERTBOT_EMAIL,
             nsg_name=args.name,
             show_logs=args.logs,
         )

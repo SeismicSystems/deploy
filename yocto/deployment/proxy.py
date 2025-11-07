@@ -20,7 +20,10 @@ class ProxyClient:
         self.process: subprocess.Popen | None = None
 
     def start(self) -> bool:
-        """Start the proxy client, make an HTTP request, and verify attestation."""
+        """Start the proxy client, make an HTTP request, verify.
+
+        Verifies attestation.
+        """
 
         proxy_cmd = [
             self.executable_path,
@@ -71,7 +74,7 @@ class ProxyClient:
             self.stop()
 
     def _monitor_attestation(self, request_thread: threading.Thread) -> bool:
-        """Monitor proxy output for successful attestation validation message."""
+        """Monitor proxy output for successful attestation validation."""
         start_time = time.time()
         while True:
             # Read output line by line from stdout
@@ -85,7 +88,8 @@ class ProxyClient:
                     logger.info(
                         "Proxy server validated attestation successfully"
                     )
-                    request_thread.join()  # Ensure HTTP request thread has completed
+                    # Ensure HTTP request thread has completed
+                    request_thread.join()
                     return True
 
                 # Timeout after 30 seconds if no validation message is found
@@ -102,7 +106,8 @@ class ProxyClient:
 
     def perform_http_request(self):
         """Simulate an external HTTP request to the proxy server"""
-        # Wait a moment before sending the request to ensure proxy client is running
+        # Wait to ensure proxy client is running
+        # before sending the request
         time.sleep(5)
         try:
             response = requests.get(
@@ -110,9 +115,8 @@ class ProxyClient:
                 headers={"Host": "localhost"},
             )
             response.raise_for_status()
-            logger.info(
-                f"HTTP request succeeded with output:\n{json.dumps(response.json())}"
-            )
+            output = json.dumps(response.json())
+            logger.info(f"HTTP request succeeded with output:\n{output}")
         except requests.RequestException as e:
             logger.error(f"HTTP request failed: {e}")
             raise ConnectionError(

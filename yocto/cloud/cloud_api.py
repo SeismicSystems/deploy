@@ -119,7 +119,8 @@ class CloudApi(ABC):
         """Create a managed disk for upload.
 
         Returns:
-            The disk name that was created (may be sanitized for cloud requirements)
+            The disk name that was created (may be sanitized for
+            cloud requirements)
         """
         raise NotImplementedError
 

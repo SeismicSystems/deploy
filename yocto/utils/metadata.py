@@ -43,9 +43,9 @@ def load_artifact_measurements(
 ) -> tuple[Path, "Measurements"]:
     artifacts = load_metadata(home).get("artifacts", {})
     if artifact not in artifacts:
-        raise ValueError(
-            f"Could not find artifact {artifact} in {BuildPaths(home).deploy_metadata}"
-        )
+        metadata_path = BuildPaths(home).deploy_metadata
+        msg = f"Could not find artifact {artifact} in {metadata_path}"
+        raise ValueError(msg)
     image_path = BuildPaths(home).artifacts / artifact
     artifact = artifacts[artifact]
     if not image_path.exists():
