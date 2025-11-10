@@ -20,7 +20,9 @@ def _genesis_vm_name(node: int, cloud: CloudProvider) -> str:
 def _genesis_client(node: int, cloud: CloudProvider) -> SummitClient:
     """Create a genesis client for the given node and cloud provider."""
     prefix = get_domain_record_prefix(cloud)
-    return SummitClient(f"https://{prefix}-{node}.seismictest.net/summit")
+    return SummitClient(
+        f"https://{prefix}-{node}.seismictest.net/summit"
+    )
 
 
 def _parse_args() -> argparse.Namespace:

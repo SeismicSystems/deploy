@@ -96,7 +96,8 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
         type=str,
         default=DEFAULT_DOMAIN_RESOURCE_GROUP,
         help=(
-            f"Domain resource group (default: {DEFAULT_DOMAIN_RESOURCE_GROUP})"
+            "Domain resource group "
+            f"(default: {DEFAULT_DOMAIN_RESOURCE_GROUP})"
         ),
     )
     parser.add_argument(

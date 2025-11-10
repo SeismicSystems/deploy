@@ -21,7 +21,9 @@ def _extract_timestamp(artifact: str):
     match = re.search(pattern, artifact)
     if not match:
         example = "cvm-image-azure-tdx.rootfs-20241202202935.wic.vhd"
-        msg = f'Invalid artifact name: {artifact}. Should be like "{example}"'
+        msg = (
+            f"Invalid artifact name: {artifact}. " f'Should be like "{example}"'
+        )
         raise ValueError(msg)
     return match.group(1)
 

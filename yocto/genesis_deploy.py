@@ -133,10 +133,7 @@ def parse_genesis_args():
     parser.add_argument(
         "--name",
         type=str,
-        help=(
-            "Manual VM name override "
-            "(default: cloud-specific prefix + node number)"
-        ),
+        help="Manual VM name override (default: cloud-specific prefix + node number)",
     )
     return parser.parse_args()
 

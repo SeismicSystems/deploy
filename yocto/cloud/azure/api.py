@@ -18,7 +18,7 @@ from yocto.cloud.azure.defaults import (
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
-from yocto.config import DeployConfigs
+from yocto.config import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
 

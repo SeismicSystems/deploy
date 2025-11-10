@@ -125,7 +125,8 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         type=str,
         default=AZURE_DOMAIN_RG,
         help=(
-            f"Domain resource group for Azure DNS (default: {AZURE_DOMAIN_RG})"
+            "Domain resource group for Azure DNS "
+            f"(default: {AZURE_DOMAIN_RG})"
         ),
     )
     parser.add_argument(
