@@ -22,14 +22,15 @@ class DeployConfigs:
 
     @staticmethod
     def from_args(args: argparse.Namespace, home: str) -> "DeployConfigs":
+        dev = getattr(args, "dev", False)
         return DeployConfigs(
             vm=VmConfigs.from_args(args),
             domain=DomainConfig.from_args(args),
-            artifact=expect_artifact(args.artifact, home),
+            artifact=expect_artifact(args.artifact, home, dev),
             email=args.email,
             source_ip=get_host_ip(),
             show_logs=args.logs,
-            dev=args.dev,
+            dev=dev,
         )
 
     def to_dict(self) -> dict[str, Any]:

@@ -73,6 +73,7 @@ class DeploymentConfig:
     resource_group: str
     nsg_name: str
     show_logs: bool
+    dev: bool = False
 
     def to_configs(self) -> Configs:
         return Configs(
@@ -96,6 +97,7 @@ class DeploymentConfig:
                 email=self.certbot_email,
                 source_ip=self.source_ip,
                 show_logs=self.show_logs,
+                dev=self.dev,
             ),
             home=self.home,
             show_logs=self.show_logs,
@@ -129,9 +131,10 @@ class DeploymentConfig:
         home = str(
             Path.home() / args.code_path if args.code_path else Path.home()
         )
+        dev = getattr(args, "dev", False)
         return {
             "home": home,
-            "artifact": expect_artifact(args.artifact, home),
+            "artifact": expect_artifact(args.artifact, home, dev),
             "ip_only": args.ip_only,
             "cloud": cloud,  # Use the parsed CloudProvider enum
             "region": region,
@@ -142,6 +145,7 @@ class DeploymentConfig:
             "domain_name": args.domain_name,
             "certbot_email": args.certbot_email,
             "show_logs": args.logs,
+            "dev": dev,
         }
 
     @classmethod

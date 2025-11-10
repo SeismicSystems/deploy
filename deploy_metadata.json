@@ -193,6 +193,49 @@
           }
         }
       }
+    },
+    "seismic-dev-azure-20251110203158.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "fb5ab57cf82a80d3f9d62569282316c744b3a3e2"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "0981f14418d40ddff6711754e05259334e8ee144"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "2022223a75f7e9e6d008638501ad95d1662d5ebc"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251110203158.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "45f1b4ebd8273660a440b0c8093dea6a52253efd7a2a363ef755850a9d864a0b"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "36305a00ad8c8f0bc6c228b1f02ffd2b5893bb46b34918cc5063036bbaef7060"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "47ee5e04d81d8c738054ce72a4f6d650cdcb298b35c47ca219bfab1f6ca6d8f3"
+          }
+        }
+      }
     }
   }
 }

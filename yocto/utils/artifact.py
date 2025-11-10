@@ -44,17 +44,39 @@ def artifact_timestamp(artifact: str) -> int:
     return int(dt.timestamp())
 
 
-def _artifact_from_timestamp(timestamp: str, home: str) -> str | None:
+def _artifact_from_timestamp(
+    timestamp: str, home: str, dev: bool = False
+) -> str | None:
     """Find artifact file by timestamp.
 
-    Searches the artifacts directory for any file matching the timestamp.
+    Searches the artifacts directory for files matching the timestamp.
     Returns the filename if found, or constructs a legacy name as fallback.
+
+    Args:
+        timestamp: 14-digit timestamp string
+        home: Home directory path
+        dev: If True, prefer dev artifacts (seismic-dev-*), else prefer non-dev
+
+    Returns:
+        Artifact filename
     """
     artifacts_path = BuildPaths(home).artifacts
 
     # Search for any file with this timestamp
     matches = list(glob.glob(f"{artifacts_path}/*{timestamp}*"))
     if matches:
+        # Filter by dev preference
+        if dev:
+            dev_matches = [m for m in matches if "-dev-" in os.path.basename(m)]
+            if dev_matches:
+                matches = dev_matches
+        else:
+            non_dev_matches = [
+                m for m in matches if "-dev-" not in os.path.basename(m)
+            ]
+            if non_dev_matches:
+                matches = non_dev_matches
+
         # Return the basename of the first match (preferring .vhd, .tar.gz, or .efi)
         for ext in [".vhd", ".tar.gz", ".efi"]:
             for match in matches:
@@ -67,7 +89,9 @@ def _artifact_from_timestamp(timestamp: str, home: str) -> str | None:
     return f"{BuildPaths.artifact_prefix()}-{timestamp}.wic.vhd"
 
 
-def parse_artifact(artifact_arg: str | None, home: str | None = None) -> str | None:
+def parse_artifact(
+    artifact_arg: str | None, home: str | None = None, dev: bool = False
+) -> str | None:
     if not artifact_arg:
         return None
 
@@ -75,7 +99,7 @@ def parse_artifact(artifact_arg: str | None, home: str | None = None) -> str | N
         if all(a.isdigit() for a in artifact_arg):
             if home is None:
                 raise ValueError("home parameter required when parsing timestamp")
-            return _artifact_from_timestamp(artifact_arg, home)
+            return _artifact_from_timestamp(artifact_arg, home, dev)
 
     # Validate that it's correctly named
     timestamp = _extract_timestamp(artifact_arg)
@@ -85,8 +109,8 @@ def parse_artifact(artifact_arg: str | None, home: str | None = None) -> str | N
     return artifact_arg
 
 
-def expect_artifact(artifact_arg: str, home: str) -> str:
-    artifact = parse_artifact(artifact_arg, home)
+def expect_artifact(artifact_arg: str, home: str, dev: bool = False) -> str:
+    artifact = parse_artifact(artifact_arg, home, dev)
     if artifact is None:
         raise ValueError("Empty --artifact")
     return artifact
