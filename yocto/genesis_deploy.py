@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class GenesisIPManager:
     """Manages persistent IP addresses for genesis nodes."""
 
-    def __init__(self, cloud_api: CloudApi, ip_rg: str):
+    def __init__(self, cloud_api: type[CloudApi], ip_rg: str):
         self.cloud_api = cloud_api
         self.ip_rg = ip_rg
 
@@ -68,7 +68,10 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     node = args.node
     cfg = args.to_configs()
     deploy_cfg = cfg.deploy
+    if deploy_cfg is None:
+        raise ValueError("Deploy config is None")
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
+
 
     cloud_api = get_cloud_api(deploy_cfg.vm.cloud)
     genesis_ip_manager = GenesisIPManager(cloud_api, args.resource_group)
@@ -98,9 +101,12 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
         logger.info("Not creating machines (used --ip-only flag)")
         return
 
-    image_path, measurements = maybe_build(cfg)
+    build_result = maybe_build(cfg)
+    if build_result is None:
+        raise ValueError("Build result is None")
+    image_path, measurements = build_result
     deployer = Deployer(
-        configs=cfg.deploy,
+        configs=deploy_cfg,
         image_path=image_path,
         measurements=measurements,
         home=cfg.home,
