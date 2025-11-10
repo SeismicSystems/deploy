@@ -13,6 +13,7 @@ import traceback
 from pathlib import Path
 
 from yocto.cloud.azure.api import AzureApi
+from yocto.cloud.cloud_config import CloudProvider
 
 # Import defaults here to avoid circular imports
 from yocto.cloud.azure.defaults import (
@@ -133,6 +134,8 @@ def deploy_bob_vm(
 
     # Convert to Configs object to access vm/deploy attributes
     cfg = config.to_configs()
+    if cfg.deploy is None:
+        raise ValueError("Deploy config is None")
     deploy_cfg = cfg.deploy
 
     logger.info(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
@@ -357,6 +360,7 @@ def main():
     try:
         # Create config (similar to genesis but without domain/DNS)
         config = DeploymentConfig(
+            cloud=CloudProvider.AZURE,
             vm_name=args.name,
             region=args.region or DEFAULT_REGION,
             vm_size=args.vm_size or DEFAULT_VM_SIZE,
