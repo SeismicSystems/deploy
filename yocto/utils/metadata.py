@@ -57,13 +57,24 @@ def load_artifact_measurements(
         msg = f"Could not find artifact {artifact} in {metadata_path}"
         raise ValueError(msg)
     image_path = BuildPaths(home).artifacts / artifact
-    artifact = artifacts[artifact]
+    artifact_data = artifacts[artifact]
     if not image_path.exists():
         raise FileNotFoundError(
             f"Artifact {artifact} is defined in the deploy metadata, "
             "but the corresponding file was not found on the machine"
         )
-    return image_path, artifact["image"]
+    
+    if not isinstance(artifact_data, dict):
+        raise TypeError(f"Artifact data for {artifact} is not a dict")
+    if "image" not in artifact_data:
+        raise ValueError(f"Artifact {artifact} missing 'image' key")
+    
+    measurements = artifact_data["image"]
+    if not isinstance(measurements, dict):
+        raise TypeError(f"Measurements for {artifact} is not a dict")
+    
+    return image_path, measurements
+
 
 
 def get_cloud_resources(home: str, cloud: str) -> dict[str, dict]:

@@ -12,6 +12,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from google.api_core.extended_operation import ExtendedOperation
 from google.cloud import compute_v1, resourcemanager_v3, storage
 
 from yocto.cloud.azure.api import AzureApi
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 # Disk Operations
 def wait_for_extended_operation(
-    operation: compute_v1.Operation,
+    operation: ExtendedOperation,
     operation_name: str,
     timeout: int = 600,
 ) -> None:
@@ -46,19 +47,14 @@ def wait_for_extended_operation(
         operation_name: Human-readable name for logging
         timeout: Maximum time to wait in seconds
     """
-    start_time = time.time()
-
-    while not operation.done():
-        if time.time() - start_time > timeout:
+    try:
+        operation.result(timeout=timeout)
+    except Exception as e:
+        if "timeout" in str(e).lower():
             raise TimeoutError(
                 f"{operation_name} timed out after {timeout} seconds"
             )
-
-        time.sleep(5)
-        logger.info(f"Waiting for {operation_name}...")
-
-    if operation.error:
-        raise RuntimeError(f"{operation_name} failed: {operation.error}")
+        raise RuntimeError(f"{operation_name} failed: {e}")
 
 
 class GcpApi(CloudApi):

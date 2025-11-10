@@ -42,7 +42,7 @@ class Mode:
             delete_artifact=None,
         )
 
-    def to_dict(self) -> dict[str, str | bool]:
+    def to_dict(self) -> dict[str, bool | dict[str, str]]:
         delete_kwargs = {}
         if self.delete_vm:
             delete_kwargs["vm"] = self.delete_vm

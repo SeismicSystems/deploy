@@ -81,7 +81,7 @@ def _post_shares(
     node_to_pubkey: dict[int, str],
 ):
     genesis_file = f"{tmpdir}/genesis.toml"
-    genesis_toml = SummitClient.load_genesis_toml(genesis_file)
+    genesis_toml = SummitClient.load_genesis_toml(Path(genesis_file))
     validators = genesis_toml["validators"]
 
     for node, client in node_clients:
@@ -140,7 +140,7 @@ def main():
 
     _post_shares(tmpdir, node_clients, node_to_pubkey)
     for _, client in node_clients:
-        client.post_genesis_filepath(f"{tmpdir}/genesis.toml")
+        client.post_genesis_filepath(Path(f"{tmpdir}/genesis.toml"))
 
 
 if __name__ == "__main__":
