@@ -14,12 +14,12 @@ class Mode:
     delete_artifact: str | None
 
     @staticmethod
-    def from_args(args: argparse.Namespace) -> "Mode":
+    def from_args(args: argparse.Namespace, home: str) -> "Mode":
         mode = Mode(
             build=args.build,
             deploy=args.deploy,
             delete_vm=args.delete_vm,
-            delete_artifact=parse_artifact(args.delete_artifact),
+            delete_artifact=parse_artifact(args.delete_artifact, home),
         )
         if not (
             mode.build or mode.deploy or mode.delete_vm or mode.delete_artifact

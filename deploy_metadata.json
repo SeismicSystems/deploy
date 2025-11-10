@@ -107,6 +107,92 @@
           }
         }
       }
+    },
+    "seismic-dev-azure-20251110195225.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "fb5ab57cf82a80d3f9d62569282316c744b3a3e2"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "0981f14418d40ddff6711754e05259334e8ee144"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "2022223a75f7e9e6d008638501ad95d1662d5ebc"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251110195225.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "06025aca5fb7548ce10cefb7826212b004606a95a97e17d4a13c5a2fe938f9fb"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "e4afddd0a65b342013084b6d7cdd2332dc8fd053f1d2499ef5472742cdaba2f4"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "204e49be9b5a6be54d4afab25b9a46087b41b43fee9127968d15b7d1b66883b3"
+          }
+        }
+      }
+    },
+    "seismic-azure-20251110195509.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "fb5ab57cf82a80d3f9d62569282316c744b3a3e2"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "0981f14418d40ddff6711754e05259334e8ee144"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "2022223a75f7e9e6d008638501ad95d1662d5ebc"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-azure-20251110195509.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "c8354db904173b29d24108f75b78d593c3e29e2d514a01a272c45cd2830655da"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "2d811af130b35a3fa7df47903a0f5afae52403518816f9f6ac531ccb806f1087"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "fe4c67d81dbd8771be6aa294d05294142ae7f6e88bd67b872e420c9c56f9615e"
+          }
+        }
+      }
     }
   }
 }

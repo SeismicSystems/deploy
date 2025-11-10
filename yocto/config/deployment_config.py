@@ -126,11 +126,12 @@ class DeploymentConfig:
             source_ip = get_host_ip()
             logger.info(f"Fetched public IP: {source_ip}")
 
+        home = str(
+            Path.home() / args.code_path if args.code_path else Path.home()
+        )
         return {
-            "home": str(
-                Path.home() / args.code_path if args.code_path else Path.home()
-            ),
-            "artifact": expect_artifact(args.artifact),
+            "home": home,
+            "artifact": expect_artifact(args.artifact, home),
             "ip_only": args.ip_only,
             "cloud": cloud,  # Use the parsed CloudProvider enum
             "region": region,

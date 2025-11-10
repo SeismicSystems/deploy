@@ -21,11 +21,11 @@ class DeployConfigs:
     dev: bool = False
 
     @staticmethod
-    def from_args(args: argparse.Namespace) -> "DeployConfigs":
+    def from_args(args: argparse.Namespace, home: str) -> "DeployConfigs":
         return DeployConfigs(
             vm=VmConfigs.from_args(args),
             domain=DomainConfig.from_args(args),
-            artifact=expect_artifact(args.artifact),
+            artifact=expect_artifact(args.artifact, home),
             email=args.email,
             source_ip=get_host_ip(),
             show_logs=args.logs,
