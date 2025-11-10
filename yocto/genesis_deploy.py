@@ -120,15 +120,16 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"IP Address: {ip_address}")
     print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
     print("\nNext steps:")
-    print(f"1. Register SSH key:")
+    print(f"1. Register SSH key (port 8080):")
     print(f"   curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://{ip_address}:8080")
-    print(f"\n2. Initialize disk:")
-    print(f"   ssh searcher@{ip_address} initialize")
+    print(f"\n2. Wait ~30 seconds for services to start, then initialize disk:")
+    print(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} initialize")
     print("   (You will be prompted to enter a passphrase)")
+    print(f"\n3. SSH access uses dropbear (from bob-common) on port 22")
+    print("   NOTE: Seismic uses bob-common's SSH setup:")
+    print("   - Production: key-only auth, no root, no password")
     if args.dev:
-        print(f"\n3. SSH as root (dev builds only):")
-        print(f"   ssh root@{ip_address}")
-        print("   Password: dqSPjo4p")
+        print("   - Dev builds: devtools profile removes security restrictions")
     print("\n" + "=" * 80 + "\n")
 
 
