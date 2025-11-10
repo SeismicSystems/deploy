@@ -338,6 +338,32 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=True)
 
     @classmethod
+    def delete_disk_by_name(
+        cls, resource_group: str, disk_name: str, zone: str
+    ):
+        """Delete a disk by its exact name.
+
+        Args:
+            resource_group: Azure resource group
+            disk_name: Exact disk name to delete
+            zone: Zone/region (unused for Azure, for API consistency)
+        """
+        logger.info(
+            f"Deleting disk {disk_name} from resource group {resource_group}"
+        )
+        cmd = [
+            "az",
+            "disk",
+            "delete",
+            "-g",
+            resource_group,
+            "-n",
+            disk_name,
+            "--yes",
+        ]
+        cls.run_command(cmd, show_logs=True)
+
+    @classmethod
     def _copy_disk(
         cls,
         image_path: Path,
@@ -778,6 +804,13 @@ class AzureApi(CloudApi):
 
         region = meta["vm"]["region"]
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
+
+        # Delete persistent data disk if it exists
+        if "data_disk" in meta:
+            data_disk_name = meta["data_disk"]
+            logger.info(f"Deleting persistent data disk: {data_disk_name}")
+            cls.delete_disk_by_name(vm_resource_group, data_disk_name, region)
+
         remove_vm_from_metadata(vm_name, home, cls.get_cloud_provider().value)
         return True
 

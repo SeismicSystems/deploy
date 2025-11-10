@@ -657,6 +657,34 @@ class GcpApi(CloudApi):
         logger.info(f"Disk {disk_name} deleted successfully")
 
     @classmethod
+    def delete_disk_by_name(
+        cls,
+        resource_group: str,
+        disk_name: str,
+        zone: str,
+    ):
+        """Delete a disk by its exact name.
+
+        Args:
+            resource_group: GCP project ID
+            disk_name: Exact disk name to delete
+            zone: Zone where the disk is located
+        """
+        logger.info(
+            f"Deleting disk {disk_name} from project {resource_group}"
+        )
+
+        disk_client = compute_v1.DisksClient()
+        operation = disk_client.delete(
+            project=resource_group,
+            zone=zone,
+            disk=disk_name,
+        )
+
+        wait_for_extended_operation(operation, f"disk deletion for {disk_name}")
+        logger.info(f"Disk {disk_name} deleted successfully")
+
+    @classmethod
     def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
         """Upload disk image to GCP.
         Note: This is handled in create_disk for GCP.
@@ -1140,5 +1168,12 @@ class GcpApi(CloudApi):
 
         logger.info("Deleting associated disk...")
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
+
+        # Delete persistent data disk if it exists
+        if "data_disk" in meta:
+            data_disk_name = meta["data_disk"]
+            logger.info(f"Deleting persistent data disk: {data_disk_name}")
+            cls.delete_disk_by_name(vm_resource_group, data_disk_name, region)
+
         remove_vm_from_metadata(vm_name, home, cls.get_cloud_provider().value)
         return True

@@ -167,6 +167,20 @@ class CloudApi(ABC):
 
     @classmethod
     @abstractmethod
+    def delete_disk_by_name(
+        cls, resource_group: str, disk_name: str, zone: str
+    ):
+        """Delete a disk by its exact name.
+
+        Args:
+            resource_group: Resource group/project ID
+            disk_name: Exact disk name to delete
+            zone: Zone/region where the disk is located
+        """
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
     def upload_disk(cls, config: "DeployConfigs", image_path: Path) -> None:
         """Upload disk image to cloud."""
         raise NotImplementedError
