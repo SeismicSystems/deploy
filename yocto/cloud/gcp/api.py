@@ -997,8 +997,7 @@ class GcpApi(CloudApi):
                     logger.info(f"Using reserved IP: {reserved_ip}")
                 else:
                     logger.warning(
-                        f"Reserved IP {ip_name} not found, "
-                        "using ephemeral IP"
+                        f"Reserved IP {ip_name} not found, using ephemeral IP"
                     )
 
             network_interface.access_configs = [access_config]
