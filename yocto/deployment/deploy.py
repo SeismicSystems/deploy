@@ -26,11 +26,9 @@ def delete_vm(vm_name: str, home: str) -> bool:
 
     # Search for VM in all clouds
     meta = None
-    cloud_str = None
-    for cloud_key, cloud_resources in resources.items():
+    for _cloud_key, cloud_resources in resources.items():
         if vm_name in cloud_resources:
             meta = cloud_resources[vm_name]
-            cloud_str = cloud_key
             break
 
     if not meta:
