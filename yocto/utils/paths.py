@@ -36,9 +36,11 @@ class BuildPaths:
         prefix = "seismic-dev" if dev else "seismic"
 
         if cloud == CloudProvider.AZURE:
-            return f"{prefix}-azure-*.vhd"
+            # Dev builds include devtools profile, resulting in comma-separated profiles
+            # e.g., seismic-dev-azure,devtools-timestamp.vhd or seismic-azure-timestamp.vhd
+            return f"{prefix}-azure*-*.vhd"
         elif cloud == CloudProvider.GCP:
-            return f"{prefix}-gcp-*.tar.gz"
+            return f"{prefix}-gcp*-*.tar.gz"
         elif cloud == CloudProvider.OVH:
             # OVH uses baremetal profile (no PROFILE in build)
             return f"{prefix}-baremetal-*.efi"

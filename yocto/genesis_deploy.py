@@ -112,6 +112,25 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
 
     logger.info("Genesis deployment completed.")
 
+    # Print setup instructions
+    print("\n" + "=" * 80)
+    print("DEPLOYMENT COMPLETE")
+    print("=" * 80)
+    print(f"\nNode: {node}")
+    print(f"IP Address: {ip_address}")
+    print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
+    print("\nNext steps:")
+    print(f"1. Register SSH key:")
+    print(f"   curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://{ip_address}:8080")
+    print(f"\n2. Initialize disk:")
+    print(f"   ssh searcher@{ip_address} initialize")
+    print("   (You will be prompted to enter a passphrase)")
+    if args.dev:
+        print(f"\n3. SSH as root (dev builds only):")
+        print(f"   ssh root@{ip_address}")
+        print("   Password: dqSPjo4p")
+    print("\n" + "=" * 80 + "\n")
+
 
 def parse_genesis_args():
     """Parse genesis-specific command line arguments."""
