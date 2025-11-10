@@ -7,6 +7,10 @@ Import directly from submodules when needed:
   - etc.
 """
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from yocto.utils import artifact, logging_setup, metadata, parser, paths, summit_client
+
 # Only export module names, not individual functions
 __all__ = [
     "artifact",

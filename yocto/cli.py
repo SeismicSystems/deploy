@@ -25,7 +25,7 @@ def main() -> int:
 
     should_deploy = maybe_build(configs)
     if not should_deploy:
-        return
+        return 0
 
     assert configs.deploy  # should never happen
 

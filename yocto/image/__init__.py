@@ -7,6 +7,10 @@ Import directly from submodules when needed:
   - from yocto.image.measurements import ...
 """
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from yocto.image import build, git, measurements
+
 # Only export module names, not individual functions
 __all__ = [
     "build",
