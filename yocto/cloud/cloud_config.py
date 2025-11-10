@@ -38,6 +38,7 @@ class CloudProvider(str, Enum):
 
     AZURE = "azure"
     GCP = "gcp"
+    OVH = "ovh"
 
 
 # Re-export for convenience

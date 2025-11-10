@@ -184,16 +184,26 @@ class Deployer:
         if not self.proxy.start():
             raise RuntimeError("Failed to start proxy server")
 
-    def find_latest_image(self) -> Path:
-        """Find the most recently built image"""
-        pattern = str(
-            BuildPaths(self.home).artifacts
-            / "cvm-image-azure-tdx.rootfs-*.wic.vhd"
-        )
+    def find_latest_image(self, cloud: str, dev: bool = False) -> Path:
+        """Find the most recently built image for the given cloud.
+
+        Args:
+            cloud: Cloud provider ("azure", "gcp", etc.)
+            dev: Whether to search for dev builds
+
+        Returns:
+            Path to the most recent image
+        """
+        from yocto.cloud.cloud_config import CloudProvider
+
+        cloud_provider = CloudProvider(cloud)
+        artifact_pattern = BuildPaths.artifact_pattern(cloud_provider, dev)
+        pattern = str(BuildPaths(self.home).artifacts / artifact_pattern)
+
         image_files = glob.glob(pattern)
         if not image_files:
             raise FileNotFoundError(
-                "No existing images found in artifacts directory"
+                f"No images found matching pattern: {pattern}"
             )
 
         latest_image = max(image_files, key=lambda x: Path(x).stat().st_mtime)

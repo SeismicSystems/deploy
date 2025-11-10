@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+if __name__ != "__main__":
+    from yocto.cloud.cloud_config import CloudProvider
+
 
 @dataclass
 class BuildPaths:
@@ -12,11 +15,40 @@ class BuildPaths:
         return self.home / "yocto-manifests"
 
     @property
+    def flashbots_images(self) -> Path:
+        return self.home / "flashbots-images"
+
+    @property
     def artifacts(self) -> Path:
-        return self.yocto_manifests / "reproducible-build/artifacts"
+        return self.flashbots_images / "build"
+
+    @staticmethod
+    def artifact_pattern(cloud: "CloudProvider", dev: bool = False) -> str:
+        """Get artifact pattern for the given cloud and dev flag.
+
+        Args:
+            cloud: CloudProvider enum (AZURE, GCP, or OVH)
+            dev: Whether this is a dev build
+
+        Returns:
+            Glob pattern like "seismic-dev-azure-*.vhd" or "seismic-gcp-*.tar.gz"
+        """
+        prefix = "seismic-dev" if dev else "seismic"
+
+        if cloud == CloudProvider.AZURE:
+            return f"{prefix}-azure-*.vhd"
+        elif cloud == CloudProvider.GCP:
+            return f"{prefix}-gcp-*.tar.gz"
+        elif cloud == CloudProvider.OVH:
+            # OVH uses baremetal profile (no PROFILE in build)
+            return f"{prefix}-baremetal-*.efi"
+        else:
+            # Bare metal or unknown
+            return f"{prefix}-baremetal-*.efi"
 
     @staticmethod
     def artifact_prefix() -> str:
+        """Legacy method for backward compatibility."""
         return "cvm-image-azure-tdx.rootfs"
 
     @property

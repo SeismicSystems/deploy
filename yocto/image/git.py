@@ -95,75 +95,188 @@ def _extract(cmd: str, field: str) -> str:
         raise Exception(f"Failed to get {field}: {stderr}")
 
 
-def _extract_srcrev(bb_path: Path) -> str:
-    pattern = "^[[:space:]]*SRCREV[[:space:]]*="
-    cmd = f"grep '{pattern}' {bb_path} | awk -F'\"' '{{print $2}}'"
-    return _extract(cmd, "SRCREV")
+def _extract_commit_from_mkosi(build_file: Path, package_name: str) -> str:
+    """Extract commit hash from mkosi.build file for a given package.
+
+    Args:
+        build_file: Path to mkosi.build file
+        package_name: Package name (e.g., "summit", "seismic-reth", "seismic-enclave-server")
+
+    Returns:
+        The commit hash as a string
+
+    The format in mkosi.build is:
+        make_git_package \
+            "summit" \
+            "2022223a75f7e9e6d008638501ad95d1662d5ebc" \
+    """
+    # Find the line with the package name, get the next line (commit), extract the quoted string
+    cmd = f"""grep -A 1 '"{package_name}"' {build_file} | tail -1 | grep -o '"[^"]*"' | tr -d '"'"""
+    result = _extract(cmd, f"{package_name} commit")
+    if not result or len(result) != 40:
+        raise ValueError(
+            f"Failed to extract valid commit hash for {package_name}. "
+            f"Got: '{result}'"
+        )
+    return result
 
 
 def _extract_branch(bb_path: Path) -> str:
-    cmd = f"grep 'branch=' {bb_path} | sed 's/.*branch=\\([^;\"]*\\).*/\\1/'"
-    return _extract(cmd, "branch")
+    """Legacy function - branches are not stored in mkosi.build."""
+    # For mkosi builds, we don't track branches separately
+    # The commit hash is what matters
+    return "main"
 
 
+def update_git_mkosi_batch(
+    updates: dict[str, GitConfig],
+    home: str,
+    commit_message: str | None = None,
+) -> dict[str, GitConfig]:
+    """
+    Update git commits for multiple packages in seismic/mkosi.build in a single commit.
+
+    Args:
+        updates: Dict mapping package name to GitConfig
+                 (e.g., {"summit": GitConfig(...), "seismic-reth": GitConfig(...)})
+        home: Home directory path
+        commit_message: Optional custom commit message
+
+    Returns:
+        Dict mapping package names to their final GitConfig
+    """
+
+    paths = BuildPaths(home)
+    build_file = paths.flashbots_images / "seismic" / "mkosi.build"
+
+    if not paths.flashbots_images.exists():
+        raise FileNotFoundError(
+            f"flashbots-images path not found: {paths.flashbots_images}"
+        )
+
+    if not build_file.exists():
+        raise FileNotFoundError(f"{build_file} not found")
+
+    # Process each package
+    results = {}
+    packages_to_update = []
+
+    for package_name, git_config in updates.items():
+        if git_config.commit is None:
+            # No commit specified, use current
+            current_commit = _extract_commit_from_mkosi(build_file, package_name)
+            current_git = GitConfig(
+                commit=current_commit,
+                branch=git_config.branch or "main",
+            )
+            logger.info(
+                f"No git commit provided for {package_name}. "
+                f"Using current git state {current_git.branch}#{current_git.commit}"
+            )
+            results[package_name] = current_git
+        else:
+            # Mark for update
+            packages_to_update.append((package_name, git_config))
+            results[package_name] = git_config
+
+    # If nothing to update, return early
+    if not packages_to_update:
+        logger.info("No packages to update")
+        return results
+
+    logger.info(f"Updating {len(packages_to_update)} packages in {build_file.name}...")
+
+    # Update all packages in one pass
+    for package_name, git_config in packages_to_update:
+        logger.info(f"  - {package_name} → {git_config.commit[:8]}")
+        update_cmd = f"""
+            awk -v pkg="{package_name}" -v commit="{git_config.commit}" '
+            BEGIN {{ in_pkg=0; line_count=0 }}
+            /make_git_package/ {{
+                if ($0 ~ "\\"" pkg "\\"") {{
+                    in_pkg=1
+                    line_count=0
+                }}
+            }}
+            {{
+                if (in_pkg && line_count == 1) {{
+                    sub(/"[^"]*"/, "\\"" commit "\\"")
+                    in_pkg=0
+                }}
+                if (in_pkg) line_count++
+                print
+            }}
+            ' {build_file} > {build_file}.tmp && mv {build_file}.tmp {build_file}
+        """
+        run_command(update_cmd, cwd=paths.flashbots_images)
+
+    logger.info("All packages updated in file")
+
+    # Stage the file
+    run_command(f"git add seismic/mkosi.build", cwd=paths.flashbots_images)
+
+    # Check if there are changes to commit
+    status_result = run_command(
+        "git status --porcelain", cwd=paths.flashbots_images
+    )
+    if status_result.stdout.strip():
+        logger.info("Changes detected, committing...")
+        if not commit_message:
+            package_names = ", ".join([name for name, _ in packages_to_update])
+            commit_message = f"Update commit hashes for {package_names}"
+        run_command(f'git commit -m "{commit_message}"', cwd=paths.flashbots_images)
+        logger.info("Committed changes")
+
+        run_command("git push", cwd=paths.flashbots_images)
+        logger.info("Successfully pushed changes")
+    else:
+        logger.info("No changes to commit")
+
+    logger.info("Batch update completed successfully")
+    return results
+
+
+def update_git_mkosi(
+    package_name: str,
+    git_config: GitConfig,
+    home: str,
+    commit_message: str | None = None,
+) -> GitConfig:
+    """
+    Update the git commit for a single package in seismic/mkosi.build.
+
+    For batch updates of multiple packages, use update_git_mkosi_batch() instead.
+    """
+    results = update_git_mkosi_batch(
+        {package_name: git_config},
+        home,
+        commit_message,
+    )
+    return results[package_name]
+
+
+# Keep old function name for backwards compatibility, but delegate to new one
 def update_git_bb(
     bb_pathname: str,
     git_config: GitConfig,
     home: str,
     commit_message: str | None = None,
 ) -> GitConfig:
+    """Legacy wrapper for update_git_mkosi.
+
+    Maps old bb_pathname to package names:
+    - recipes-nodes/enclave/enclave.bb -> seismic-enclave-server
+    - recipes-nodes/reth/reth.bb -> seismic-reth
+    - recipes-nodes/summit/summit.bb -> summit
     """
-    Update the git commit and branch for a given Yocto bb file
-    """
+    package_map = {
+        "recipes-nodes/enclave/enclave.bb": "seismic-enclave-server",
+        "recipes-nodes/reth/reth.bb": "seismic-reth",
+        "recipes-nodes/summit/summit.bb": "summit",
+    }
 
-    paths = BuildPaths(home)
-    bb_path = paths.meta_seismic / bb_pathname
+    package_name = package_map.get(bb_pathname)
+    if not package_name:
+        raise ValueError(f"Unknown bb_pathname: {bb_pathname}")
 
-    if not commit_message:
-        commit_message = f"Update {bb_path.name} commit hash and branch"
-
-    if not paths.meta_seismic.exists():
-        raise FileNotFoundError(
-            f"Meta seismic path not found: {paths.meta_seismic}"
-        )
-
-    if not bb_path.exists():
-        raise FileNotFoundError(f"{bb_path} not found")
-
-    if git_config.commit is None:
-        current_git = GitConfig(
-            commit=_extract_srcrev(bb_path),
-            branch=_extract_branch(bb_path),
-        )
-        logger.info(
-            f"No git commit provided for {bb_pathname}. "
-            f"Using current git state {current_git.branch}#{current_git.commit}"
-        )
-        return current_git
-
-    logger.info(f"Updating {bb_pathname}...")
-    update_cmd = f"""
-        sed -i 's|\\(branch=\\)[^;"]*|\\1{git_config.branch}|' {bb_path} &&
-        sed -i 's|^\\s*SRCREV\\s*=.*|SRCREV = "{git_config.commit}"|' {bb_path}
-    """
-    run_command(update_cmd, cwd=paths.meta_seismic)
-    logger.info(f"{bb_path.name} updated successfully")
-
-    run_command(f"git add {bb_pathname}", cwd=paths.meta_seismic)
-
-    # Check if there are changes to commit
-    status_result = run_command(
-        "git status --porcelain", cwd=paths.meta_seismic
-    )
-    if status_result.stdout.strip():
-        logger.info("Changes detected, committing...")
-        run_command(f'git commit -m "{commit_message}"', cwd=paths.meta_seismic)
-        logger.info("Committed changes")
-
-        run_command("git push", cwd=paths.meta_seismic)
-        logger.info("Successfully pushed changes")
-    else:
-        logger.info("No changes to commit")
-
-    logger.info(f"{bb_pathname} update completed successfully")
-    return git_config
+    return update_git_mkosi(package_name, git_config, home, commit_message)

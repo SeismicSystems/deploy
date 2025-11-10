@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from yocto.config import BuildConfigs, Configs
-from yocto.image.git import GitConfigs, update_git_bb
+from yocto.image.git import GitConfigs, update_git_mkosi_batch
 from yocto.image.measurements import Measurements, generate_measurements
 from yocto.utils.artifact import artifact_timestamp
 from yocto.utils.metadata import (
@@ -22,18 +22,43 @@ _ONE_HOUR_IN_SECONDS = 3600
 _MAX_ARTIFACT_AGE = 5
 
 
-def build_image(home: str, capture_output: bool = True) -> Path:
-    """Build Yocto image and return image path and timestamp."""
+def build_image(
+    home: str,
+    image_name: str = "seismic",
+    profile: str | None = None,
+    dev: bool = False,
+    capture_output: bool = True,
+) -> Path:
+    """Build mkosi image and return image path.
 
-    yocto_manifests_path = BuildPaths(home).yocto_manifests
-    if not yocto_manifests_path.exists():
+    Args:
+        home: Home directory path
+        image_name: Image name (default: "seismic")
+        profile: Build profile - "azure", "gcp", or None for baremetal/no profile
+        dev: Whether to build dev version
+        capture_output: Whether to capture build output
+
+    Returns:
+        Path to the built image
+    """
+    flashbots_images_path = BuildPaths(home).flashbots_images
+    if not flashbots_images_path.exists():
         raise FileNotFoundError(
-            f"yocto-manifests path not found: {yocto_manifests_path}"
+            f"flashbots-images path not found: {flashbots_images_path}"
         )
+
+    # Construct the make command
+    make_target = "build-dev" if dev else "build"
+
+    # Build env vars: IMAGE=seismic [PROFILE=azure]
+    # Note: OVH doesn't use PROFILE (builds like baremetal)
+    env_vars = f"IMAGE={image_name}"
+    if profile and profile != "ovh":
+        env_vars += f" PROFILE={profile}"
 
     # Run the build command
     build_cmd = " && ".join(
-        [f"cd {yocto_manifests_path}", "rm -rf build/", "make azure-image"]
+        [f"cd {flashbots_images_path}", f"{env_vars} make {make_target}"]
     )
     build_result = subprocess.run(
         build_cmd,
@@ -49,10 +74,23 @@ def build_image(home: str, capture_output: bool = True) -> Path:
         )
         raise RuntimeError(f"Image build failed: {err}")
 
-    # Find the latest built image
+    # Find the latest built image based on profile
+    from yocto.cloud.cloud_config import CloudProvider
+
+    if profile == "azure":
+        cloud = CloudProvider.AZURE
+    elif profile == "gcp":
+        cloud = CloudProvider.GCP
+    elif profile == "ovh":
+        cloud = CloudProvider.OVH
+    else:
+        cloud = None  # Bare metal
+
+    artifact_pattern = BuildPaths.artifact_pattern(cloud, dev) if cloud else f"{image_name}-*.efi"
+
     find_cmd = f"""
-    find ~/yocto-manifests/reproducible-build/artifacts \
-    -name '{BuildPaths.artifact_prefix()}-*.wic.vhd' \
+    find {BuildPaths(home).artifacts} \
+    -name '{artifact_pattern}' \
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """
     find_result = subprocess.run(
@@ -66,7 +104,7 @@ def build_image(home: str, capture_output: bool = True) -> Path:
 
     image_path_str = find_result.stdout.strip()
     if not image_path_str:
-        raise FileNotFoundError("No image file found in the expected directory")
+        raise FileNotFoundError(f"No image file found matching: {artifact_pattern}")
 
     ts = artifact_timestamp(image_path_str)
     if (
@@ -109,15 +147,22 @@ class Builder:
         self.home = home
 
     def update_git(self) -> GitConfigs:
-        paths = BuildPaths(self.home)
         git = self.configs.git
-        enclave = update_git_bb(paths.enclave_bb, git.enclave, self.home)
-        sreth = update_git_bb(paths.sreth_bb, git.sreth, self.home)
-        summit = update_git_bb(paths.summit_bb, git.summit, self.home)
+
+        # Batch update all packages in one commit
+        results = update_git_mkosi_batch(
+            {
+                "seismic-enclave-server": git.enclave,
+                "seismic-reth": git.sreth,
+                "summit": git.summit,
+            },
+            self.home,
+        )
+
         return GitConfigs(
-            enclave=enclave,
-            sreth=sreth,
-            summit=summit,
+            enclave=results["seismic-enclave-server"],
+            sreth=results["seismic-reth"],
+            summit=results["summit"],
         )
 
     def build(self) -> BuildOutput:
@@ -125,6 +170,8 @@ class Builder:
         git_configs = self.update_git()
         image_path = build_image(
             self.home,
+            profile=self.configs.cloud,
+            dev=self.configs.dev,
             capture_output=not self.show_logs,
         )
         measurements = generate_measurements(image_path, self.home)

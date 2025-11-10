@@ -18,6 +18,7 @@ class DeployConfigs:
     email: str
     source_ip: str
     show_logs: bool = False
+    dev: bool = False
 
     @staticmethod
     def from_args(args: argparse.Namespace) -> "DeployConfigs":
@@ -28,6 +29,7 @@ class DeployConfigs:
             email=args.email,
             source_ip=get_host_ip(),
             show_logs=args.logs,
+            dev=args.dev,
         )
 
     def to_dict(self) -> dict[str, Any]:
