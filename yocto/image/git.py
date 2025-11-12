@@ -106,18 +106,60 @@ def _extract_commit_from_mkosi(build_file: Path, package_name: str) -> str:
         The commit hash as a string
 
     The format in mkosi.build is:
-        make_git_package \
-            "summit" \
-            "2022223a75f7e9e6d008638501ad95d1662d5ebc" \
+        RETH_COMMIT="e0ebd6a8d2c4d160867f213ad39482d1095195a4"
     """
-    # TODO: remove this
-    return ""
-    # Find the line with the package name, get the next line (commit), extract the quoted string
-    cmd = f"""grep -A 1 '"{package_name}"' {build_file} | tail -1 | grep -o '"[^"]*"' | tr -d '"'"""
+    # Map package names to variable prefixes
+    package_var_map = {
+        "seismic-reth": "RETH",
+        "seismic-enclave-server": "ENCLAVE",
+        "summit": "SUMMIT",
+    }
+
+    var_prefix = package_var_map.get(package_name)
+    if not var_prefix:
+        raise ValueError(f"Unknown package name: {package_name}")
+
+    commit_var = f"{var_prefix}_COMMIT"
+    cmd = f"""grep '^{commit_var}=' {build_file} | cut -d'"' -f2"""
     result = _extract(cmd, f"{package_name} commit")
     if not result or len(result) != 40:
         raise ValueError(
             f"Failed to extract valid commit hash for {package_name}. "
+            f"Got: '{result}'"
+        )
+    return result
+
+
+def _extract_branch_from_mkosi(build_file: Path, package_name: str) -> str:
+    """Extract branch name from mkosi.build file for a given package.
+
+    Args:
+        build_file: Path to mkosi.build file
+        package_name: Package name (e.g., "summit", "seismic-reth", "seismic-enclave-server")
+
+    Returns:
+        The branch name as a string
+
+    The format in mkosi.build is:
+        RETH_BRANCH="seismic"
+    """
+    # Map package names to variable prefixes
+    package_var_map = {
+        "seismic-reth": "RETH",
+        "seismic-enclave-server": "ENCLAVE",
+        "summit": "SUMMIT",
+    }
+
+    var_prefix = package_var_map.get(package_name)
+    if not var_prefix:
+        raise ValueError(f"Unknown package name: {package_name}")
+
+    branch_var = f"{var_prefix}_BRANCH"
+    cmd = f"""grep '^{branch_var}=' {build_file} | cut -d'"' -f2"""
+    result = _extract(cmd, f"{package_name} branch")
+    if not result:
+        raise ValueError(
+            f"Failed to extract branch for {package_name}. "
             f"Got: '{result}'"
         )
     return result
@@ -159,6 +201,13 @@ def update_git_mkosi_batch(
     if not build_file.exists():
         raise FileNotFoundError(f"{build_file} not found")
 
+    # Map package names to variable prefixes
+    package_var_map = {
+        "seismic-reth": "RETH",
+        "seismic-enclave-server": "ENCLAVE",
+        "summit": "SUMMIT",
+    }
+
     # Process each package
     results = {}
     packages_to_update = []
@@ -167,9 +216,10 @@ def update_git_mkosi_batch(
         if git_config.commit is None:
             # No commit specified, use current
             current_commit = _extract_commit_from_mkosi(build_file, package_name)
+            current_branch = _extract_branch_from_mkosi(build_file, package_name)
             current_git = GitConfig(
                 commit=current_commit,
-                branch=git_config.branch or "main",
+                branch=git_config.branch or current_branch,
             )
             logger.info(
                 f"No git commit provided for {package_name}. "
@@ -190,27 +240,25 @@ def update_git_mkosi_batch(
 
     # Update all packages in one pass
     for package_name, git_config in packages_to_update:
-        logger.info(f"  - {package_name} → {git_config.commit[:8]}")
-        update_cmd = f"""
-            awk -v pkg="{package_name}" -v commit="{git_config.commit}" '
-            BEGIN {{ in_pkg=0; line_count=0 }}
-            /make_git_package/ {{
-                if ($0 ~ "\\"" pkg "\\"") {{
-                    in_pkg=1
-                    line_count=0
-                }}
-            }}
-            {{
-                if (in_pkg && line_count == 1) {{
-                    sub(/"[^"]*"/, "\\"" commit "\\"")
-                    in_pkg=0
-                }}
-                if (in_pkg) line_count++
-                print
-            }}
-            ' {build_file} > {build_file}.tmp && mv {build_file}.tmp {build_file}
+        logger.info(f"  - {package_name} → {git_config.branch}#{git_config.commit[:8]}")
+
+        var_prefix = package_var_map.get(package_name)
+        if not var_prefix:
+            raise ValueError(f"Unknown package name: {package_name}")
+
+        # Update branch variable (e.g., RETH_BRANCH="seismic")
+        branch_var = f"{var_prefix}_BRANCH"
+        branch_update_cmd = f"""
+            sed -i 's/^{branch_var}=.*$/{branch_var}="{git_config.branch}"/' {build_file}
         """
-        run_command(update_cmd, cwd=paths.flashbots_images)
+        run_command(branch_update_cmd, cwd=paths.flashbots_images)
+
+        # Update commit variable (e.g., RETH_COMMIT="abc123...")
+        commit_var = f"{var_prefix}_COMMIT"
+        commit_update_cmd = f"""
+            sed -i 's/^{commit_var}=.*$/{commit_var}="{git_config.commit}"/' {build_file}
+        """
+        run_command(commit_update_cmd, cwd=paths.flashbots_images)
 
     logger.info("All packages updated in file")
 
