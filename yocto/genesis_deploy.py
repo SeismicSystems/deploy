@@ -129,7 +129,10 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print("   NOTE: Seismic uses bob-common's SSH setup:")
     print("   - Production: key-only auth, no root, no password")
     if args.dev:
-        print("   - Dev builds: devtools profile removes security restrictions")
+        print("\n   ⚠️  DEV MODE - SSH Root Access Enabled:")
+        print(f"   ssh root@{ip_address}")
+        print("   Password: dqSPjo4p")
+        print("   (Dev builds have debugging tools enabled)")
     print("\n" + "=" * 80 + "\n")
 
 
