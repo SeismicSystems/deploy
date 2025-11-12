@@ -94,6 +94,25 @@
           "size": "Standard_DC4es_v6"
         },
         "data_disk": "az-genesis-85-persistent"
+      },
+      "az-genesis-86": {
+        "artifact": "seismic-dev-azure-20251112175933.vhd",
+        "public_ip": "48.194.59.10",
+        "domain": {
+          "url": "https://az-86.seismictest.net",
+          "record": "az-86",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-86",
+          "nsgName": "az-genesis-86",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-86-persistent"
       }
     }
   },
@@ -1040,6 +1059,49 @@
           },
           "9": {
             "expected": "61eef389059e5aa07ea36ce49076a06e70cd14bf2454b0d1015012bc63e012e3"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251112175933.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": ""
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": ""
+        },
+        "summit": {
+          "branch": "main",
+          "commit": ""
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251112175933.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "5e43edff7392e18d68eeb99f1e58562247f0689f53748e3cf1adcd3e2d2d5caa"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "ce78be26a18011c4378bc51737b054962b7d87c1bd48fa59a3b0f3f61fb37c2c"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "ad1f1956d1d5df70cea76fcdffc5f04aaa63a4113b56ac9390a492e4eb364e22"
           }
         }
       }
