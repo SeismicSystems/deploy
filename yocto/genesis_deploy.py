@@ -136,7 +136,12 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"\n2. Wait ~30 seconds for services to start, then initialize disk:")
     print(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} initialize")
     print("   (You will be prompted to enter a passphrase)")
-    print(f"\n3. SSH access uses dropbear (from bob-common) on port 22")
+    print(f"\n3. Nginx with SSL will automatically set up after initialization")
+    print(f"   Endpoints will be available at:")
+    print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/rpc")
+    print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/ws")
+    print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/summit")
+    print(f"\n4. SSH access uses dropbear (from bob-common) on port 22")
     print("   NOTE: Seismic uses bob-common's SSH setup:")
     print("   - Production: key-only auth, no root, no password")
     if args.dev:
