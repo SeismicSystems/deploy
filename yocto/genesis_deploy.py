@@ -8,6 +8,7 @@ node-specific allocation.
 
 import json
 import logging
+from pathlib import Path
 
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.base_parser import create_base_parser
@@ -112,6 +113,16 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
 
     logger.info("Genesis deployment completed.")
 
+    # Read SSH public key
+    ssh_key_path = Path.home() / ".ssh" / "id_ed25519.pub"
+    try:
+        ssh_key_content = ssh_key_path.read_text().strip()
+        # Extract just the key part (second field)
+        ssh_key = ssh_key_content.split()[1]
+    except (FileNotFoundError, IndexError) as e:
+        logger.warning(f"Could not read SSH key from {ssh_key_path}: {e}")
+        ssh_key = "YOUR_SSH_KEY_HERE"
+
     # Print setup instructions
     print("\n" + "=" * 80)
     print("DEPLOYMENT COMPLETE")
@@ -120,8 +131,8 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"IP Address: {ip_address}")
     print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
     print("\nNext steps:")
-    print(f"1. Register SSH key (port 8080):")
-    print(f"   curl -X POST -d \"$(cut -d' ' -f2 ~/.ssh/id_ed25519.pub)\" http://{ip_address}:8080")
+    print(f"1. Register SSH key and domain config (port 8080):")
+    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{{\"ssh_keys\":[\"{ssh_key}\"],\"domain\":{{\"email\":\"{args.certbot_email}\",\"name\":\"{deploy_cfg.domain.record}.{deploy_cfg.domain.name}\"}}}}'")
     print(f"\n2. Wait ~30 seconds for services to start, then initialize disk:")
     print(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} initialize")
     print("   (You will be prompted to enter a passphrase)")
