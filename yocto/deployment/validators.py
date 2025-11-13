@@ -140,6 +140,9 @@ def main():
         show_logs=True,
     )
 
+    print(tmp_validators)
+    return
+
     _post_shares(tmpdir, node_clients, node_to_pubkey)
     for _, client in node_clients:
         client.post_genesis_filepath(f"{tmpdir}/genesis.toml")
