@@ -132,7 +132,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
     print("\nNext steps:")
     print(f"1. Register SSH key and domain config (port 8080):")
-    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{{\"ssh_keys\":[\"{ssh_key}\"],\"domain\":{{\"email\":\"{args.certbot_email}\",\"name\":\"{deploy_cfg.domain.record}.{deploy_cfg.domain.name}\"}}}}'")
+    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{{\"ssh_keys\":[\"{ssh_key}\"],\"domain\":{{\"email\":\"{args.certbot_email}\",\"name\":\"{deploy_cfg.domain.record}.{deploy_cfg.domain.name}\"}},\"args\":{{\"enclave\":\"--genesis-node\",\"reth\":\"\",\"summit\":\"\"}}}}'")
     print(f"\n2. Wait ~30 seconds for services to start, then initialize disk:")
     print(f"   ssh -i ~/.ssh/id_ed25519 searcher@{ip_address} initialize")
     print("   (You will be prompted to enter a passphrase)")
