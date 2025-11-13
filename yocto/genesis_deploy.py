@@ -93,7 +93,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     )
 
     # NOTE: only use Azure for domain
-    AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=False)
+    AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=True)
 
     if args.ip_only:
         logger.info("Not creating machines (used --ip-only flag)")
