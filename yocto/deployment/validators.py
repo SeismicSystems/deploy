@@ -29,6 +29,12 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--nodes", type=int, default=4)
     parser.add_argument(
+        "--node",
+        nargs="*",
+        type=int,
+        help="Specific node numbers (e.g., --node 23 24 25). Overrides -n/--nodes if provided.",
+    )
+    parser.add_argument(
         "--code-path",
         default="",
         type=str,
@@ -76,7 +82,7 @@ def _get_pubkeys(
             raise e
     return validators, node_to_pubkey
 
-
+"""
 def _post_shares(
     tmpdir: str,
     node_clients: list[tuple[int, SummitClient]],
@@ -102,13 +108,22 @@ def _post_shares(
             )
             print(msg)
             client.send_share(share)
-
+"""
 
 def main():
     args = _parse_args()
     cloud = CloudProvider(args.cloud)
+
+    # Use --node if provided, otherwise use range from --nodes
+    if args.node:
+        node_numbers = args.node
+    elif args.nodes == 0:
+        raise ValueError(f'Must provide --node <n1> <n2> or --nodes <COUNT>')
+    else:
+        node_numbers = list(range(1, args.nodes + 1))
+
     node_clients = [
-        (n, _genesis_client(n, cloud)) for n in range(1, args.nodes + 1)
+        (n, _genesis_client(n, cloud)) for n in node_numbers
     ]
 
     tmpdir = tempfile.mkdtemp()
@@ -140,10 +155,6 @@ def main():
         show_logs=True,
     )
 
-    print(tmp_validators)
-    return
-
-    _post_shares(tmpdir, node_clients, node_to_pubkey)
     for _, client in node_clients:
         client.post_genesis_filepath(f"{tmpdir}/genesis.toml")
 
