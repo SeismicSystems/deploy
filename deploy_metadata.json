@@ -1,100 +1,157 @@
 {
   "resources": {
     "azure": {
-      "az-genesis-39": {
-        "artifact": "seismic-dev-azure-20251117193153.vhd",
-        "public_ip": "48.194.83.34",
+      "az-genesis-93": {
+        "artifact": "seismic-dev-azure-20251118223053.vhd",
+        "public_ip": "20.241.245.197",
         "domain": {
-          "url": "https://az-39.seismictest.net",
-          "record": "az-39",
+          "url": "https://az-93.seismictest.net",
+          "record": "az-93",
           "name": "seismictest.net",
           "resource_group": "yocto-testnet"
         },
         "vm": {
           "resourceGroup": "tdx-testnet",
-          "name": "az-genesis-39",
-          "nsgName": "az-genesis-39",
+          "name": "az-genesis-93",
+          "nsgName": "az-genesis-93",
           "cloud": "azure",
           "region": "eastus",
           "size": "Standard_DC4es_v6"
         },
-        "data_disk": "az-genesis-39-persistent"
+        "data_disk": "az-genesis-93-persistent"
       },
-      "az-genesis-50": {
-        "artifact": "seismic-dev-azure-20251118171517.vhd",
-        "public_ip": "13.82.13.218",
+      "az-genesis-91": {
+        "artifact": "seismic-dev-azure-20251118223053.vhd",
+        "public_ip": "20.246.209.41",
         "domain": {
-          "url": "https://az-50.seismictest.net",
-          "record": "az-50",
+          "url": "https://az-91.seismictest.net",
+          "record": "az-91",
           "name": "seismictest.net",
           "resource_group": "yocto-testnet"
         },
         "vm": {
           "resourceGroup": "tdx-testnet",
-          "name": "az-genesis-50",
-          "nsgName": "az-genesis-50",
+          "name": "az-genesis-91",
+          "nsgName": "az-genesis-91",
           "cloud": "azure",
           "region": "eastus",
           "size": "Standard_DC4es_v6"
         },
-        "data_disk": "az-genesis-50-persistent"
+        "data_disk": "az-genesis-91-persistent"
       },
-      "az-genesis-52": {
-        "artifact": "seismic-dev-azure-20251118171517.vhd",
-        "public_ip": "20.241.245.119",
+      "az-genesis-92": {
+        "artifact": "seismic-dev-azure-20251118223053.vhd",
+        "public_ip": "4.157.102.160",
         "domain": {
-          "url": "https://az-52.seismictest.net",
-          "record": "az-52",
+          "url": "https://az-92.seismictest.net",
+          "record": "az-92",
           "name": "seismictest.net",
           "resource_group": "yocto-testnet"
         },
         "vm": {
           "resourceGroup": "tdx-testnet",
-          "name": "az-genesis-52",
-          "nsgName": "az-genesis-52",
+          "name": "az-genesis-92",
+          "nsgName": "az-genesis-92",
           "cloud": "azure",
           "region": "eastus",
           "size": "Standard_DC4es_v6"
         },
-        "data_disk": "az-genesis-52-persistent"
+        "data_disk": "az-genesis-92-persistent"
       },
-      "az-genesis-51": {
-        "artifact": "seismic-dev-azure-20251118171517.vhd",
-        "public_ip": "20.241.244.251",
+      "az-genesis-90": {
+        "artifact": "seismic-dev-azure-20251118223053.vhd",
+        "public_ip": "4.255.3.241",
         "domain": {
-          "url": "https://az-51.seismictest.net",
-          "record": "az-51",
+          "url": "https://az-90.seismictest.net",
+          "record": "az-90",
           "name": "seismictest.net",
           "resource_group": "yocto-testnet"
         },
         "vm": {
           "resourceGroup": "tdx-testnet",
-          "name": "az-genesis-51",
-          "nsgName": "az-genesis-51",
+          "name": "az-genesis-90",
+          "nsgName": "az-genesis-90",
           "cloud": "azure",
           "region": "eastus",
           "size": "Standard_DC4es_v6"
         },
-        "data_disk": "az-genesis-51-persistent"
+        "data_disk": "az-genesis-90-persistent"
       },
-      "az-genesis-53": {
-        "artifact": "seismic-dev-azure-20251118171517.vhd",
-        "public_ip": "48.194.20.41",
+      "az-genesis-102": {
+        "artifact": "seismic-dev-azure-20251119143345.vhd",
+        "public_ip": "48.194.78.41",
         "domain": {
-          "url": "https://az-53.seismictest.net",
-          "record": "az-53",
+          "url": "https://az-102.seismictest.net",
+          "record": "az-102",
           "name": "seismictest.net",
           "resource_group": "yocto-testnet"
         },
         "vm": {
           "resourceGroup": "tdx-testnet",
-          "name": "az-genesis-53",
-          "nsgName": "az-genesis-53",
+          "name": "az-genesis-102",
+          "nsgName": "az-genesis-102",
           "cloud": "azure",
           "region": "eastus",
           "size": "Standard_DC4es_v6"
         },
-        "data_disk": "az-genesis-53-persistent"
+        "data_disk": "az-genesis-102-persistent"
+      },
+      "az-genesis-100": {
+        "artifact": "seismic-dev-azure-20251119143345.vhd",
+        "public_ip": "20.253.7.127",
+        "domain": {
+          "url": "https://az-100.seismictest.net",
+          "record": "az-100",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-100",
+          "nsgName": "az-genesis-100",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-100-persistent"
+      },
+      "az-genesis-103": {
+        "artifact": "seismic-dev-azure-20251119143345.vhd",
+        "public_ip": "4.157.30.65",
+        "domain": {
+          "url": "https://az-103.seismictest.net",
+          "record": "az-103",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-103",
+          "nsgName": "az-genesis-103",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-103-persistent"
+      },
+      "az-genesis-101": {
+        "artifact": "seismic-dev-azure-20251119143345.vhd",
+        "public_ip": "48.194.75.237",
+        "domain": {
+          "url": "https://az-101.seismictest.net",
+          "record": "az-101",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-101",
+          "nsgName": "az-genesis-101",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-101-persistent"
       }
     }
   },
@@ -955,6 +1012,307 @@
           },
           "9": {
             "expected": "650e10a66778056ea5013198f32dc0ebb346e4279f8df24217180f737d101001"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251118175534.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "ef9a53d84dc25596f66ccf438cfd3374a5b0eabc"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "2343d339ee77844ff390365a6b087149d2d6e968"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "b4835df7bd524012b8a71c033214c9efe81735bc"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251118175534.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "7a7efd622e333e1620cb860c3f8d04b5f0bf9186a3ecd1fa7f27a4d9b5885305"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "455218fe02f2a980824ea467d39477209a76a4b17c516672e855462ef8904631"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "1abb9c99a7b30cbf8b04a73b84256ca2048164a9e98c0c25f17297ace43c1474"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251118184454.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "ef9a53d84dc25596f66ccf438cfd3374a5b0eabc"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "2343d339ee77844ff390365a6b087149d2d6e968"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "b4835df7bd524012b8a71c033214c9efe81735bc"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251118184454.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "bddb7117f4abc1a8d3f693129426bb54e4d36ad9989aa6e36bf13ed8134fc909"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "aaa05206da2cca8f4a59c782b4ae1bf4f5d66e746695f4a1d8a31b517f161e5a"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "17ff655f14e13ce9d47f0e89cd870b127385ca75d38ade98cda78f95aef752a8"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251118191135.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "ef9a53d84dc25596f66ccf438cfd3374a5b0eabc"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "e30c3b1243fc29546c4b91c80516f489982bb518"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "2129a428da3bf51c7586b55b719c995e4db5b740"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251118191135.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "af591c450ada9dda75a271fa984dfdf64bec9b7effa4c087d14f59d615c4b507"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "dba00d42643c5d47d1c6f83ce2f7bb068eaac76da05c53f988affadbe3608b58"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "650e10a66778056ea5013198f32dc0ebb346e4279f8df24217180f737d101001"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251118193131.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "ef9a53d84dc25596f66ccf438cfd3374a5b0eabc"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "e30c3b1243fc29546c4b91c80516f489982bb518"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "2129a428da3bf51c7586b55b719c995e4db5b740"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251118193131.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "af591c450ada9dda75a271fa984dfdf64bec9b7effa4c087d14f59d615c4b507"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "dba00d42643c5d47d1c6f83ce2f7bb068eaac76da05c53f988affadbe3608b58"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "650e10a66778056ea5013198f32dc0ebb346e4279f8df24217180f737d101001"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251118221312.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "ef9a53d84dc25596f66ccf438cfd3374a5b0eabc"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "d70fa119be549d60970681654c53d31b80edb7a1"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "fdd4ebe47ce5487c62703b5898ac772dfc1584d4"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251118221312.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "a460ae04b7c99b2365bfd457d2974d697efc375485d068c79cd7dc4250629b39"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "2c2bb57f788b0845bfda8de9665bc9bf57221a5efee83160109a2288efd7d780"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "75089e4233aea0d2f90e05fded71f110ebc0451957da0c241913c9b11d559ec2"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251118223053.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "ef9a53d84dc25596f66ccf438cfd3374a5b0eabc"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "d70fa119be549d60970681654c53d31b80edb7a1"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "fdd4ebe47ce5487c62703b5898ac772dfc1584d4"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251118223053.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "07126b815b0c91f4cb37992e9323779a0921ac48775b6cc6db9c392abd61e34d"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "607c9cf5611ec7af7680ebaffb10a6a637b6cde4eb423595b562fa22aed5044a"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "81091b424e0cfd39d862bb1749898527327e93b0c770afb5289966de2d64e780"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251119143345.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "f1adbce6e44c28393ea4ac6c5abe8283f9a424b2"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "d70fa119be549d60970681654c53d31b80edb7a1"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "fdd4ebe47ce5487c62703b5898ac772dfc1584d4"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251119143345.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "e904a11add8cce4f2bd3787412ef33d755ae5f0dc41af03dd5fb860f659eeaa2"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "2a55bc49d5464d168916076d7fb8ae4260e4ef17bc8a4a0d68ea39affee3c920"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "ed9b8b475803d2bde5da9f134ab64352d5a04cebd81d0d53ff26bbb93179ede3"
           }
         }
       }

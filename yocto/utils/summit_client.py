@@ -4,11 +4,17 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
 GenesisText = str
 Json = Any
+
+@dataclass
+class PublicKeys:
+    node: str
+    consensus: str
 
 
 class SummitClient:
@@ -19,6 +25,11 @@ class SummitClient:
         response = requests.get(f"{self.url}/{path}")
         response.raise_for_status()
         return response.text
+    
+    def _get_json(self, path: str) -> str:
+        response = requests.get(f"{self.url}/{path}")
+        response.raise_for_status()
+        return response.json()
 
     def _post_text(self, path: str, body: str) -> str:
         response = requests.post(
@@ -32,8 +43,9 @@ class SummitClient:
     def health(self) -> str:
         return self._get("health")
 
-    def get_public_key(self) -> str:
-        return self._get("get_public_key")
+    def get_public_keys(self) -> PublicKeys:
+        keys = self._get_json("get_public_keys")
+        return PublicKeys(node=keys['node'], consensus=keys['consensus'])
 
     def send_share(self, share: str) -> str:
         return self._post_text("send_share", share)
