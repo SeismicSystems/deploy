@@ -465,7 +465,7 @@ class AzureApi(CloudApi):
     @staticmethod
     def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
         tcp_rules = [
-            (f"Allow {port}", f"{100+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
+            (f"Allow {port}", f"{102+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
             for port in OPEN_PORTS
         ]
         return [
