@@ -15,7 +15,8 @@ class Mode:
 
     @staticmethod
     def from_args(args: argparse.Namespace, home: str) -> "Mode":
-        # For delete_artifact, use dev flag if available (e.g., when deleting by timestamp)
+        # For delete_artifact, use dev flag if available
+        # (e.g., when deleting by timestamp)
         dev = getattr(args, "dev", False)
         mode = Mode(
             build=args.build,

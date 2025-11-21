@@ -30,7 +30,10 @@ def parse_args() -> argparse.Namespace:
         "--cloud",
         type=str,
         choices=["azure", "gcp", "ovh"],
-        help="Cloud provider (azure, gcp, ovh). Required for deployment, optional for build.",
+        help=(
+            "Cloud provider (azure, gcp, ovh). "
+            "Required for deployment, optional for build."
+        ),
     )
     parser.add_argument(
         "--resource-group",

@@ -31,13 +31,15 @@ class BuildPaths:
             dev: Whether this is a dev build
 
         Returns:
-            Glob pattern like "azure/seismic-dev-azure-*.vhd" or "gcp/seismic-gcp-*.tar.gz"
+            Glob pattern like "azure/seismic-dev-azure-*.vhd" or
+            "gcp/seismic-gcp-*.tar.gz"
         """
         prefix = "seismic-dev" if dev else "seismic"
 
         if cloud == CloudProvider.AZURE:
             # Dev builds use "seismic-dev" prefix
-            # e.g., azure/seismic-dev-azure-timestamp.vhd or azure/seismic-azure-timestamp.vhd
+            # e.g., azure/seismic-dev-azure-timestamp.vhd or
+            # azure/seismic-azure-timestamp.vhd
             return f"azure/{prefix}-azure-*.vhd"
         elif cloud == CloudProvider.GCP:
             return f"gcp/{prefix}-gcp-*.tar.gz"

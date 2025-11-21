@@ -35,7 +35,8 @@ def build_image(
     Args:
         home: Home directory path
         image_name: Image name (default: "seismic")
-        profile: Build profile - "azure", "gcp", or None for baremetal/no profile
+        profile: Build profile - "azure", "gcp", or None for
+            baremetal/no profile
         dev: Whether to build dev version
         capture_output: Whether to capture build output
 
@@ -85,7 +86,11 @@ def build_image(
     else:
         cloud = None  # Bare metal
 
-    artifact_pattern = BuildPaths.artifact_pattern(cloud, dev) if cloud else f"{image_name}-*.efi"
+    artifact_pattern = (
+        BuildPaths.artifact_pattern(cloud, dev)
+        if cloud
+        else f"{image_name}-*.efi"
+    )
 
     find_cmd = f"""
     find {BuildPaths(home).artifacts} \
@@ -103,7 +108,9 @@ def build_image(
 
     image_path_str = find_result.stdout.strip()
     if not image_path_str:
-        raise FileNotFoundError(f"No image file found matching: {artifact_pattern}")
+        raise FileNotFoundError(
+            f"No image file found matching: {artifact_pattern}"
+        )
 
     ts = artifact_timestamp(image_path_str)
     if (

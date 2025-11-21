@@ -465,8 +465,15 @@ class AzureApi(CloudApi):
     @staticmethod
     def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
         tcp_rules = [
-            (f"Allow {port}", f"{103+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
-            for port in OPEN_PORTS
+            (
+                f"Allow {port}",
+                f"{103+i}",
+                f"{port}",
+                "tcp",
+                "*",
+                f"TCP {port} rule",
+            )
+            for i, port in enumerate(OPEN_PORTS)
         ]
         return [
             # NOTE: allowing SSH from anywhere;

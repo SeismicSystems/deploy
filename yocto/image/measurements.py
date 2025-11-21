@@ -30,7 +30,8 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     efi_path = image_path
     if image_path.suffix in [".vhd", ".tar.gz"]:
         # Look for the corresponding .efi file
-        # Pattern: seismic-dev-azure-TIMESTAMP.vhd -> seismic-dev-azure-TIMESTAMP.efi
+        # Pattern: seismic-dev-azure-TIMESTAMP.vhd ->
+        # seismic-dev-azure-TIMESTAMP.efi
         efi_path = image_path.with_suffix(".efi")
         if not efi_path.exists():
             raise FileNotFoundError(
@@ -51,20 +52,24 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
 
     # Use the same command as make measure, but with our specific EFI file
     # This is what make measure does internally:
-    #   $(WRAPPER) measured-boot "$$EFI_FILE" build/measurements.json --direct-uki
+    #   $(WRAPPER) measured-boot "$$EFI_FILE" build/measurements.json
+    #   --direct-uki
     #
-    # Important: env_wrapper.sh runs in Lima VM where flashbots-images is mounted at ~/mnt
-    # So we need to use relative paths from flashbots-images root
+    # Important: env_wrapper.sh runs in Lima VM where flashbots-images is
+    # mounted at ~/mnt. So we need to use relative paths from
+    # flashbots-images root
     wrapper_script = paths.flashbots_images / "scripts" / "env_wrapper.sh"
 
-    # Get relative path from flashbots-images root (e.g., "build/seismic-dev-azure-*.efi")
+    # Get relative path from flashbots-images root
+    # (e.g., "build/seismic-dev-azure-*.efi")
     efi_relative = efi_path.relative_to(paths.flashbots_images)
     measurements_relative = "build/measurements.json"
 
-    measure_cmd = f"""
-    cd {paths.flashbots_images} &&
-    IMAGE={image_name} {wrapper_script} measured-boot "{efi_relative}" {measurements_relative} --direct-uki
-    """
+    measure_cmd = (
+        f"cd {paths.flashbots_images} && "
+        f"IMAGE={image_name} {wrapper_script} measured-boot "
+        f'"{efi_relative}" {measurements_relative} --direct-uki'
+    )
 
     result = subprocess.run(
         measure_cmd, shell=True, capture_output=True, text=True

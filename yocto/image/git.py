@@ -100,7 +100,8 @@ def _extract_commit_from_mkosi(build_file: Path, package_name: str) -> str:
 
     Args:
         build_file: Path to mkosi.build file
-        package_name: Package name (e.g., "summit", "seismic-reth", "seismic-enclave-server")
+        package_name: Package name (e.g., "summit", "seismic-reth",
+            "seismic-enclave-server")
 
     Returns:
         The commit hash as a string
@@ -135,7 +136,8 @@ def _extract_branch_from_mkosi(build_file: Path, package_name: str) -> str:
 
     Args:
         build_file: Path to mkosi.build file
-        package_name: Package name (e.g., "summit", "seismic-reth", "seismic-enclave-server")
+        package_name: Package name (e.g., "summit", "seismic-reth",
+            "seismic-enclave-server")
 
     Returns:
         The branch name as a string
@@ -178,11 +180,13 @@ def update_git_mkosi_batch(
     commit_message: str | None = None,
 ) -> dict[str, GitConfig]:
     """
-    Update git commits for multiple packages in seismic/mkosi.build in a single commit.
+    Update git commits for multiple packages in seismic/mkosi.build in a
+    single commit.
 
     Args:
         updates: Dict mapping package name to GitConfig
-                 (e.g., {"summit": GitConfig(...), "seismic-reth": GitConfig(...)})
+                 (e.g., {"summit": GitConfig(...),
+                 "seismic-reth": GitConfig(...)})
         home: Home directory path
         commit_message: Optional custom commit message
 
@@ -215,15 +219,20 @@ def update_git_mkosi_batch(
     for package_name, git_config in updates.items():
         if git_config.commit is None:
             # No commit specified, use current
-            current_commit = _extract_commit_from_mkosi(build_file, package_name)
-            current_branch = _extract_branch_from_mkosi(build_file, package_name)
+            current_commit = _extract_commit_from_mkosi(
+                build_file, package_name
+            )
+            current_branch = _extract_branch_from_mkosi(
+                build_file, package_name
+            )
             current_git = GitConfig(
                 commit=current_commit,
                 branch=git_config.branch or current_branch,
             )
             logger.info(
                 f"No git commit provided for {package_name}. "
-                f"Using current git state {current_git.branch}#{current_git.commit}"
+                f"Using current git state "
+                f"{current_git.branch}#{current_git.commit}"
             )
             results[package_name] = current_git
         else:
@@ -236,11 +245,17 @@ def update_git_mkosi_batch(
         logger.info("No packages to update")
         return results
 
-    logger.info(f"Updating {len(packages_to_update)} packages in {build_file.name}...")
+    logger.info(
+        f"Updating {len(packages_to_update)} packages in "
+        f"{build_file.name}..."
+    )
 
     # Update all packages in one pass
     for package_name, git_config in packages_to_update:
-        logger.info(f"  - {package_name} → {git_config.branch}#{git_config.commit[:8]}")
+        logger.info(
+            f"  - {package_name} → "
+            f"{git_config.branch}#{git_config.commit[:8]}"
+        )
 
         var_prefix = package_var_map.get(package_name)
         if not var_prefix:
@@ -248,16 +263,18 @@ def update_git_mkosi_batch(
 
         # Update branch variable (e.g., RETH_BRANCH="seismic")
         branch_var = f"{var_prefix}_BRANCH"
-        branch_update_cmd = f"""
-            sed -i 's/^{branch_var}=.*$/{branch_var}="{git_config.branch}"/' {build_file}
-        """
+        branch_update_cmd = (
+            f"sed -i 's/^{branch_var}=.*$/{branch_var}="
+            f'"{git_config.branch}"\' {build_file}'
+        )
         run_command(branch_update_cmd, cwd=paths.flashbots_images)
 
         # Update commit variable (e.g., RETH_COMMIT="abc123...")
         commit_var = f"{var_prefix}_COMMIT"
-        commit_update_cmd = f"""
-            sed -i 's/^{commit_var}=.*$/{commit_var}="{git_config.commit}"/' {build_file}
-        """
+        commit_update_cmd = (
+            f"sed -i 's/^{commit_var}=.*$/{commit_var}="
+            f'"{git_config.commit}"\' {build_file}'
+        )
         run_command(commit_update_cmd, cwd=paths.flashbots_images)
 
     logger.info("All packages updated in file")
@@ -274,7 +291,9 @@ def update_git_mkosi_batch(
         if not commit_message:
             package_names = ", ".join([name for name, _ in packages_to_update])
             commit_message = f"Update commit hashes for {package_names}"
-        run_command(f'git commit -m "{commit_message}"', cwd=paths.flashbots_images)
+        run_command(
+            f'git commit -m "{commit_message}"', cwd=paths.flashbots_images
+        )
         logger.info("Committed changes")
 
         run_command("git push", cwd=paths.flashbots_images)
@@ -295,7 +314,8 @@ def update_git_mkosi(
     """
     Update the git commit for a single package in seismic/mkosi.build.
 
-    For batch updates of multiple packages, use update_git_mkosi_batch() instead.
+    For batch updates of multiple packages, use update_git_mkosi_batch()
+    instead.
     """
     results = update_git_mkosi_batch(
         {package_name: git_config},

@@ -165,7 +165,10 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
     print("\nNext steps:")
     print("1. Register SSH key and domain config (port 8080):")
-    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{payload_json}'")
+    print(
+        f"   curl -X POST http://{ip_address}:8080 "
+        f"-H 'Content-Type: application/json' -d '{payload_json}'"
+    )
     print("\n2. Nginx with SSL will automatically set up after initialization")
     print("   Endpoints will be available at:")
     print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/rpc")
@@ -202,7 +205,10 @@ def parse_genesis_args():
     parser.add_argument(
         "--name",
         type=str,
-        help="Manual VM name override (default: cloud-specific prefix + node number)",
+        help=(
+            "Manual VM name override "
+            "(default: cloud-specific prefix + node number)"
+        ),
     )
     parser.add_argument(
         "--peers",

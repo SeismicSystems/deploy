@@ -45,7 +45,10 @@ def _parse_args() -> argparse.Namespace:
         "--node",
         nargs="*",
         type=int,
-        help="Specific node numbers (e.g., --node 23 24 25). Overrides -n/--nodes if provided.",
+        help=(
+            "Specific node numbers (e.g., --node 23 24 25). "
+            "Overrides -n/--nodes if provided."
+        ),
     )
     parser.add_argument(
         "--code-path",
@@ -94,7 +97,9 @@ def _get_pubkeys(
                     "node_public_key": pubkeys.node,
                     "consensus_public_key": pubkeys.consensus,
                     "ip_address": f"{ip_address}:{CONSENSUS_PORT}",
-                    "withdrawal_credentials": _ANVIL_ADDRESSES[i % len(_ANVIL_ADDRESSES)],
+                    "withdrawal_credentials": _ANVIL_ADDRESSES[
+                        i % len(_ANVIL_ADDRESSES)
+                    ],
                 }
             )
             node_to_pubkey[node] = pubkeys.node
