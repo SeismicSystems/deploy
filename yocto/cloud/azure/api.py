@@ -465,14 +465,24 @@ class AzureApi(CloudApi):
     @staticmethod
     def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
         tcp_rules = [
-            (f"Allow {port}", f"{102+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
+            (f"Allow {port}", f"{103+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
             for port in OPEN_PORTS
         ]
         return [
-            ("AllowSSH", "100", "22", "tcp", config.source_ip, "SSH rule"),
+            # NOTE: allowing SSH from anywhere;
+            # config.source_ip
+            ("AllowSSH", "100", "22", "tcp", "*", "SSH rule"),
+            (
+                "AllowSSHKeyReg",
+                "101",
+                "8080",
+                "tcp",
+                config.source_ip,
+                "SSH Key Registration"
+            ),
             (
                 f"ANY{CONSENSUS_PORT}",
-                "101",
+                "102",
                 f"{CONSENSUS_PORT}",
                 "all",
                 "*",
