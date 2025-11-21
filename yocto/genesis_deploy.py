@@ -5,7 +5,7 @@ Genesis Azure VM Deployment Tool
 Genesis mode deployment with persistent IP addresses and
 node-specific allocation.
 """
-
+import copy
 import json
 import logging
 from pathlib import Path
@@ -102,6 +102,11 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
 
     # NOTE: only use Azure for domain
     AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=True)
+
+    # Enable metrics at metrics.{domain}
+    metrics_cfg = copy.deepcopy(deploy_cfg)
+    metrics_cfg.domain.record = f"metrics.{deploy_cfg.domain.record}"
+    AzureApi.update_dns_record(metrics_cfg, ip_address, remove_old=True)
 
     if args.ip_only:
         logger.info("Not creating machines (used --ip-only flag)")
