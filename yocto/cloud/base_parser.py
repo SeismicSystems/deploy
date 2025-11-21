@@ -189,4 +189,12 @@ def create_base_parser(description: str) -> argparse.ArgumentParser:
         help="Only deploy genesis IPs",
     )
 
+    # Dev flag
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="Deploy dev image (searches for seismic-dev-* artifacts)",
+        default=False,
+    )
+
     return parser

@@ -26,8 +26,11 @@ class VmConfigs:
     @staticmethod
     def from_args(args: argparse.Namespace) -> "VmConfigs":
         # Get cloud provider (should be set by parser or passed in)
-        if not hasattr(args, "cloud"):
-            raise ValueError("args must have 'cloud' attribute set")
+        if not hasattr(args, "cloud") or args.cloud is None:
+            raise ValueError(
+                "--cloud is required when deploying. "
+                "Use --cloud azure or --cloud gcp"
+            )
 
         cloud = CloudProvider(args.cloud)
 

@@ -11,6 +11,20 @@ from yocto.utils.metadata import load_metadata
 from yocto.utils.summit_client import SummitClient
 
 
+_ANVIL_ADDRESSES = [
+    "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+    "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+    "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+    "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+    "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+    "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+    "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720"
+]
+
+
 def _genesis_vm_name(node: int, cloud: CloudProvider) -> str:
     """Get genesis VM name for the given node and cloud provider."""
     prefix = get_genesis_vm_prefix(cloud)
@@ -29,6 +43,12 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--nodes", type=int, default=4)
     parser.add_argument(
+        "--node",
+        nargs="*",
+        type=int,
+        help="Specific node numbers (e.g., --node 23 24 25). Overrides -n/--nodes if provided.",
+    )
+    parser.add_argument(
         "--code-path",
         default="",
         type=str,
@@ -40,6 +60,12 @@ def _parse_args() -> argparse.Namespace:
         default="azure",
         choices=["azure", "gcp"],
         help="Cloud provider (azure or gcp)",
+    )
+    parser.add_argument(
+        "-g", "--genesis-hash",
+        type=str,
+        default=None,
+        help="Eth genesis hash",
     )
     return parser.parse_args()
 
@@ -55,7 +81,7 @@ def _get_pubkeys(
 
     validators = []
     node_to_pubkey = {}
-    for node, client in node_clients:
+    for i, (node, client) in enumerate(node_clients):
         vm_name = _genesis_vm_name(node, cloud_provider)
         if vm_name not in cloud_resources:
             raise ValueError(f"VM {vm_name} not found in {cloud} metadata")
@@ -63,52 +89,36 @@ def _get_pubkeys(
         meta = cloud_resources[vm_name]
         ip_address = meta["public_ip"]
         try:
-            pubkey = client.get_public_key()
+            pubkeys = client.get_public_keys()
             validators.append(
                 {
-                    "public_key": pubkey,
+                    "node_public_key": pubkeys.node,
+                    "consensus_public_key": pubkeys.consensus,
                     "ip_address": f"{ip_address}:{CONSENSUS_PORT}",
+                    "withdrawal_credentials": _ANVIL_ADDRESSES[i % len(_ANVIL_ADDRESSES)],
                 }
             )
-            node_to_pubkey[node] = pubkey
+            node_to_pubkey[node] = pubkeys.node
         except Exception as e:
             print(f"Error: {e}")
             raise e
     return validators, node_to_pubkey
 
-
-def _post_shares(
-    tmpdir: str,
-    node_clients: list[tuple[int, SummitClient]],
-    node_to_pubkey: dict[int, str],
-):
-    genesis_file = f"{tmpdir}/genesis.toml"
-    genesis_toml = SummitClient.load_genesis_toml(genesis_file)
-    validators = genesis_toml["validators"]
-
-    for node, client in node_clients:
-        share_index = next(
-            i
-            for i, v in enumerate(validators)
-            if v["public_key"] == node_to_pubkey[node]
-        )
-        ip = validators[share_index]["ip_address"]
-        share_file = f"{tmpdir}/node{share_index}/share.pem"
-        with open(share_file) as f:
-            share = f.read()
-            msg = (
-                f"Posting share {share} to node {node} @ {ip} "
-                f"/ {node_to_pubkey[node]}"
-            )
-            print(msg)
-            client.send_share(share)
-
-
 def main():
     args = _parse_args()
+    genesis_arg = ["-g", args.genesis_hash] if args.genesis_hash else []
     cloud = CloudProvider(args.cloud)
+
+    # Use --node if provided, otherwise use range from --nodes
+    if args.node:
+        node_numbers = args.node
+    elif args.nodes == 0:
+        raise ValueError(f'Must provide --node <n1> <n2> or --nodes <COUNT>')
+    else:
+        node_numbers = list(range(1, args.nodes + 1))
+
     node_clients = [
-        (n, _genesis_client(n, cloud)) for n in range(1, args.nodes + 1)
+        (n, _genesis_client(n, cloud)) for n in node_numbers
     ]
 
     tmpdir = tempfile.mkdtemp()
@@ -136,11 +146,11 @@ def main():
             summit_example_genesis,
             "-v",
             tmp_validators,
+            *genesis_arg,
         ],
         show_logs=True,
     )
 
-    _post_shares(tmpdir, node_clients, node_to_pubkey)
     for _, client in node_clients:
         client.post_genesis_filepath(f"{tmpdir}/genesis.toml")
 

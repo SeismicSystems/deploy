@@ -23,8 +23,14 @@ def parse_args() -> argparse.Namespace:
         help=(
             "If not running with --build, "
             "use this to specify an artifact to deploy, "
-            "e.g. 'cvm-image-azure-tdx.rootfs-20241203182636.wic.vhd'"
+            "e.g. 'seismic-azure-20250110120000.vhd'"
         ),
+    )
+    parser.add_argument(
+        "--cloud",
+        type=str,
+        choices=["azure", "gcp", "ovh"],
+        help="Cloud provider (azure, gcp, ovh). Required for deployment, optional for build.",
     )
     parser.add_argument(
         "--resource-group",
@@ -36,6 +42,12 @@ def parse_args() -> argparse.Namespace:
         "--logs",
         action="store_true",
         help="If flagged, print build and/or deploy logs as they run",
+        default=False,
+    )
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="Build or deploy dev images (e.g., seismic-dev-azure-*.vhd)",
         default=False,
     )
 

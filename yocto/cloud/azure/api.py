@@ -22,6 +22,15 @@ from yocto.config import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
 
+OPEN_PORTS = [
+    22, # ssh 
+    80, # http
+    443, # https
+    7878, # enclave
+    9090, # prometheus
+    8545, # reth http rpc
+    8546, # reth ws rpc
+]
 
 # Disk Operations
 class AzureApi(CloudApi):
@@ -338,6 +347,32 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=True)
 
     @classmethod
+    def delete_disk_by_name(
+        cls, resource_group: str, disk_name: str, zone: str
+    ):
+        """Delete a disk by its exact name.
+
+        Args:
+            resource_group: Azure resource group
+            disk_name: Exact disk name to delete
+            zone: Zone/region (unused for Azure, for API consistency)
+        """
+        logger.info(
+            f"Deleting disk {disk_name} from resource group {resource_group}"
+        )
+        cmd = [
+            "az",
+            "disk",
+            "delete",
+            "-g",
+            resource_group,
+            "-n",
+            disk_name,
+            "--yes",
+        ]
+        cls.run_command(cmd, show_logs=True)
+
+    @classmethod
     def _copy_disk(
         cls,
         image_path: Path,
@@ -426,44 +461,40 @@ class AzureApi(CloudApi):
             source,
         ]
         cls.run_command(cmd, show_logs=config.show_logs)
+    
+    @staticmethod
+    def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
+        tcp_rules = [
+            (f"Allow {port}", f"{103+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
+            for port in OPEN_PORTS
+        ]
+        return [
+            # NOTE: allowing SSH from anywhere;
+            # config.source_ip
+            ("AllowSSH", "100", "22", "tcp", "*", "SSH rule"),
+            (
+                "AllowSSHKeyReg",
+                "101",
+                "8080",
+                "tcp",
+                config.source_ip,
+                "SSH Key Registration"
+            ),
+            (
+                f"ANY{CONSENSUS_PORT}",
+                "102",
+                f"{CONSENSUS_PORT}",
+                "all",
+                "*",
+                f"Any {CONSENSUS_PORT} rule",
+            ),
+            *tcp_rules,
+        ]
 
     @classmethod
     def create_standard_nsg_rules(cls, config: DeployConfigs) -> None:
         """Add all standard security rules."""
-        rules = [
-            ("AllowSSH", "100", "22", "Tcp", config.source_ip, "SSH rule"),
-            (
-                "AllowAnyHTTPInbound",
-                "101",
-                "80",
-                "Tcp",
-                "*",
-                "HTTP rule (TCP 80)",
-            ),
-            (
-                "AllowAnyHTTPSInbound",
-                "102",
-                "443",
-                "Tcp",
-                "*",
-                "HTTPS rule (TCP 443)",
-            ),
-            ("TCP7878", "115", "7878", "Tcp", "*", "TCP 7878 rule"),
-            ("TCP7936", "116", "7936", "Tcp", "*", "TCP 7936 rule"),
-            ("TCP8545", "110", "8545", "Tcp", "*", "TCP 8545 rule"),
-            ("TCP8551", "111", "8551", "Tcp", "*", "TCP 8551 rule"),
-            ("TCP8645", "112", "8645", "Tcp", "*", "TCP 8645 rule"),
-            ("TCP8745", "113", "8745", "Tcp", "*", "TCP 8745 rule"),
-            (
-                f"ANY{CONSENSUS_PORT}",
-                "114",
-                f"{CONSENSUS_PORT}",
-                "*",
-                "*",
-                "Any 30303 rule",
-            ),
-        ]
-
+        rules = AzureApi.get_nsg_rules(config)
         for name, priority, port, protocol, source, description in rules:
             logger.info(f"Creating {description}")
             cls.add_nsg_rule(config, name, priority, port, protocol, source)
@@ -778,6 +809,13 @@ class AzureApi(CloudApi):
 
         region = meta["vm"]["region"]
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
+
+        # Delete persistent data disk if it exists
+        if "data_disk" in meta:
+            data_disk_name = meta["data_disk"]
+            logger.info(f"Deleting persistent data disk: {data_disk_name}")
+            cls.delete_disk_by_name(vm_resource_group, data_disk_name, region)
+
         remove_vm_from_metadata(vm_name, home, cls.get_cloud_provider().value)
         return True
 

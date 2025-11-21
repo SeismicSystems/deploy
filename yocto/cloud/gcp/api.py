@@ -14,7 +14,7 @@ from pathlib import Path
 
 from google.cloud import compute_v1, resourcemanager_v3, storage
 
-from yocto.cloud.azure.api import AzureApi
+from yocto.cloud.azure.api import AzureApi, OPEN_PORTS
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
@@ -657,6 +657,34 @@ class GcpApi(CloudApi):
         logger.info(f"Disk {disk_name} deleted successfully")
 
     @classmethod
+    def delete_disk_by_name(
+        cls,
+        resource_group: str,
+        disk_name: str,
+        zone: str,
+    ):
+        """Delete a disk by its exact name.
+
+        Args:
+            resource_group: GCP project ID
+            disk_name: Exact disk name to delete
+            zone: Zone where the disk is located
+        """
+        logger.info(
+            f"Deleting disk {disk_name} from project {resource_group}"
+        )
+
+        disk_client = compute_v1.DisksClient()
+        operation = disk_client.delete(
+            project=resource_group,
+            zone=zone,
+            disk=disk_name,
+        )
+
+        wait_for_extended_operation(operation, f"disk deletion for {disk_name}")
+        logger.info(f"Disk {disk_name} deleted successfully")
+
+    @classmethod
     def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
         """Upload disk image to GCP.
         Note: This is handled in create_disk for GCP.
@@ -721,40 +749,7 @@ class GcpApi(CloudApi):
     @classmethod
     def create_standard_nsg_rules(cls, config: DeployConfigs) -> None:
         """Add all standard security rules."""
-        rules = [
-            ("AllowSSH", "100", "22", "tcp", config.source_ip, "SSH rule"),
-            (
-                "AllowAnyHTTPInbound",
-                "101",
-                "80",
-                "tcp",
-                "*",
-                "HTTP rule (TCP 80)",
-            ),
-            (
-                "AllowAnyHTTPSInbound",
-                "102",
-                "443",
-                "tcp",
-                "*",
-                "HTTPS rule (TCP 443)",
-            ),
-            ("TCP7878", "115", "7878", "tcp", "*", "TCP 7878 rule"),
-            ("TCP7936", "116", "7936", "tcp", "*", "TCP 7936 rule"),
-            ("TCP8545", "110", "8545", "tcp", "*", "TCP 8545 rule"),
-            ("TCP8551", "111", "8551", "tcp", "*", "TCP 8551 rule"),
-            ("TCP8645", "112", "8645", "tcp", "*", "TCP 8645 rule"),
-            ("TCP8745", "113", "8745", "tcp", "*", "TCP 8745 rule"),
-            (
-                f"ANY{CONSENSUS_PORT}",
-                "114",
-                f"{CONSENSUS_PORT}",
-                "all",
-                "*",
-                "Any 18551 rule",
-            ),
-        ]
-
+        rules = AzureApi.get_nsg_rules(config)
         for name, priority, port, protocol, source, description in rules:
             logger.info(f"Creating {description}")
             cls.add_nsg_rule(config, name, priority, port, protocol, source)
@@ -1140,5 +1135,12 @@ class GcpApi(CloudApi):
 
         logger.info("Deleting associated disk...")
         cls.delete_disk(vm_resource_group, vm_name, artifact, region)
+
+        # Delete persistent data disk if it exists
+        if "data_disk" in meta:
+            data_disk_name = meta["data_disk"]
+            logger.info(f"Deleting persistent data disk: {data_disk_name}")
+            cls.delete_disk_by_name(vm_resource_group, data_disk_name, region)
+
         remove_vm_from_metadata(vm_name, home, cls.get_cloud_provider().value)
         return True

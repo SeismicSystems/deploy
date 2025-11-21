@@ -5,9 +5,10 @@ Genesis Azure VM Deployment Tool
 Genesis mode deployment with persistent IP addresses and
 node-specific allocation.
 """
-
+import copy
 import json
 import logging
+from pathlib import Path
 
 from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.base_parser import create_base_parser
@@ -70,6 +71,14 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     deploy_cfg = cfg.deploy
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
 
+    # Prepare enclave args based on peers
+    if hasattr(args, 'peers') and args.peers:
+        # Format peers as space-separated list of URLs
+        peer_urls = ' '.join([f"http://{ip.strip()}:7878" for ip in args.peers])
+        enclave_args = f"--peers {peer_urls}"
+    else:
+        enclave_args = "--genesis-node"
+
     cloud_api = get_cloud_api(deploy_cfg.vm.cloud)
     genesis_ip_manager = GenesisIPManager(cloud_api, args.resource_group)
 
@@ -92,7 +101,12 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     )
 
     # NOTE: only use Azure for domain
-    AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=False)
+    AzureApi.update_dns_record(deploy_cfg, ip_address, remove_old=True)
+
+    # Enable metrics at metrics.{domain}
+    metrics_cfg = copy.deepcopy(deploy_cfg)
+    metrics_cfg.domain.record = f"metrics.{deploy_cfg.domain.record}"
+    AzureApi.update_dns_record(metrics_cfg, ip_address, remove_old=True)
 
     if args.ip_only:
         logger.info("Not creating machines (used --ip-only flag)")
@@ -111,6 +125,61 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     deploy_output.update_deploy_metadata()
 
     logger.info("Genesis deployment completed.")
+
+    # Read SSH public key
+    ssh_key_path = Path.home() / ".ssh" / "id_ed25519.pub"
+    try:
+        ssh_key_content = ssh_key_path.read_text().strip()
+        # Extract just the key part (second field)
+        ssh_key = ssh_key_content.split()[1]
+    except (FileNotFoundError, IndexError) as e:
+        logger.warning(f"Could not read SSH key from {ssh_key_path}: {e}")
+        ssh_key = "YOUR_SSH_KEY_HERE"
+
+    # Prepare the JSON payload
+    payload = {
+        "ssh_keys": [ssh_key],
+        "domain": {
+            "email": args.certbot_email,
+            "name": f"{deploy_cfg.domain.record}.{deploy_cfg.domain.name}"
+        },
+        "log": {
+            "enclave": "debug",
+            "summit": "debug",
+            "reth": "debug"
+        },
+        "args": {
+            "enclave": enclave_args,
+            "reth": "",
+            "summit": ""
+        }
+    }
+    payload_json = json.dumps(payload)
+
+    # Print setup instructions
+    print("\n" + "=" * 80)
+    print("DEPLOYMENT COMPLETE")
+    print("=" * 80)
+    print(f"\nNode: {node}")
+    print(f"IP Address: {ip_address}")
+    print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
+    print("\nNext steps:")
+    print(f"1. Register SSH key and domain config (port 8080):")
+    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{payload_json}'")
+    print(f"\n2. Nginx with SSL will automatically set up after initialization")
+    print(f"   Endpoints will be available at:")
+    print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/rpc")
+    print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/ws")
+    print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/summit")
+    if args.dev:
+        print(f"\n3. SSH access uses dropbear (from bob-common) on port 22")
+        print("   NOTE: Seismic uses bob-common's SSH setup:")
+        print("   - Production: key-only auth, no root, no password")
+        print("\n   ⚠️  DEV MODE - SSH Root Access Enabled:")
+        print(f"   ssh root@{ip_address}")
+        print("   Password: dqSPjo4p")
+        print("   (Dev builds have debugging tools enabled)")
+    print("\n" + "=" * 80 + "\n")
 
 
 def parse_genesis_args():
@@ -134,6 +203,12 @@ def parse_genesis_args():
         "--name",
         type=str,
         help="Manual VM name override (default: cloud-specific prefix + node number)",
+    )
+    parser.add_argument(
+        "--peers",
+        type=str,
+        nargs='+',
+        help="List of peer IP addresses (will be formatted as http://{ip}:7878)",
     )
     return parser.parse_args()
 

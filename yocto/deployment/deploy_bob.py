@@ -236,7 +236,7 @@ def deploy_bob_vm(
 
 
 def print_next_steps(
-    vm_name: str, ip_address: str, resource_group: str
+    vm_name: str, ip_address: str, resource_group: str, is_dev: bool = False
 ) -> None:
     """Print post-deployment instructions."""
     logger.info("\n" + "=" * 70)
@@ -245,6 +245,13 @@ def print_next_steps(
     logger.info("\nVM Details:")
     logger.info(f"  Name:       {vm_name}")
     logger.info(f"  Public IP:  {ip_address}")
+
+    if is_dev:
+        logger.info("\n⚠️  DEV MODE - SSH Access Enabled:")
+        logger.info(f"   ssh root@{ip_address}")
+        logger.info("   Password: dqSPjo4p")
+        logger.info("\n   Note: This is a development image with debugging tools enabled.")
+
     logger.info("\nNext Steps:")
     logger.info(
         "\n1. Wait for VM to boot (~2 minutes), then register your SSH key:"
@@ -378,7 +385,11 @@ def main():
         )
 
         ip_address = deploy_bob_vm(config, vhd_path, args.data_disk_size)
-        print_next_steps(config.vm_name, ip_address, config.resource_group)
+
+        # Check if this is a dev build by looking for "-dev-" in the artifact name
+        is_dev = "-dev-" in args.artifact
+
+        print_next_steps(config.vm_name, ip_address, config.resource_group, is_dev)
 
     except Exception as e:
         logger.error(f"Deployment failed: {e}")

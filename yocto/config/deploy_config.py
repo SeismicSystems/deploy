@@ -18,16 +18,19 @@ class DeployConfigs:
     email: str
     source_ip: str
     show_logs: bool = False
+    dev: bool = False
 
     @staticmethod
-    def from_args(args: argparse.Namespace) -> "DeployConfigs":
+    def from_args(args: argparse.Namespace, home: str) -> "DeployConfigs":
+        dev = getattr(args, "dev", False)
         return DeployConfigs(
             vm=VmConfigs.from_args(args),
             domain=DomainConfig.from_args(args),
-            artifact=expect_artifact(args.artifact),
+            artifact=expect_artifact(args.artifact, home, dev),
             email=args.email,
             source_ip=get_host_ip(),
             show_logs=args.logs,
+            dev=dev,
         )
 
     def to_dict(self) -> dict[str, Any]:

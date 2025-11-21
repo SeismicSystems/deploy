@@ -43,13 +43,13 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    # Cloud provider selection (required)
+    # Cloud provider selection (optional for builds, required for deploys)
     parser.add_argument(
         "--cloud",
         type=str,
-        choices=["azure", "gcp"],
-        required=True,
-        help="Cloud provider to use (azure or gcp)",
+        choices=["azure", "gcp", "ovh"],
+        required=False,
+        help="Cloud provider to use (azure, gcp, or ovh). Required for deployment, optional for build.",
     )
 
     # Region/Zone (optional, defaults based on cloud)
@@ -128,6 +128,14 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
         "--logs",
         action="store_true",
         help="If flagged, print build and/or deploy logs as they run",
+        default=False,
+    )
+
+    # Dev build flag
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="Deploy dev build (e.g., seismic-dev-azure-*.vhd)",
         default=False,
     )
 

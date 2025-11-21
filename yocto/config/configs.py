@@ -21,24 +21,27 @@ class Configs:
     @staticmethod
     def parse() -> "Configs":
         args = parse_args()
-        mode = Mode.from_args(args)
+        # Calculate home first so it can be passed to Mode.from_args
+        home_path = (
+            Path.home() if not args.code_path else Path.home() / args.code_path
+        )
+        home = str(home_path)
+
+        mode = Mode.from_args(args, home)
         build = BuildConfigs.from_args(args) if args.build else None
-        deploy = DeployConfigs.from_args(args) if args.deploy else None
+        deploy = DeployConfigs.from_args(args, home) if args.deploy else None
         show_logs = args.logs
         if deploy and not build and not deploy.artifact:
             raise ValueError(
                 "If running with --deploy and not --build, "
                 "you must provide an --artifact to deploy"
             )
-        home_path = (
-            Path.home() if not args.code_path else Path.home() / args.code_path
-        )
         return Configs(
             mode=mode,
             build=build,
             deploy=deploy,
             show_logs=show_logs,
-            home=str(home_path),
+            home=home,
         )
 
     def to_dict(self) -> dict[str, Any]:

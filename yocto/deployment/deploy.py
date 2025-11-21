@@ -50,8 +50,8 @@ def deploy_image(
     image_path: Path,
     configs: DeployConfigs,
     ip_name: str,
-) -> str:
-    """Deploy image and return public IP.
+) -> tuple[str, str]:
+    """Deploy image and return (public_ip, data_disk_name).
 
     Raises an error if deployment fails.
     """
@@ -80,12 +80,33 @@ def deploy_image(
     # Actually create the VM
     cloud_api.create_vm(configs, image_path, ip_name, disk_name)
 
+    # Create and attach persistent data disk at LUN 10 (required by tdx-init)
+    data_disk_name = f"{configs.vm.name}-persistent"
+    logger.info(f"Creating persistent data disk: {data_disk_name}")
+    cloud_api.create_data_disk(
+        resource_group=configs.vm.resource_group,
+        disk_name=data_disk_name,
+        location=configs.vm.location,
+        size_gb=1024,  # 1TB default
+        sku="Premium_LRS",
+        show_logs=configs.show_logs,
+    )
+    cloud_api.attach_data_disk(
+        resource_group=configs.vm.resource_group,
+        vm_name=configs.vm.name,
+        disk_name=data_disk_name,
+        zone=configs.vm.location,  # Not used by Azure but required by API
+        lun=10,  # MUST be LUN 10 for tdx-init
+        show_logs=configs.show_logs,
+    )
+
     # Get the VM's IP address
-    return cloud_api.get_vm_ip(
+    public_ip = cloud_api.get_vm_ip(
         vm_name=configs.vm.name,
         resource_group=configs.vm.resource_group,
         location=configs.vm.location,
     )
+    return (public_ip, data_disk_name)
 
 
 @dataclass
@@ -94,6 +115,7 @@ class DeployOutput:
     artifact: str
     public_ip: str
     home: str
+    data_disk_name: str | None = None
 
     def update_deploy_metadata(self):
         metadata = load_metadata(self.home)
@@ -104,12 +126,18 @@ class DeployOutput:
         if cloud not in metadata["resources"]:
             metadata["resources"][cloud] = {}
 
-        metadata["resources"][cloud][self.configs.vm.name] = {
+        vm_metadata = {
             "artifact": self.artifact,
             "public_ip": self.public_ip,
             "domain": self.configs.domain.to_dict(),
             "vm": self.configs.vm.to_dict(),
         }
+
+        # Track data disk if it exists
+        if self.data_disk_name:
+            vm_metadata["data_disk"] = self.data_disk_name
+
+        metadata["resources"][cloud][self.configs.vm.name] = vm_metadata
         write_metadata(metadata, self.home)
 
 
@@ -133,7 +161,7 @@ class Deployer:
         self.proxy: ProxyClient | None = None
 
     def deploy(self) -> DeployOutput:
-        public_ip = deploy_image(
+        public_ip, data_disk_name = deploy_image(
             image_path=self.image_path,
             configs=self.configs,
             ip_name=self.ip_name,
@@ -146,6 +174,7 @@ class Deployer:
             artifact=self.image_path.name,
             public_ip=public_ip,
             home=self.home,
+            data_disk_name=data_disk_name,
         )
 
     def start_proxy_server(self, public_ip: str) -> None:
@@ -155,16 +184,26 @@ class Deployer:
         if not self.proxy.start():
             raise RuntimeError("Failed to start proxy server")
 
-    def find_latest_image(self) -> Path:
-        """Find the most recently built image"""
-        pattern = str(
-            BuildPaths(self.home).artifacts
-            / "cvm-image-azure-tdx.rootfs-*.wic.vhd"
-        )
+    def find_latest_image(self, cloud: str, dev: bool = False) -> Path:
+        """Find the most recently built image for the given cloud.
+
+        Args:
+            cloud: Cloud provider ("azure", "gcp", etc.)
+            dev: Whether to search for dev builds
+
+        Returns:
+            Path to the most recent image
+        """
+        from yocto.cloud.cloud_config import CloudProvider
+
+        cloud_provider = CloudProvider(cloud)
+        artifact_pattern = BuildPaths.artifact_pattern(cloud_provider, dev)
+        pattern = str(BuildPaths(self.home).artifacts / artifact_pattern)
+
         image_files = glob.glob(pattern)
         if not image_files:
             raise FileNotFoundError(
-                "No existing images found in artifacts directory"
+                f"No images found matching pattern: {pattern}"
             )
 
         latest_image = max(image_files, key=lambda x: Path(x).stat().st_mtime)
