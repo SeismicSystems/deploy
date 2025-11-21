@@ -71,6 +71,14 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     deploy_cfg = cfg.deploy
     print(f"Config:\n{json.dumps(cfg.to_dict(), indent=2)}")
 
+    # Prepare enclave args based on peers
+    if hasattr(args, 'peers') and args.peers:
+        # Format peers as space-separated list of URLs
+        peer_urls = ' '.join([f"http://{ip.strip()}:7878" for ip in args.peers])
+        enclave_args = f"--peers {peer_urls}"
+    else:
+        enclave_args = "--genesis-node"
+
     cloud_api = get_cloud_api(deploy_cfg.vm.cloud)
     genesis_ip_manager = GenesisIPManager(cloud_api, args.resource_group)
 
@@ -123,6 +131,26 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
         logger.warning(f"Could not read SSH key from {ssh_key_path}: {e}")
         ssh_key = "YOUR_SSH_KEY_HERE"
 
+    # Prepare the JSON payload
+    payload = {
+        "ssh_keys": [ssh_key],
+        "domain": {
+            "email": args.certbot_email,
+            "name": f"{deploy_cfg.domain.record}.{deploy_cfg.domain.name}"
+        },
+        "log": {
+            "enclave": "debug",
+            "summit": "debug",
+            "reth": "debug"
+        },
+        "args": {
+            "enclave": enclave_args,
+            "reth": "",
+            "summit": ""
+        }
+    }
+    payload_json = json.dumps(payload)
+
     # Print setup instructions
     print("\n" + "=" * 80)
     print("DEPLOYMENT COMPLETE")
@@ -132,7 +160,7 @@ def deploy_genesis_vm(args: DeploymentConfig) -> None:
     print(f"Domain: {deploy_cfg.domain.record}.{deploy_cfg.domain.name}")
     print("\nNext steps:")
     print(f"1. Register SSH key and domain config (port 8080):")
-    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{{\"ssh_keys\":[\"{ssh_key}\"],\"domain\":{{\"email\":\"{args.certbot_email}\",\"name\":\"{deploy_cfg.domain.record}.{deploy_cfg.domain.name}\"}},\"args\":{{\"enclave\":\"--genesis-node\",\"reth\":\"\",\"summit\":\"\"}}}}'")
+    print(f"   curl -X POST http://{ip_address}:8080 -H 'Content-Type: application/json' -d '{payload_json}'")
     print(f"\n2. Nginx with SSL will automatically set up after initialization")
     print(f"   Endpoints will be available at:")
     print(f"     https://{deploy_cfg.domain.record}.{deploy_cfg.domain.name}/rpc")
@@ -170,6 +198,12 @@ def parse_genesis_args():
         "--name",
         type=str,
         help="Manual VM name override (default: cloud-specific prefix + node number)",
+    )
+    parser.add_argument(
+        "--peers",
+        type=str,
+        nargs='+',
+        help="List of peer IP addresses (will be formatted as http://{ip}:7878)",
     )
     return parser.parse_args()
 

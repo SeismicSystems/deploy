@@ -74,6 +74,7 @@ class DeploymentConfig:
     nsg_name: str
     show_logs: bool
     dev: bool = False
+    peers: list[str] | None = None
 
     def to_configs(self) -> Configs:
         return Configs(
@@ -132,6 +133,7 @@ class DeploymentConfig:
             Path.home() / args.code_path if args.code_path else Path.home()
         )
         dev = getattr(args, "dev", False)
+        peers = getattr(args, "peers", None)
         return {
             "home": home,
             "artifact": expect_artifact(args.artifact, home, dev),
@@ -146,6 +148,7 @@ class DeploymentConfig:
             "certbot_email": args.certbot_email,
             "show_logs": args.logs,
             "dev": dev,
+            "peers": peers,
         }
 
     @classmethod
