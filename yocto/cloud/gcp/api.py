@@ -14,12 +14,11 @@ from pathlib import Path
 
 from google.cloud import compute_v1, resourcemanager_v3, storage
 
-from yocto.cloud.azure.api import AzureApi, OPEN_PORTS
+from yocto.cloud.azure.api import AzureApi
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
 from yocto.cloud.gcp.defaults import (
-    CONSENSUS_PORT,
     DEFAULT_DISK_TYPE,
     DEFAULT_NETWORK_TIER,
     DEFAULT_NIC_TYPE,

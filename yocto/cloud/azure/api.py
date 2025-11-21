@@ -18,12 +18,12 @@ from yocto.cloud.azure.defaults import (
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
-from yocto.config import DeployConfigs, VmConfigs
+from yocto.config import DeployConfigs
 
 logger = logging.getLogger(__name__)
 
 OPEN_PORTS = [
-    22, # ssh 
+    22, # ssh
     80, # http
     443, # https
     7878, # enclave
@@ -461,7 +461,7 @@ class AzureApi(CloudApi):
             source,
         ]
         cls.run_command(cmd, show_logs=config.show_logs)
-    
+
     @staticmethod
     def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
         tcp_rules = [

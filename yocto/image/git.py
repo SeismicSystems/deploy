@@ -263,7 +263,7 @@ def update_git_mkosi_batch(
     logger.info("All packages updated in file")
 
     # Stage the file
-    run_command(f"git add seismic/mkosi.build", cwd=paths.flashbots_images)
+    run_command("git add seismic/mkosi.build", cwd=paths.flashbots_images)
 
     # Check if there are changes to commit
     status_result = run_command(

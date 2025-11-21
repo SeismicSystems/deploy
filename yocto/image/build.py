@@ -4,8 +4,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from yocto.config import BuildConfigs, Configs
 from yocto.cloud.cloud_config import CloudProvider
+from yocto.config import BuildConfigs, Configs
 from yocto.image.git import GitConfigs, update_git_mkosi_batch
 from yocto.image.measurements import Measurements, generate_measurements
 from yocto.utils.artifact import artifact_timestamp

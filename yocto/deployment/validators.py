@@ -10,7 +10,6 @@ from yocto.config import get_domain_record_prefix, get_genesis_vm_prefix
 from yocto.utils.metadata import load_metadata
 from yocto.utils.summit_client import SummitClient
 
-
 _ANVIL_ADDRESSES = [
     "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
@@ -113,7 +112,7 @@ def main():
     if args.node:
         node_numbers = args.node
     elif args.nodes == 0:
-        raise ValueError(f'Must provide --node <n1> <n2> or --nodes <COUNT>')
+        raise ValueError('Must provide --node <n1> <n2> or --nodes <COUNT>')
     else:
         node_numbers = list(range(1, args.nodes + 1))
 

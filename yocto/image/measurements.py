@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -93,5 +92,5 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
         "measurements": raw_measurements.get("measurements", raw_measurements),
     }
 
-    logger.info(f"Measurements generated successfully")
+    logger.info("Measurements generated successfully")
     return measurements
