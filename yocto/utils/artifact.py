@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import re
+from pathlib import Path
 
 from yocto.utils.metadata import load_metadata, remove_artifact_from_metadata
 from yocto.utils.paths import BuildPaths
@@ -49,7 +50,7 @@ def _artifact_from_timestamp(
 ) -> str | None:
     """Find artifact file by timestamp.
 
-    Searches the artifacts directory for files matching the timestamp.
+    Searches the artifacts directory (including subdirectories) for files matching the timestamp.
     Returns the filename if found, or constructs a legacy name as fallback.
 
     Args:
@@ -62,8 +63,8 @@ def _artifact_from_timestamp(
     """
     artifacts_path = BuildPaths(home).artifacts
 
-    # Search for any file with this timestamp
-    matches = list(glob.glob(f"{artifacts_path}/*{timestamp}*"))
+    # Search for any file with this timestamp in all subdirectories
+    matches = list(glob.glob(f"{artifacts_path}/**/*{timestamp}*", recursive=True))
     if matches:
         # Filter by dev preference
         if dev:
@@ -116,6 +117,40 @@ def expect_artifact(artifact_arg: str, home: str, dev: bool = False) -> str:
     return artifact
 
 
+def get_artifact_path(artifact: str, home: str) -> Path:
+    """Get the full path to an artifact file.
+
+    Args:
+        artifact: Artifact filename (e.g., "seismic-azure-20251121.vhd")
+        home: Home directory path
+
+    Returns:
+        Full path to the artifact file
+
+    Raises:
+        FileNotFoundError: If the artifact file doesn't exist
+    """
+    artifacts_base = BuildPaths(home).artifacts
+
+    # Determine subdirectory from artifact filename
+    if "-azure-" in artifact:
+        artifact_path = artifacts_base / "azure" / artifact
+    elif "-gcp-" in artifact:
+        artifact_path = artifacts_base / "gcp" / artifact
+    elif "-baremetal-" in artifact:
+        artifact_path = artifacts_base / "baremetal" / artifact
+    else:
+        raise ValueError(
+            f"Cannot determine cloud provider from artifact name: {artifact}. "
+            "Expected format: seismic-[azure|gcp|baremetal]-YYYYMMDDHHMMSS.<ext>"
+        )
+
+    if not artifact_path.exists():
+        raise FileNotFoundError(f"Artifact not found: {artifact_path}")
+
+    return artifact_path
+
+
 def delete_artifact(artifact: str, home: str):
     resources = load_metadata(home).get("resources", {})
 
@@ -141,7 +176,8 @@ def delete_artifact(artifact: str, home: str):
     timestamp = _extract_timestamp(artifact)
     artifacts_path = BuildPaths(home).artifacts
     files_deleted = 0
-    for filepath in glob.glob(f"{artifacts_path}/*{timestamp}*"):
+    # Search in all subdirectories
+    for filepath in glob.glob(f"{artifacts_path}/**/*{timestamp}*", recursive=True):
         os.remove(filepath)
         files_deleted += 1
 

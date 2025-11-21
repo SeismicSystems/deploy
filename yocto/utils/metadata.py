@@ -51,18 +51,24 @@ def remove_artifact_from_metadata(name: str, home: str):
 def load_artifact_measurements(
     artifact: str, home: str
 ) -> tuple[Path, "Measurements"]:
+    from yocto.utils.artifact import get_artifact_path
+
     artifacts = load_metadata(home).get("artifacts", {})
     if artifact not in artifacts:
         metadata_path = BuildPaths(home).deploy_metadata
         msg = f"Could not find artifact {artifact} in {metadata_path}"
         raise ValueError(msg)
-    image_path = BuildPaths(home).artifacts / artifact
-    artifact = artifacts[artifact]
-    if not image_path.exists():
+
+    # Use get_artifact_path to handle subdirectory structure
+    try:
+        image_path = get_artifact_path(artifact, home)
+    except FileNotFoundError as e:
         raise FileNotFoundError(
             f"Artifact {artifact} is defined in the deploy metadata, "
             "but the corresponding file was not found on the machine"
-        )
+        ) from e
+
+    artifact = artifacts[artifact]
     return image_path, artifact["image"]
 
 

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from yocto.config import BuildConfigs, Configs
+from yocto.cloud.cloud_config import CloudProvider
 from yocto.image.git import GitConfigs, update_git_mkosi_batch
 from yocto.image.measurements import Measurements, generate_measurements
 from yocto.utils.artifact import artifact_timestamp
@@ -75,8 +76,6 @@ def build_image(
         raise RuntimeError(f"Image build failed: {err}")
 
     # Find the latest built image based on profile
-    from yocto.cloud.cloud_config import CloudProvider
-
     if profile == "azure":
         cloud = CloudProvider.AZURE
     elif profile == "gcp":
