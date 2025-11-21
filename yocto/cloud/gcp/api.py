@@ -14,7 +14,7 @@ from pathlib import Path
 
 from google.cloud import compute_v1, resourcemanager_v3, storage
 
-from yocto.cloud.azure.api import AzureApi
+from yocto.cloud.azure.api import AzureApi, OPEN_PORTS
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
@@ -749,40 +749,7 @@ class GcpApi(CloudApi):
     @classmethod
     def create_standard_nsg_rules(cls, config: DeployConfigs) -> None:
         """Add all standard security rules."""
-        rules = [
-            ("AllowSSH", "100", "22", "tcp", config.source_ip, "SSH rule"),
-            (
-                "AllowAnyHTTPInbound",
-                "101",
-                "80",
-                "tcp",
-                "*",
-                "HTTP rule (TCP 80)",
-            ),
-            (
-                "AllowAnyHTTPSInbound",
-                "102",
-                "443",
-                "tcp",
-                "*",
-                "HTTPS rule (TCP 443)",
-            ),
-            ("TCP7878", "115", "7878", "tcp", "*", "TCP 7878 rule"),
-            ("TCP7936", "116", "7936", "tcp", "*", "TCP 7936 rule"),
-            ("TCP8545", "110", "8545", "tcp", "*", "TCP 8545 rule"),
-            ("TCP8551", "111", "8551", "tcp", "*", "TCP 8551 rule"),
-            ("TCP8645", "112", "8645", "tcp", "*", "TCP 8645 rule"),
-            ("TCP8745", "113", "8745", "tcp", "*", "TCP 8745 rule"),
-            (
-                f"ANY{CONSENSUS_PORT}",
-                "114",
-                f"{CONSENSUS_PORT}",
-                "all",
-                "*",
-                "Any 18551 rule",
-            ),
-        ]
-
+        rules = AzureApi.get_nsg_rules(config)
         for name, priority, port, protocol, source, description in rules:
             logger.info(f"Creating {description}")
             cls.add_nsg_rule(config, name, priority, port, protocol, source)

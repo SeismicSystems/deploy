@@ -22,6 +22,15 @@ from yocto.config import DeployConfigs, VmConfigs
 
 logger = logging.getLogger(__name__)
 
+OPEN_PORTS = [
+    22, # ssh 
+    80, # http
+    443, # https
+    7878, # enclave
+    9090, # prometheus
+    8545, # reth http rpc
+    8546, # reth ws rpc
+]
 
 # Disk Operations
 class AzureApi(CloudApi):
@@ -452,52 +461,30 @@ class AzureApi(CloudApi):
             source,
         ]
         cls.run_command(cmd, show_logs=config.show_logs)
+    
+    @staticmethod
+    def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
+        tcp_rules = [
+            (f"Allow {port}", f"{100+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
+            for port in OPEN_PORTS
+        ]
+        return [
+            ("AllowSSH", "100", "22", "tcp", config.source_ip, "SSH rule"),
+            (
+                f"ANY{CONSENSUS_PORT}",
+                "101",
+                f"{CONSENSUS_PORT}",
+                "all",
+                "*",
+                f"Any {CONSENSUS_PORT} rule",
+            ),
+            *tcp_rules,
+        ]
 
     @classmethod
     def create_standard_nsg_rules(cls, config: DeployConfigs) -> None:
         """Add all standard security rules."""
-        rules = [
-            ("AllowSSH", "100", "22", "Tcp", config.source_ip, "SSH rule"),
-            (
-                "AllowAnyHTTPInbound",
-                "101",
-                "80",
-                "Tcp",
-                "*",
-                "HTTP rule (TCP 80)",
-            ),
-            (
-                "AllowAnyHTTPSInbound",
-                "102",
-                "443",
-                "Tcp",
-                "*",
-                "HTTPS rule (TCP 443)",
-            ),
-            (
-                "AllowSSHKeyReg",
-                "103",
-                "8080",
-                "Tcp",
-                config.source_ip,
-                "SSH key registration (TCP 8080)",
-            ),
-            ("TCP7878", "115", "7878", "Tcp", "*", "TCP 7878 rule"),
-            ("TCP7936", "116", "7936", "Tcp", "*", "TCP 7936 rule"),
-            ("TCP8545", "110", "8545", "Tcp", "*", "TCP 8545 rule"),
-            ("TCP8551", "111", "8551", "Tcp", "*", "TCP 8551 rule"),
-            ("TCP8645", "112", "8645", "Tcp", "*", "TCP 8645 rule"),
-            ("TCP8745", "113", "8745", "Tcp", "*", "TCP 8745 rule"),
-            (
-                f"ANY{CONSENSUS_PORT}",
-                "114",
-                f"{CONSENSUS_PORT}",
-                "*",
-                "*",
-                "Any 30303 rule",
-            ),
-        ]
-
+        rules = AzureApi.get_nsg_rules(config)
         for name, priority, port, protocol, source, description in rules:
             logger.info(f"Creating {description}")
             cls.add_nsg_rule(config, name, priority, port, protocol, source)
