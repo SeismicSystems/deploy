@@ -76,6 +76,82 @@
           "size": "Standard_DC4es_v6"
         },
         "data_disk": "az-genesis-203-persistent"
+      },
+      "az-genesis-1": {
+        "artifact": "seismic-dev-azure-20251124143117.vhd",
+        "public_ip": "48.223.236.240",
+        "domain": {
+          "url": "https://az-1.seismictest.net",
+          "record": "az-1",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-1",
+          "nsgName": "az-genesis-1",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-1-persistent"
+      },
+      "az-genesis-2": {
+        "artifact": "seismic-dev-azure-20251124143117.vhd",
+        "public_ip": "48.223.215.252",
+        "domain": {
+          "url": "https://az-2.seismictest.net",
+          "record": "az-2",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-2",
+          "nsgName": "az-genesis-2",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-2-persistent"
+      },
+      "az-genesis-3": {
+        "artifact": "seismic-dev-azure-20251124143117.vhd",
+        "public_ip": "134.33.152.130",
+        "domain": {
+          "url": "https://az-3.seismictest.net",
+          "record": "az-3",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-3",
+          "nsgName": "az-genesis-3",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-3-persistent"
+      },
+      "az-genesis-4": {
+        "artifact": "seismic-dev-azure-20251124143117.vhd",
+        "public_ip": "128.203.77.183",
+        "domain": {
+          "url": "https://az-4.seismictest.net",
+          "record": "az-4",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-4",
+          "nsgName": "az-genesis-4",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-4-persistent"
       }
     }
   },

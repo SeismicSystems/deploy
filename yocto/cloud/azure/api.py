@@ -165,9 +165,9 @@ class AzureApi(CloudApi):
             "json",
         ]
         result = cls.run_command(cmd)
-        records = json.loads(result)
+        records = json.loads(result.stdout)
         return [
-            ip
+            ip["ipv4Address"]
             for r in records
             for ip in r["ARecords"]
             if r['name'] == config.domain.record
@@ -468,8 +468,8 @@ class AzureApi(CloudApi):
     @staticmethod
     def get_nsg_rules(config: DeployConfigs) -> list[str]:
         tcp_rules = [
-            (f"Allow {port}", f"{103+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
-            for port in OPEN_PORTS
+            (f"Allow{port}", f"{103+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
+            for i, port in enumerate(OPEN_PORTS)
         ]
         return [
             # NOTE: allowing SSH from anywhere;
@@ -487,7 +487,7 @@ class AzureApi(CloudApi):
                 f"ANY{CONSENSUS_PORT}",
                 "102",
                 f"{CONSENSUS_PORT}",
-                "all",
+                "*",
                 "*",
                 f"Any {CONSENSUS_PORT} rule",
             ),
