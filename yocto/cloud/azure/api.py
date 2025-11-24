@@ -161,15 +161,17 @@ class AzureApi(CloudApi):
             config.domain.name,
             "--recordsetnamesuffix",
             config.domain.record,
-            "--query",
-            "[].ARecords[].ipv4Address",
             "-o",
-            "tsv",
+            "json",
         ]
         result = cls.run_command(cmd)
-        return (
-            result.stdout.strip().split("\n") if result.stdout.strip() else []
-        )
+        records = json.loads(result)
+        return [
+            ip
+            for r in records
+            for ip in r["ARecords"]
+            if r['name'] == config.domain.record
+        ]
 
     @classmethod
     def remove_dns_ip(cls, config: DeployConfigs, ip_address: str) -> None:
@@ -232,6 +234,7 @@ class AzureApi(CloudApi):
         """Update DNS A record with new IP address."""
         if remove_old:
             previous_ips = cls.get_existing_dns_ips(config)
+            print(f'Removing previous IPs: {previous_ips}')
             for prev_ip in previous_ips:
                 if prev_ip:
                     cls.remove_dns_ip(config, prev_ip)
@@ -463,7 +466,7 @@ class AzureApi(CloudApi):
         cls.run_command(cmd, show_logs=config.show_logs)
     
     @staticmethod
-    def get_nsg_rules(cls, config: DeployConfigs) -> list[str]:
+    def get_nsg_rules(config: DeployConfigs) -> list[str]:
         tcp_rules = [
             (f"Allow {port}", f"{103+i}", f"{port}", "tcp", "*", f"TCP {port} rule")
             for port in OPEN_PORTS
