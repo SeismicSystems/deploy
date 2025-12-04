@@ -124,11 +124,11 @@ def update_git_mkosi_batch(
     """
 
     paths = BuildPaths(home)
-    build_file = paths.flashbots_images / "seismic" / "mkosi.build"
+    build_file = paths.seismic_images / "seismic" / "mkosi.build"
 
-    if not paths.flashbots_images.exists():
+    if not paths.seismic_images.exists():
         raise FileNotFoundError(
-            f"flashbots-images path not found: {paths.flashbots_images}"
+            f"flashbots-images path not found: {paths.seismic_images}"
         )
 
     if not build_file.exists():
@@ -187,17 +187,17 @@ def update_git_mkosi_batch(
             f"sed -i 's/^{commit_var}=.*$/{commit_var}="
             f'"{git_config.commit}"\' {build_file}'
         )
-        run_command(commit_update_cmd, cwd=paths.flashbots_images)
+        run_command(commit_update_cmd, cwd=paths.seismic_images)
 
     logger.info("All packages updated in file")
 
     # Stage the file
-    run_command("git add seismic/mkosi.build", cwd=paths.flashbots_images)
+    run_command("git add seismic/mkosi.build", cwd=paths.seismic_images)
 
     # Check if there are changes to commit
     status_result = run_command(
         cmd="git status --porcelain",
-        cwd=paths.flashbots_images,
+        cwd=paths.seismic_images,
     )
     if status_result.stdout.strip():
         logger.info("Changes detected, committing...")
@@ -205,11 +205,11 @@ def update_git_mkosi_batch(
             package_names = ", ".join([name for name, _ in packages_to_update])
             commit_message = f"Update commit hashes for {package_names}"
         run_command(
-            f'git commit -m "{commit_message}"', cwd=paths.flashbots_images
+            f'git commit -m "{commit_message}"', cwd=paths.seismic_images
         )
         logger.info("Committed changes")
 
-        run_command("git push", cwd=paths.flashbots_images)
+        run_command("git push", cwd=paths.seismic_images)
         logger.info("Successfully pushed changes")
     else:
         logger.info("No changes to commit")

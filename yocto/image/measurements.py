@@ -39,9 +39,9 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
                 f"Expected: {efi_path}"
             )
 
-    if not paths.flashbots_images.exists():
+    if not paths.seismic_images.exists():
         raise FileNotFoundError(
-            f"flashbots-images path not found: {paths.flashbots_images}"
+            f"flashbots-images path not found: {paths.seismic_images}"
         )
 
     logger.info(f"Generating measurements for: {efi_path.name}")
@@ -58,15 +58,15 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     # Important: env_wrapper.sh runs in Lima VM where flashbots-images is
     # mounted at ~/mnt. So we need to use relative paths from
     # flashbots-images root
-    wrapper_script = paths.flashbots_images / "scripts" / "env_wrapper.sh"
+    wrapper_script = paths.seismic_images / "scripts" / "env_wrapper.sh"
 
     # Get relative path from flashbots-images root
     # (e.g., "build/seismic-dev-azure-*.efi")
-    efi_relative = efi_path.relative_to(paths.flashbots_images)
+    efi_relative = efi_path.relative_to(paths.seismic_images)
     measurements_relative = "build/measurements.json"
 
     measure_cmd = (
-        f"cd {paths.flashbots_images} && "
+        f"cd {paths.seismic_images} && "
         f"IMAGE={image_name} {wrapper_script} measured-boot "
         f'"{efi_relative}" {measurements_relative} --direct-uki'
     )
@@ -81,7 +81,7 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
         )
 
     # Read the generated measurements.json
-    measurements_output = paths.flashbots_images / measurements_relative
+    measurements_output = paths.seismic_images / measurements_relative
     if not measurements_output.exists():
         raise FileNotFoundError(
             f"Measurements file not generated: {measurements_output}"

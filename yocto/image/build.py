@@ -43,7 +43,7 @@ def build_image(
     Returns:
         Path to the built image
     """
-    flashbots_images_path = BuildPaths(home).flashbots_images
+    flashbots_images_path = BuildPaths(home).seismic_images
     if not flashbots_images_path.exists():
         raise FileNotFoundError(
             f"flashbots-images path not found: {flashbots_images_path}"
@@ -93,7 +93,7 @@ def build_image(
     )
 
     find_cmd = f"""
-    find {BuildPaths(home).artifacts} \
+    find {BuildPaths(home).artifacts / cloud} \
     -name '{artifact_pattern}' \
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """

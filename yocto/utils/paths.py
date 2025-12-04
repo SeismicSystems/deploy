@@ -11,16 +11,12 @@ class BuildPaths:
         self.home = Path(home)
 
     @property
-    def yocto_manifests(self) -> Path:
-        return self.home / "yocto-manifests"
-
-    @property
-    def flashbots_images(self) -> Path:
-        return self.home / "flashbots-images"
+    def seismic_images(self) -> Path:
+        return self.home / "seismic-images"
 
     @property
     def artifacts(self) -> Path:
-        return self.flashbots_images / "build"
+        return self.seismic_images / "build"
 
     @staticmethod
     def artifact_pattern(cloud: "CloudProvider", dev: bool = False) -> str:
@@ -40,15 +36,12 @@ class BuildPaths:
             # Dev builds use "seismic-dev" prefix
             # e.g., azure/seismic-dev-azure-timestamp.vhd or
             # azure/seismic-azure-timestamp.vhd
-            return f"azure/{prefix}-azure-*.vhd"
+            return f"{prefix}-azure-*.vhd"
         elif cloud == CloudProvider.GCP:
-            return f"gcp/{prefix}-gcp-*.tar.gz"
-        elif cloud == CloudProvider.OVH:
-            # OVH uses baremetal profile (no PROFILE in build)
-            return f"baremetal/{prefix}-baremetal-*.efi"
+            return f"{prefix}-gcp-*.tar.gz"
         else:
-            # Bare metal or unknown
-            return f"baremetal/{prefix}-baremetal-*.efi"
+            # OVH uses baremetal profile (no PROFILE in build)
+            return f"{prefix}-baremetal-*.efi"
 
     @staticmethod
     def artifact_prefix() -> str:
@@ -56,32 +49,8 @@ class BuildPaths:
         return "cvm-image-azure-tdx.rootfs"
 
     @property
-    def meta_seismic(self) -> Path:
-        return self.home / "meta-seismic"
-
-    @property
-    def measured_boot(self) -> Path:
-        return self.home / "measured-boot"
-
-    @property
-    def enclave_bb(self) -> str:
-        return "recipes-nodes/enclave/enclave.bb"
-
-    @property
-    def sreth_bb(self) -> str:
-        return "recipes-nodes/reth/reth.bb"
-
-    @property
-    def summit_bb(self) -> str:
-        return "recipes-nodes/summit/summit.bb"
-
-    @property
     def repo_root(self) -> Path:
         return self.home / "deploy"
-
-    @property
-    def deploy_script(self) -> Path:
-        return self.repo_root / "deploy.sh"
 
     @property
     def deploy_metadata(self) -> Path:
@@ -90,7 +59,3 @@ class BuildPaths:
     @property
     def proxy_client(self) -> Path:
         return self.home / "cvm-reverse-proxy/build/proxy-client"
-
-    @property
-    def source_env(self) -> Path:
-        return self.home / "yocto-manifests/build/srcs/poky"
