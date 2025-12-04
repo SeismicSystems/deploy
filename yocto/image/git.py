@@ -145,8 +145,8 @@ def update_git_mkosi_batch(
     results = {}
     packages_to_update = []
 
-    for package_name, git_config in updates.items():
-        if git_config is None:
+    for package_name, git_commit in updates.items():
+        if git_commit is None:
             # No commit specified, use current
             current_commit = _extract_commit_from_mkosi(
                 build_file=build_file,
@@ -160,8 +160,8 @@ def update_git_mkosi_batch(
             results[package_name] = current_commit
         else:
             # Mark for update
-            packages_to_update.append((package_name, git_config))
-            results[package_name] = git_config
+            packages_to_update.append((package_name, git_commit))
+            results[package_name] = git_commit
 
     # If nothing to update, return early
     if not packages_to_update:
@@ -185,7 +185,7 @@ def update_git_mkosi_batch(
         commit_var = f"{var_prefix}_COMMIT"
         commit_update_cmd = (
             f"sed -i 's/^{commit_var}=.*$/{commit_var}="
-            f'"{git_config.commit}"\' {build_file}'
+            f'"{git_commit}"\' {build_file}'
         )
         run_command(commit_update_cmd, cwd=paths.seismic_images)
 
