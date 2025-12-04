@@ -77,7 +77,9 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
 
     if result.returncode != 0:
         raise RuntimeError(
-            f"measured-boot failed: {result.stderr.strip()}"
+            f"measured-boot failed:\n"
+            f"{result.stderr.strip()}\n"
+            f"Command:\n{measure_cmd}"
         )
 
     # Read the generated measurements.json
