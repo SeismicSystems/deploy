@@ -113,14 +113,14 @@ def update_git_mkosi_batch(
     single commit.
 
     Args:
-        updates: Dict mapping package name to GitConfig
-                 (e.g., {"summit": GitConfig(...),
-                 "seismic-reth": GitConfig(...)})
+        updates: Dict mapping package name to commit hash
+                 (e.g., {"summit": "3720ab4...",
+                 "seismic-reth": "3720ab4..."})
         home: Home directory path
         commit_message: Optional custom commit message
 
     Returns:
-        Dict mapping package names to their final GitConfig
+        Dict mapping package names to their final commit hash
     """
 
     paths = BuildPaths(home)
@@ -220,10 +220,10 @@ def update_git_mkosi_batch(
 
 def update_git_mkosi(
     package_name: str,
-    git_config: GitConfig,
+    git_config: GitCommit,
     home: str,
     commit_message: str | None = None,
-) -> GitConfig:
+) -> GitCommit:
     """
     Update the git commit for a single package in seismic/mkosi.build.
 
@@ -236,30 +236,3 @@ def update_git_mkosi(
         commit_message,
     )
     return results[package_name]
-
-
-# Keep old function name for backwards compatibility, but delegate to new one
-def update_git_bb(
-    bb_pathname: str,
-    git_config: GitConfig,
-    home: str,
-    commit_message: str | None = None,
-) -> GitConfig:
-    """Legacy wrapper for update_git_mkosi.
-
-    Maps old bb_pathname to package names:
-    - recipes-nodes/enclave/enclave.bb -> seismic-enclave-server
-    - recipes-nodes/reth/reth.bb -> seismic-reth
-    - recipes-nodes/summit/summit.bb -> summit
-    """
-    package_map = {
-        "recipes-nodes/enclave/enclave.bb": "seismic-enclave-server",
-        "recipes-nodes/reth/reth.bb": "seismic-reth",
-        "recipes-nodes/summit/summit.bb": "summit",
-    }
-
-    package_name = package_map.get(bb_pathname)
-    if not package_name:
-        raise ValueError(f"Unknown bb_pathname: {bb_pathname}")
-
-    return update_git_mkosi(package_name, git_config, home, commit_message)
