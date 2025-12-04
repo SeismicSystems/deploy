@@ -184,8 +184,8 @@ def update_git_mkosi_batch(
         # Update commit variable (e.g., RETH_COMMIT="abc123...")
         commit_var = f"{var_prefix}_COMMIT"
         commit_update_cmd = (
-            f"sed -i 's/^{commit_var}=.*$/{commit_var}="
-            f'"{git_commit}"\' {build_file}'
+            f"sed -i 's|^{commit_var}=.*$|{commit_var}="
+            f'"{git_commit}"|' {build_file}'
         )
         run_command(commit_update_cmd, cwd=paths.seismic_images)
 
