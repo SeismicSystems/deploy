@@ -62,6 +62,7 @@ def build_image(
     build_cmd = " && ".join(
         [f"cd {flashbots_images_path}", f"{env_vars} make {make_target}"]
     )
+    print(build_cmd)
     build_result = subprocess.run(
         build_cmd,
         shell=True,
