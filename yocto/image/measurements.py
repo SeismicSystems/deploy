@@ -216,10 +216,13 @@ Examples:
         help="Path to image file (.efi, .vhd, or .tar.gz)",
     )
     parser.add_argument(
-        "--home",
+        "--code",
         type=str,
-        default="/home/azureuser",
-        help="Home directory path (required for BuildPaths)",
+        default=str(Path.home()),
+        help=(
+            f"Code directory path (required for BuildPaths). "
+            f"Defaults to $HOME: {Path.home()}"
+        ),
     )
     parser.add_argument(
         "--cloud",
@@ -249,7 +252,7 @@ Examples:
 
     try:
         # Generate measurements
-        measurements = generate_measurements(args.image_path, args.home)
+        measurements = generate_measurements(args.image_path, args.code)
 
         # If custom output specified, also write there
         if args.output:
