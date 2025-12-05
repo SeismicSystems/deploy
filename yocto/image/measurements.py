@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from yocto.utils.paths import BuildPaths
+from yocto.cloud.cloud_config import CloudProvider
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,57 @@ def write_measurements_tmpfile(measurements: Measurements) -> Path:
     with open(measurements_tmpfile, "w+") as f:
         json.dump([measurements], f)
     return measurements_tmpfile
+
+
+def parse_gcp_measurements(measurements_output: Path, result: subprocess.CompletedProcess):
+    # Parse stdout and extract only the JSON part (first valid JSON object)
+    stdout = result.stdout.strip()
+
+    # Try to parse as JSON directly first (in case output is clean)
+    try:
+        measurements_data = json.loads(stdout)
+        json_str = json.dumps(measurements_data, indent=2)
+    except json.JSONDecodeError:
+        # If that fails, extract JSON by tracking brace balance
+        # This handles cases where Lima VM messages are mixed with output
+        json_lines = []
+        brace_count = 0
+        in_json = False
+
+        for line in stdout.split('\n'):
+            stripped = line.strip()
+            # Look for the start of a JSON object
+            if not in_json and '{' in stripped:
+                in_json = True
+                # Find where the brace starts and slice from there
+                brace_pos = line.index('{')
+                line = line[brace_pos:]
+
+            if in_json:
+                json_lines.append(line)
+                # Count braces on this line
+                brace_count += line.count('{') - line.count('}')
+
+                # If brace count is 0, we've completed the JSON object
+                if brace_count == 0:
+                    break
+
+        if not json_lines:
+            raise RuntimeError(
+                f"Could not find JSON in dstack-mr output:\n{stdout}"
+            )
+
+        json_str = '\n'.join(json_lines)
+        # Validate it's valid JSON
+        try:
+            json.loads(json_str)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(
+                f"Extracted invalid JSON from dstack-mr output:\n{json_str}\n\nError: {e}"
+            )
+
+    measurements_output.parent.mkdir(parents=True, exist_ok=True)
+    measurements_output.write_text(json_str)
 
 
 def generate_measurements(image_path: Path, home: str) -> Measurements:
@@ -63,8 +115,7 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     image_name = efi_path.name.split("-")[0]
 
     # Detect cloud provider from filename (e.g., seismic-dev-gcp-*.efi)
-    is_gcp = "-gcp-" in efi_path.name.lower()
-    cloud_provider = "gcp" if is_gcp else "azure"
+    cloud_provider = CloudProvider.from_string(efi_path.name)
 
     # Important: env_wrapper.sh runs in Lima VM where flashbots-images is
     # mounted at ~/mnt. So we need to use relative paths from
@@ -80,8 +131,8 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     timestamp_match = re.search(r'-(\d{14})\.', efi_path.name)
     timestamp = timestamp_match.group(1) if timestamp_match else "latest"
 
-    if is_gcp:
-        measurements_relative = f"build/gcp_measurements-{timestamp}.json"
+    if cloud_provider.is_gcp():
+        measurements_relative = f"build/gcp/measurements-{timestamp}.json"
         # GCP uses dstack-mr which outputs to stdout
         # We need to capture only stdout (not the Lima message), so we'll handle this differently
         measure_cmd = (
@@ -90,7 +141,7 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
             f'-uki "{efi_relative}" -json'
         )
     else:
-        measurements_relative = f"build/measurements-{timestamp}.json"
+        measurements_relative = f"build/{cloud_provider.value}/measurements-{timestamp}.json"
         # Azure uses measured-boot which writes to a file
         measure_cmd = (
             f"cd {paths.seismic_images} && "
@@ -98,7 +149,7 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
             f'"{efi_relative}" {measurements_relative} --direct-uki'
         )
 
-    logger.info(f"Running measurement tool for {cloud_provider.upper()}")
+    logger.info(f"Running measurement tool for {cloud_provider.value.upper()}")
     logger.info(f"Output: {measurements_relative}")
 
     result = subprocess.run(
@@ -106,7 +157,7 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
     )
 
     if result.returncode != 0:
-        tool_name = "dstack-mr" if is_gcp else "measured-boot"
+        tool_name = "dstack-mr" if cloud_provider.is_gcp() else "measured-boot"
         raise RuntimeError(
             f"{tool_name} failed:\n"
             f"{result.stderr.strip()}\n"
@@ -115,55 +166,8 @@ def generate_measurements(image_path: Path, home: str) -> Measurements:
 
     # For GCP, we need to manually write the stdout to file (filtering out non-JSON)
     measurements_output = paths.seismic_images / measurements_relative
-    if is_gcp:
-        # Parse stdout and extract only the JSON part (first valid JSON object)
-        stdout = result.stdout.strip()
-
-        # Try to parse as JSON directly first (in case output is clean)
-        try:
-            measurements_data = json.loads(stdout)
-            json_str = json.dumps(measurements_data, indent=2)
-        except json.JSONDecodeError:
-            # If that fails, extract JSON by tracking brace balance
-            # This handles cases where Lima VM messages are mixed with output
-            json_lines = []
-            brace_count = 0
-            in_json = False
-
-            for line in stdout.split('\n'):
-                stripped = line.strip()
-                # Look for the start of a JSON object
-                if not in_json and '{' in stripped:
-                    in_json = True
-                    # Find where the brace starts and slice from there
-                    brace_pos = line.index('{')
-                    line = line[brace_pos:]
-
-                if in_json:
-                    json_lines.append(line)
-                    # Count braces on this line
-                    brace_count += line.count('{') - line.count('}')
-
-                    # If brace count is 0, we've completed the JSON object
-                    if brace_count == 0:
-                        break
-
-            if not json_lines:
-                raise RuntimeError(
-                    f"Could not find JSON in dstack-mr output:\n{stdout}"
-                )
-
-            json_str = '\n'.join(json_lines)
-            # Validate it's valid JSON
-            try:
-                json.loads(json_str)
-            except json.JSONDecodeError as e:
-                raise RuntimeError(
-                    f"Extracted invalid JSON from dstack-mr output:\n{json_str}\n\nError: {e}"
-                )
-
-        measurements_output.parent.mkdir(parents=True, exist_ok=True)
-        measurements_output.write_text(json_str)
+    if cloud_provider.is_gcp():
+        parse_gcp_measurements(measurements_output, result)
     else:
         # measured-boot writes directly to file
         if not measurements_output.exists():
@@ -214,7 +218,7 @@ Examples:
     parser.add_argument(
         "--home",
         type=str,
-        required=True,
+        default="/home/azureuser",
         help="Home directory path (required for BuildPaths)",
     )
     parser.add_argument(
