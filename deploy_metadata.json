@@ -154,7 +154,27 @@
         "data_disk": "az-genesis-4-persistent"
       }
     },
-    "gcp": {}
+    "gcp": {
+      "gcp-genesis-6": {
+        "artifact": "seismic-dev-gcp-20251205210739.tar.gz",
+        "public_ip": "34.172.12.168",
+        "domain": {
+          "url": "https://gcp-6.seismictest.net",
+          "record": "gcp-6",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "testnet-477314",
+          "name": "gcp-genesis-6",
+          "nsgName": "gcp-genesis-6",
+          "cloud": "gcp",
+          "region": "us-central1-a",
+          "size": "c3-standard-4"
+        },
+        "data_disk": "gcp-genesis-6-persistent"
+      }
+    }
   },
   "artifacts": {
     "seismic-dev-gcp-20251204212823.tar.gz": {
