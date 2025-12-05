@@ -86,7 +86,7 @@ def deploy_image(
         disk_name=data_disk_name,
         location=configs.vm.location,
         size_gb=1024,  # 1TB default
-        sku="Premium_LRS",
+        sku="pd-ssd",
         show_logs=configs.show_logs,
     )
     cloud_api.attach_data_disk(

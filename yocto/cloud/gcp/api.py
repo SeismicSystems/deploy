@@ -12,6 +12,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from google.api_core import exceptions as gcp_exceptions
 from google.cloud import compute_v1, resourcemanager_v3, storage
 
 from yocto.cloud.azure.api import AzureApi
@@ -646,14 +647,19 @@ class GcpApi(CloudApi):
         )
 
         disk_client = compute_v1.DisksClient()
-        operation = disk_client.delete(
-            project=resource_group,
-            zone=zone,
-            disk=disk_name,
-        )
+        try:
+            operation = disk_client.delete(
+                project=resource_group,
+                zone=zone,
+                disk=disk_name,
+            )
 
-        wait_for_extended_operation(operation, f"disk deletion for {disk_name}")
-        logger.info(f"Disk {disk_name} deleted successfully")
+            wait_for_extended_operation(operation, f"disk deletion for {disk_name}")
+            logger.info(f"Disk {disk_name} deleted successfully")
+        except gcp_exceptions.NotFound:
+            logger.info(
+                f"Disk {disk_name} not found - likely already deleted by Google automatically"
+            )
 
     @classmethod
     def delete_disk_by_name(
@@ -674,14 +680,19 @@ class GcpApi(CloudApi):
         )
 
         disk_client = compute_v1.DisksClient()
-        operation = disk_client.delete(
-            project=resource_group,
-            zone=zone,
-            disk=disk_name,
-        )
+        try:
+            operation = disk_client.delete(
+                project=resource_group,
+                zone=zone,
+                disk=disk_name,
+            )
 
-        wait_for_extended_operation(operation, f"disk deletion for {disk_name}")
-        logger.info(f"Disk {disk_name} deleted successfully")
+            wait_for_extended_operation(operation, f"disk deletion for {disk_name}")
+            logger.info(f"Disk {disk_name} deleted successfully")
+        except gcp_exceptions.NotFound:
+            logger.info(
+                f"Disk {disk_name} not found - likely already deleted by Google automatically"
+            )
 
     @classmethod
     def upload_disk(cls, config: DeployConfigs, image_path: Path) -> None:
