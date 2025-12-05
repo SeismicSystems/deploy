@@ -194,9 +194,9 @@ def update_git_mkosi_batch(
     # Stage the file
     run_command("git add seismic/mkosi.build", cwd=paths.seismic_images)
 
-    # Check if there are changes to commit
+    # Check if there are staged changes to commit
     status_result = run_command(
-        cmd="git status --porcelain",
+        cmd="git diff --cached --name-only",
         cwd=paths.seismic_images,
     )
     if status_result.stdout.strip():
