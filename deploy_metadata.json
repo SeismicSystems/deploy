@@ -174,43 +174,24 @@
         },
         "data_disk": "gcp-genesis-6-persistent"
       },
-      "gcp-genesis-1": {
-        "artifact": "seismic-dev-gcp-20251205223407.tar.gz",
-        "public_ip": "136.112.41.176",
+      "gcp-genesis-17": {
+        "artifact": "seismic-dev-gcp-20251209201008.tar.gz",
+        "public_ip": "34.71.110.81",
         "domain": {
-          "url": "https://gcp-1.seismictest.net",
-          "record": "gcp-1",
+          "url": "https://gcp-17.seismictest.net",
+          "record": "gcp-17",
           "name": "seismictest.net",
           "resource_group": "yocto-testnet"
         },
         "vm": {
           "resourceGroup": "testnet-477314",
-          "name": "gcp-genesis-1",
-          "nsgName": "gcp-genesis-1",
+          "name": "gcp-genesis-17",
+          "nsgName": "gcp-genesis-17",
           "cloud": "gcp",
           "region": "us-central1-a",
           "size": "c3-standard-4"
         },
-        "data_disk": "gcp-genesis-1-persistent"
-      },
-      "gcp-genesis-2": {
-        "artifact": "seismic-dev-gcp-20251209181511.tar.gz",
-        "public_ip": "136.119.55.52",
-        "domain": {
-          "url": "https://gcp-2.seismictest.net",
-          "record": "gcp-2",
-          "name": "seismictest.net",
-          "resource_group": "yocto-testnet"
-        },
-        "vm": {
-          "resourceGroup": "testnet-477314",
-          "name": "gcp-genesis-2",
-          "nsgName": "gcp-genesis-2",
-          "cloud": "gcp",
-          "region": "us-central1-a",
-          "size": "c3-standard-4"
-        },
-        "data_disk": "gcp-genesis-2-persistent"
+        "data_disk": "gcp-genesis-17-persistent"
       }
     }
   },
@@ -422,6 +403,51 @@
         "measurements": {
           "rtmr1": "ea500c04cc9f0ce8452f77d5c59030b1b6dfc2ac83d06faa05a5f98617dc864fc682e169645f156030a7d42e0630394c",
           "rtmr2": "6b5b958247b5053c51b46f35a17f91f4c04429b3414dd525c2c88dd0a8204be1690278ac4c90c99fde45040b268ec449"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251209192151.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251209192151.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "569d9f3d105fa06270d706fc48f60cbc43cd27fe1c2bba91efac4f7574fd85d54d4af650af19f0b5dbbf61769f6e64be",
+          "rtmr2": "72ee21552474f1443154db4a1f3f87ef8cb600c64ffcbcf4207aaaef48993294291155be168f70e26d67555b685c5ee4"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251209194711.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251209194711.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "e4916570e3a5dd44650c31db904e627fac26634572517940a15832aced71a8e634bc2b17af8edaabf38a3228a93cffd3",
+          "rtmr2": "54338f5fe4083979301da21d146d3127cfa38058319cea9f868cbd7d1d05797bdeda783a6901e11c1707ea9272072177"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251209201008.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251209201008.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "6e2a9f0b0ef38068ab343eb643519d4bd3bc027ea20e49d823579e298a90dac57246d222f1350cde09708fa8416a5906",
+          "rtmr2": "55c6a5f53c4ca833c515e964caad06aa06bcc22a0508f7f63c6fe07784485db50e7196182ea909bc03f68d7238aa16f3"
         }
       }
     }

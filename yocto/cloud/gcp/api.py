@@ -824,6 +824,7 @@ class GcpApi(CloudApi):
         disk_path = f"projects/{resource_group}/zones/{zone}/disks/"
         attached_disk.source = f"{disk_path}{disk_name}"
         attached_disk.auto_delete = False
+        attached_disk.interface = "SCSI"  # Use SCSI to avoid NVMe I/O issues on TDX
 
         operation = instance_client.attach_disk(
             project=resource_group,
