@@ -83,6 +83,7 @@ def deploy_image(
         disk_name=data_disk_name,
         location=configs.vm.location,
         size_gb=1024,  # 1TB default
+        sku="pd-balanced",  # Required for GCP TDX
         show_logs=configs.show_logs,
     )
 
