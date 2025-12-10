@@ -75,9 +75,6 @@ def deploy_image(
     cloud_api.create_nsg(configs)
     cloud_api.create_standard_nsg_rules(configs)
 
-    # Actually create the VM
-    cloud_api.create_vm(configs, image_path, ip_name, disk_name)
-
     # Create and attach persistent data disk at LUN 10 (required by tdx-init)
     data_disk_name = f"{configs.vm.name}-persistent"
     logger.info(f"Creating persistent data disk: {data_disk_name}")
@@ -86,17 +83,24 @@ def deploy_image(
         disk_name=data_disk_name,
         location=configs.vm.location,
         size_gb=1024,  # 1TB default
-        sku="pd-ssd",
         show_logs=configs.show_logs,
     )
-    cloud_api.attach_data_disk(
-        resource_group=configs.vm.resource_group,
-        vm_name=configs.vm.name,
-        disk_name=data_disk_name,
-        zone=configs.vm.location,  # Not used by Azure but required by API
-        lun=10,  # MUST be LUN 10 for tdx-init
-        show_logs=configs.show_logs,
-    )
+
+    # Actually create the VM
+    if configs.vm.cloud == CloudProvider.GCP:
+        # For GCP, attach the data disk at creation to avoid hot-plug issues
+        cloud_api.create_vm(configs, image_path, ip_name, disk_name, data_disk_name)
+    else:
+        # For Azure, create the VM and then attach the disk
+        cloud_api.create_vm(configs, image_path, ip_name, disk_name)
+        cloud_api.attach_data_disk(
+            resource_group=configs.vm.resource_group,
+            vm_name=configs.vm.name,
+            disk_name=data_disk_name,
+            zone=configs.vm.location,  # Not used by Azure but required by API
+            lun=10,  # MUST be LUN 10 for tdx-init
+            show_logs=configs.show_logs,
+        )
 
     # Get the VM's IP address
     public_ip = cloud_api.get_vm_ip(
