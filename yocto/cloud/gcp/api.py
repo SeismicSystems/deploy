@@ -824,7 +824,7 @@ class GcpApi(CloudApi):
         disk_path = f"projects/{resource_group}/zones/{zone}/disks/"
         attached_disk.source = f"{disk_path}{disk_name}"
         attached_disk.auto_delete = False
-        attached_disk.interface = "SCSI"  # Use SCSI to avoid NVMe I/O issues on TDX
+        attached_disk.interface = "NVME"
 
         operation = instance_client.attach_disk(
             project=resource_group,
@@ -909,6 +909,7 @@ class GcpApi(CloudApi):
         attached_disk.boot = True
         attached_disk.auto_delete = True
         attached_disk.mode = "READ_WRITE"
+        attached_disk.interface = "NVME"
         attached_disk.device_name = vm_name
         attached_disk.source = (
             f"projects/{resource_group}/zones/{location}/disks/{os_disk_name}"
@@ -1014,6 +1015,7 @@ class GcpApi(CloudApi):
             attached_disk.boot = True
             attached_disk.auto_delete = True
             attached_disk.mode = "READ_WRITE"
+            attached_disk.interface = "NVME"
             attached_disk.device_name = config.vm.name
             attached_disk.source = (
                 f"projects/{config.vm.resource_group}/zones/"
