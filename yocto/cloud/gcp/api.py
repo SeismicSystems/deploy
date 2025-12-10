@@ -818,123 +818,105 @@ class GcpApi(CloudApi):
             disk_name: Sanitized disk name to use for the VM
             data_disk_name: Optional name of the persistent data disk
         """
-        user_data_file = cls.create_user_data_file(config)
+        logger.info("Booting VM...")
 
-        try:
-            logger.info("Booting VM...")
+        instance_client = compute_v1.InstancesClient()
 
-            instance_client = compute_v1.InstancesClient()
+        # Configure network interface with external IP
+        network_interface = compute_v1.NetworkInterface()
+        network_interface.network = (
+            f"projects/{config.vm.resource_group}/global/networks/default"
+        )
+        network_interface.stack_type = "IPV4_ONLY"
+        network_interface.nic_type = DEFAULT_NIC_TYPE
 
-            # Read user data content
-            with open(user_data_file) as f:
-                user_data_content = f.read()
+        # Add access config for external IP
+        access_config = compute_v1.AccessConfig()
+        access_config.name = "External NAT"
+        access_config.type_ = "ONE_TO_ONE_NAT"
 
-            # Configure network interface with external IP
-            network_interface = compute_v1.NetworkInterface()
-            network_interface.network = (
-                f"projects/{config.vm.resource_group}/global/networks/default"
+        # Get the reserved IP address if ip_name is provided
+        if ip_name:
+            reserved_ip = cls.get_existing_public_ip(
+                ip_name, config.vm.resource_group
             )
-            network_interface.stack_type = "IPV4_ONLY"
-            network_interface.nic_type = DEFAULT_NIC_TYPE
-
-            # Add access config for external IP
-            access_config = compute_v1.AccessConfig()
-            access_config.name = "External NAT"
-            access_config.type_ = "ONE_TO_ONE_NAT"
-
-            # Get the reserved IP address if ip_name is provided
-            if ip_name:
-                reserved_ip = cls.get_existing_public_ip(
-                    ip_name, config.vm.resource_group
+            if reserved_ip:
+                access_config.nat_i_p = reserved_ip
+                logger.info(f"Using reserved IP: {reserved_ip}")
+            else:
+                logger.warning(
+                    f"Reserved IP {ip_name} not found, "
+                    "using ephemeral IP"
                 )
-                if reserved_ip:
-                    access_config.nat_i_p = reserved_ip
-                    logger.info(f"Using reserved IP: {reserved_ip}")
-                else:
-                    logger.warning(
-                        f"Reserved IP {ip_name} not found, "
-                        "using ephemeral IP"
-                    )
 
-            network_interface.access_configs = [access_config]
+        network_interface.access_configs = [access_config]
 
-            # Configure boot disk
-            boot_disk = compute_v1.AttachedDisk()
-            boot_disk.boot = True
-            boot_disk.auto_delete = True
-            boot_disk.mode = "READ_WRITE"
-            boot_disk.device_name = config.vm.name
-            boot_disk.source = (
+        # Configure boot disk
+        boot_disk = compute_v1.AttachedDisk()
+        boot_disk.boot = True
+        boot_disk.auto_delete = True
+        boot_disk.mode = "READ_WRITE"
+        boot_disk.device_name = config.vm.name
+        boot_disk.source = (
+            f"projects/{config.vm.resource_group}/zones/"
+            f"{config.vm.location}/disks/{disk_name}"
+        )
+
+        disks = [boot_disk]
+
+        # Configure and add data disk if provided
+        if data_disk_name:
+            logger.info(f"Attaching data disk {data_disk_name} at creation")
+            data_disk = compute_v1.AttachedDisk()
+            data_disk.source = (
                 f"projects/{config.vm.resource_group}/zones/"
-                f"{config.vm.location}/disks/{disk_name}"
+                f"{config.vm.location}/disks/{data_disk_name}"
             )
+            data_disk.auto_delete = False
+            # Use NVME for data disks on GCP
+            data_disk.interface = "NVME"
+            disks.append(data_disk)
 
-            disks = [boot_disk]
+        # Configure shielded instance config
+        shielded_config = compute_v1.ShieldedInstanceConfig()
+        shielded_config.enable_secure_boot = False
+        shielded_config.enable_vtpm = True
+        shielded_config.enable_integrity_monitoring = True
 
-            # Configure and add data disk if provided
-            if data_disk_name:
-                logger.info(f"Attaching data disk {data_disk_name} at creation")
-                data_disk = compute_v1.AttachedDisk()
-                data_disk.source = (
-                    f"projects/{config.vm.resource_group}/zones/"
-                    f"{config.vm.location}/disks/{data_disk_name}"
-                )
-                data_disk.auto_delete = False
-                # Use NVME for data disks on GCP
-                data_disk.interface = "NVME"
-                disks.append(data_disk)
+        # Configure confidential instance config
+        confidential_config = compute_v1.ConfidentialInstanceConfig()
+        confidential_config.confidential_instance_type = "TDX"
 
-            # Configure shielded instance config
-            shielded_config = compute_v1.ShieldedInstanceConfig()
-            shielded_config.enable_secure_boot = False
-            shielded_config.enable_vtpm = True
-            shielded_config.enable_integrity_monitoring = True
+        # Configure scheduling
+        scheduling = compute_v1.Scheduling()
+        scheduling.on_host_maintenance = "TERMINATE"
+        scheduling.provisioning_model = DEFAULT_PROVISIONING_MODEL
 
-            # Configure confidential instance config
-            confidential_config = compute_v1.ConfidentialInstanceConfig()
-            confidential_config.confidential_instance_type = "TDX"
+        # Configure network tags for firewall rules
+        tags = compute_v1.Tags()
+        tags.items = [config.vm.name]
 
-            # Configure scheduling
-            scheduling = compute_v1.Scheduling()
-            scheduling.on_host_maintenance = "TERMINATE"
-            scheduling.provisioning_model = DEFAULT_PROVISIONING_MODEL
+        # Create instance
+        instance = compute_v1.Instance()
+        instance.name = config.vm.name
+        instance.machine_type = (
+            f"zones/{config.vm.location}/machineTypes/{config.vm.size}"
+        )
+        instance.network_interfaces = [network_interface]
+        instance.disks = disks
+        instance.shielded_instance_config = shielded_config
+        instance.confidential_instance_config = confidential_config
+        instance.scheduling = scheduling
+        instance.tags = tags
 
-            # Configure metadata with user-data
-            metadata = compute_v1.Metadata()
-            metadata_item = compute_v1.Items()
-            metadata_item.key = "user-data"
-            metadata_item.value = user_data_content
-            metadata.items = [metadata_item]
+        operation = instance_client.insert(
+            project=config.vm.resource_group,
+            zone=config.vm.location,
+            instance_resource=instance,
+        )
 
-            # Configure network tags for firewall rules
-            tags = compute_v1.Tags()
-            tags.items = [config.vm.name]
-
-            # Create instance
-            instance = compute_v1.Instance()
-            instance.name = config.vm.name
-            instance.machine_type = (
-                f"zones/{config.vm.location}/machineTypes/{config.vm.size}"
-            )
-            instance.network_interfaces = [network_interface]
-            instance.disks = disks
-            instance.shielded_instance_config = shielded_config
-            instance.confidential_instance_config = confidential_config
-            instance.scheduling = scheduling
-            instance.metadata = metadata
-            instance.tags = tags
-
-            operation = instance_client.insert(
-                project=config.vm.resource_group,
-                zone=config.vm.location,
-                instance_resource=instance,
-            )
-
-            wait_for_extended_operation(operation, "VM creation")
-            logger.info(f"VM {config.vm.name} created successfully")
-        finally:
-            os.unlink(user_data_file)
-            logger.info(f"Deleted temporary user-data file: {user_data_file}")
+        wait_for_extended_operation(operation, "VM creation")
+        logger.info(f"VM {config.vm.name} created successfully")
 
     @classmethod
     def get_vm_ip(cls, vm_name: str, resource_group: str, location: str) -> str:
