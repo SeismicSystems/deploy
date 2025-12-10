@@ -353,7 +353,6 @@ class GcpApi(CloudApi):
         # VIRTIO_SCSI_MULTIQUEUE,GVNIC,TDX_CAPABLE
         guest_os_features = [
             "UEFI_COMPATIBLE",
-            "VIRTIO_SCSI_MULTIQUEUE",
             "GVNIC",
             "TDX_CAPABLE",
         ]
@@ -873,6 +872,7 @@ class GcpApi(CloudApi):
                 f"{config.vm.location}/disks/{data_disk_name}"
             )
             data_disk.auto_delete = False
+            data_disk.device_name = data_disk_name
             # Use NVME for data disks on GCP
             data_disk.interface = "NVME"
             disks.append(data_disk)
