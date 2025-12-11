@@ -175,7 +175,7 @@
         "data_disk": "gcp-genesis-6-persistent"
       },
       "gcp-genesis-13": {
-        "artifact": "seismic-dev-gcp-20251211000054.tar.gz",
+        "artifact": "seismic-dev-gcp-20251211182712.tar.gz",
         "public_ip": "34.63.184.53",
         "domain": {
           "url": "https://gcp-13.seismictest.net",
@@ -673,6 +673,141 @@
         "measurements": {
           "rtmr1": "61e889d1db6a02ef1cfcbf1f6e32f383c005673761986e4cbc7652f85bbea5354d205761abd536fea49e13ac6132bf73",
           "rtmr2": "c3bdbcde00c3de823611830faf8014200a77fe8a0c2905d347af44b118aea4aaca296789ba15a4ae9fe61a78ac1717ea"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211140647.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211140647.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "e1db8eb533d85bdb5afe623c1954e8ad0f05c95574f0a4980d2312a72ae9bfc7d35ddd4733dfee151020a4f95d3e61db",
+          "rtmr2": "7652f51fb2b93497caa286f5f2d5f370efa11511ff67b3ab7cac7fd1969244b34b266c1e0e71db02b06c93c141b34400"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211145352.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211145352.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "88563c9db2d9614cf220ca58782e76a63cdccff21c5e5dbe818781b1ce661039375136f40dceb2745501ef0765807220",
+          "rtmr2": "f820c1564135bba0f987c630fe523bdb26e83a87c0091c74f9fac31e4b7640f3bf7e7216da13979da366100d60a987cb"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211151738.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211151738.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "a9f623eee9f3ff0419d20bfb6bfbdb0c89d479e27a19f6a2856779a78ab50ded92655ad80b426cb4d4dd00f04197c3ef",
+          "rtmr2": "dbcb1ee7544db6d2bccda6169e104ad82b0a0a1628fdd0c89ae6d1d43bca4b53520243db7571e846e392239287a53432"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211161255.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211161255.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "464c436543f9b2267ae614f92d6554759b41e06d4fd2cf909e6d72fd0b574539963fd8ce298751089f2e1745c86970b9",
+          "rtmr2": "d529a00ef9c48aa0929e40d586e8206f8a9a516e6dfe586e6c973556e4003be32b3b64e68a00c5d8bdc031f043d1706d"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211161802.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211161802.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "c1b632d84eb4fb8b6c41d783780627e35633ec67e05873a8cf4e0a70847b229bcc5dc21a529f795bc067eeb6c04ba463",
+          "rtmr2": "8f4262f0061bd0bc28888afefd3111b8f7792fe3fd870bfc6e52f2699b8bdccea0e11fcd317a3c4b0d18a5296acdb941"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211163634.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211163634.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "1470d99b1e6bf540805c71a2667a0d52375297babced1319448e9ac6708661d086036efada6afca94c6fee0028619122",
+          "rtmr2": "aa9510a8c63820f54f106b1184d0a708e645ecee4f4d234be4332a71fbed61473b6497def7d6a1f8f024098954b16d28"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211175220.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211175220.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "ee44bbf962d390fed9290f662cc16a64f15af5a15492f79a96d4f8946bf7e7992b8081cc5143446cea6efeeb2b5da64f",
+          "rtmr2": "79f6d54b6a4854ff19069bc97fcbf0e9d6f31f87534e616003baca4720e170b39bc544b34548c47a689fcbf197cfbbcb"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211182712.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211182712.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "530d9dd31f04fd0eba8117f45f76ab1f0efd32a78724ac3fe3c555b884620b8f90cb41213c6da060060184edd13da7e9",
+          "rtmr2": "e276c27bf148885d310e4fcabf8f36cf8e9fffb32917bfc5e9675a3f1d6d0e55806c248bb66bab64e7fba5e1a733d630"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251211190010.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211190010.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "5a52facfce3d4a31a98b258dd7924ef2956275e06de70b022a5efd57ab5a1452dc05427544119a44df90e92e3c929a99",
+          "rtmr2": "99a10d35695fe21fa58f8d3bf929efb940eb3b8681363d402ca2a6a9ad37ebb2bd3c8b05587ffaf6d8f9b40505bbb26e"
         }
       }
     }
