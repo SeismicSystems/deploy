@@ -349,12 +349,18 @@ class GcpApi(CloudApi):
         logger.info("Source type: RAW")
 
         # Add all required guest OS features for TDX
-        # These match: --guest-os-features=UEFI_COMPATIBLE,
-        # VIRTIO_SCSI_MULTIQUEUE,GVNIC,TDX_CAPABLE
+        # These match the features from a working GCP TDX instance
         guest_os_features = [
+            "VIRTIO_SCSI_MULTIQUEUE",
+            "SEV_CAPABLE",
+            "SEV_SNP_CAPABLE",
+            "SEV_LIVE_MIGRATABLE",
+            "SEV_LIVE_MIGRATABLE_V2",
+            "SNP_SVSM_CAPABLE",
+            "IDPF",
+            "TDX_CAPABLE",
             "UEFI_COMPATIBLE",
             "GVNIC",
-            "TDX_CAPABLE",
         ]
 
         image.guest_os_features = []
@@ -855,6 +861,7 @@ class GcpApi(CloudApi):
         boot_disk.boot = True
         boot_disk.auto_delete = True
         boot_disk.mode = "READ_WRITE"
+        boot_disk.interface = "NVME"
         boot_disk.device_name = config.vm.name
         boot_disk.source = (
             f"projects/{config.vm.resource_group}/zones/"
