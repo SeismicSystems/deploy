@@ -192,6 +192,25 @@
           "size": "c3-standard-4"
         },
         "data_disk": "gcp-genesis-13-persistent"
+      },
+      "gcp-genesis-14": {
+        "artifact": "seismic-dev-gcp-20251216203946.tar.gz",
+        "public_ip": "34.69.233.60",
+        "domain": {
+          "url": "https://gcp-14.seismictest.net",
+          "record": "gcp-14",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "testnet-477314",
+          "name": "gcp-genesis-14",
+          "nsgName": "gcp-genesis-14",
+          "cloud": "gcp",
+          "region": "us-central1-a",
+          "size": "c3-standard-4"
+        },
+        "data_disk": "gcp-genesis-14-persistent"
       }
     }
   },
@@ -369,6 +388,21 @@
         "measurements": {
           "rtmr1": "6d02988de632b420b82a8478f3259b819c78158c1116177f63bbb5537df96d59ed19387d4b271d6ae1dd5d3bae240293",
           "rtmr2": "9ec15222f612bd718e98cb282b73887c6364cdef8997acc52b6e1178061325835ef54a6cc01085537918196c1827ff54"
+        }
+      }
+    },
+    "seismic-dev-gcp-20251216203946.tar.gz": {
+      "repos": {
+        "enclave": "90d53fd7c49600d78d0ab815869d05e2f4187ca8",
+        "sreth": "7f744454b9a7aef999a1b79c7ed8adb6f336cd45",
+        "summit": "12d921b0a338be0bbf50dcc33fe92b60f732218d"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251216203946.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "f0b7a1cb4f5e13912c0f92c94c5a594c693255a61764be676c6a5313993ae43a04081c3b19035189429b67b35749886e",
+          "rtmr2": "4fad64acf101b90afaf1855d81e0887ff148204ea3d109414924565f6e5f34f8ddeeba1832eb36b7486d619e3d638452"
         }
       }
     }
