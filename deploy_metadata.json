@@ -570,6 +570,17 @@
           "rtmr2": "b7698feabad08fdb4e43469547f06991ce8b02152c69e146f372eb82ba93aa4267430c2a2e359e647a8235c05a53aa32"
         }
       }
+    },
+    "seismic-dev-gcp-20251211193000.tar.gz": {
+      "repos": {},
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251211193000.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "3a3523a0c2b385579fe3816c33774c96fcae9afa6001ea094bd1b32439c85796fcbd133860cbf46e0d80147e0b2ba6f4",
+          "rtmr2": "b7698feabad08fdb4e43469547f06991ce8b02152c69e146f372eb82ba93aa4267430c2a2e359e647a8235c05a53aa32"
+        }
+      }
     }
   }
 }
