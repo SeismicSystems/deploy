@@ -150,7 +150,7 @@ def main():
         ],
         show_logs=True,
     )
-
+    
     for _, client in node_clients:
         client.post_genesis_filepath(f"{tmpdir}/genesis.toml")
 

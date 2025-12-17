@@ -216,7 +216,7 @@ def update_git_mkosi_batch(
         if git_config.commit is None:
             # No commit specified, use current
             current_commit = _extract_commit_from_mkosi(build_file, package_name)
-            current_branch = _extract_branch_from_mkosi(build_file, package_name)
+            current_branch = "-" # _extract_branch_from_mkosi(build_file, package_name)
             current_git = GitConfig(
                 commit=current_commit,
                 branch=git_config.branch or current_branch,

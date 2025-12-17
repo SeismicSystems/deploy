@@ -16,7 +16,7 @@ class BuildPaths:
 
     @property
     def flashbots_images(self) -> Path:
-        return self.home / "flashbots-images"
+        return self.home / "seismic-images"
 
     @property
     def artifacts(self) -> Path:
