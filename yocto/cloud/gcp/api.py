@@ -351,16 +351,10 @@ class GcpApi(CloudApi):
         # Add all required guest OS features for TDX
         # These match the features from a working GCP TDX instance
         guest_os_features = [
-            "VIRTIO_SCSI_MULTIQUEUE",
-            "SEV_CAPABLE",
-            "SEV_SNP_CAPABLE",
-            "SEV_LIVE_MIGRATABLE",
-            "SEV_LIVE_MIGRATABLE_V2",
-            "SNP_SVSM_CAPABLE",
-            "IDPF",
-            "TDX_CAPABLE",
             "UEFI_COMPATIBLE",
+            "VIRTIO_SCSI_MULTIQUEUE",
             "GVNIC",
+            "TDX_CAPABLE",
         ]
 
         image.guest_os_features = []
