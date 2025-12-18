@@ -192,63 +192,6 @@
           "size": "c3-standard-4"
         },
         "data_disk": "gcp-genesis-14-persistent"
-      },
-      "gcp-genesis-15": {
-        "artifact": "seismic-dev-gcp-20251217213403.tar.gz",
-        "public_ip": "34.66.148.90",
-        "domain": {
-          "url": "https://gcp-15.seismictest.net",
-          "record": "gcp-15",
-          "name": "seismictest.net",
-          "resource_group": "yocto-testnet"
-        },
-        "vm": {
-          "resourceGroup": "testnet-477314",
-          "name": "gcp-genesis-15",
-          "nsgName": "gcp-genesis-15",
-          "cloud": "gcp",
-          "region": "us-central1-a",
-          "size": "c3-standard-4"
-        },
-        "data_disk": "gcp-genesis-15-persistent"
-      },
-      "gcp-genesis-13": {
-        "artifact": "seismic-dev-gcp-20251217213403.tar.gz",
-        "public_ip": "34.63.184.53",
-        "domain": {
-          "url": "https://gcp-13.seismictest.net",
-          "record": "gcp-13",
-          "name": "seismictest.net",
-          "resource_group": "yocto-testnet"
-        },
-        "vm": {
-          "resourceGroup": "testnet-477314",
-          "name": "gcp-genesis-13",
-          "nsgName": "gcp-genesis-13",
-          "cloud": "gcp",
-          "region": "us-central1-a",
-          "size": "c3-standard-4"
-        },
-        "data_disk": "gcp-genesis-13-persistent"
-      },
-      "gcp-genesis-16": {
-        "artifact": "seismic-dev-gcp-20251217213403.tar.gz",
-        "public_ip": "34.68.94.42",
-        "domain": {
-          "url": "https://gcp-16.seismictest.net",
-          "record": "gcp-16",
-          "name": "seismictest.net",
-          "resource_group": "yocto-testnet"
-        },
-        "vm": {
-          "resourceGroup": "testnet-477314",
-          "name": "gcp-genesis-16",
-          "nsgName": "gcp-genesis-16",
-          "cloud": "gcp",
-          "region": "us-central1-a",
-          "size": "c3-standard-4"
-        },
-        "data_disk": "gcp-genesis-16-persistent"
       }
     }
   },
