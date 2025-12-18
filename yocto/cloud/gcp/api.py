@@ -897,6 +897,18 @@ class GcpApi(CloudApi):
         tags = compute_v1.Tags()
         tags.items = [config.vm.name]
 
+        # Configure metadata for serial port
+        metadata = compute_v1.Metadata()
+        metadata_items = []
+
+        # Enable serial port
+        serial_port_item = compute_v1.Items()
+        serial_port_item.key = "serial-port-enable"
+        serial_port_item.value = "TRUE"
+        metadata_items.append(serial_port_item)
+
+        metadata.items = metadata_items
+
         # Create instance
         instance = compute_v1.Instance()
         instance.name = config.vm.name
@@ -909,6 +921,7 @@ class GcpApi(CloudApi):
         instance.confidential_instance_config = confidential_config
         instance.scheduling = scheduling
         instance.tags = tags
+        instance.metadata = metadata
 
         operation = instance_client.insert(
             project=config.vm.resource_group,
