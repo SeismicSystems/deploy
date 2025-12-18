@@ -458,6 +458,21 @@
           "rtmr2": "b3dd2cf072b2a35d552d00d228282980ad6125341258ccde3a894b3b1774125c42a6b546ff4aad1fd2e4f6e0434dbc29"
         }
       }
+    },
+    "seismic-dev-gcp-20251218205246.tar.gz": {
+      "repos": {
+        "enclave": "d6c4badd0ee5639a432e96d3cced228cbf5fa3b3",
+        "sreth": "4141f746b6169f5afeb7a94b9bf087cc2fe35221",
+        "summit": "2435d1b5c762c170cf68a67ef5300052d2d66265"
+      },
+      "image": {
+        "measurement_id": "seismic-dev-gcp-20251218205246.tar.gz",
+        "attestation_type": "CloudProvider.GCP-tdx",
+        "measurements": {
+          "rtmr1": "bab64cfafff04d5b49db57392dcd8c6275f0a9624a16dc3789d65e2b1d96d9b19ba3f339734afc6631ff83dc318201a7",
+          "rtmr2": "c387f609a3f28bef432527b1f7e951f5b623e0ccdc5b001b5b893ced586d88e287183ca9c1c94714c45dab4e5c4f9527"
+        }
+      }
     }
   }
 }
