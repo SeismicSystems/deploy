@@ -77,8 +77,27 @@
         },
         "data_disk": "az-genesis-203-persistent"
       },
+      "az-genesis-1": {
+        "artifact": "seismic-dev-azure-20251218180028.vhd",
+        "public_ip": "48.223.236.240",
+        "domain": {
+          "url": "https://az-1.seismictest.net",
+          "record": "az-1",
+          "name": "seismictest.net",
+          "resource_group": "yocto-testnet"
+        },
+        "vm": {
+          "resourceGroup": "tdx-testnet",
+          "name": "az-genesis-1",
+          "nsgName": "az-genesis-1",
+          "cloud": "azure",
+          "region": "eastus",
+          "size": "Standard_DC4es_v6"
+        },
+        "data_disk": "az-genesis-1-persistent"
+      },
       "az-genesis-2": {
-        "artifact": "seismic-dev-azure-20251217201053.vhd",
+        "artifact": "seismic-dev-azure-20251218180028.vhd",
         "public_ip": "48.223.215.252",
         "domain": {
           "url": "https://az-2.seismictest.net",
@@ -97,7 +116,7 @@
         "data_disk": "az-genesis-2-persistent"
       },
       "az-genesis-4": {
-        "artifact": "seismic-dev-azure-20251217201053.vhd",
+        "artifact": "seismic-dev-azure-20251218180028.vhd",
         "public_ip": "128.203.77.183",
         "domain": {
           "url": "https://az-4.seismictest.net",
@@ -116,7 +135,7 @@
         "data_disk": "az-genesis-4-persistent"
       },
       "az-genesis-3": {
-        "artifact": "seismic-dev-azure-20251217201053.vhd",
+        "artifact": "seismic-dev-azure-20251218180028.vhd",
         "public_ip": "134.33.152.130",
         "domain": {
           "url": "https://az-3.seismictest.net",
@@ -133,25 +152,6 @@
           "size": "Standard_DC4es_v6"
         },
         "data_disk": "az-genesis-3-persistent"
-      },
-      "az-genesis-1": {
-        "artifact": "seismic-dev-azure-20251217201053.vhd",
-        "public_ip": "48.223.236.240",
-        "domain": {
-          "url": "https://az-1.seismictest.net",
-          "record": "az-1",
-          "name": "seismictest.net",
-          "resource_group": "yocto-testnet"
-        },
-        "vm": {
-          "resourceGroup": "tdx-testnet",
-          "name": "az-genesis-1",
-          "nsgName": "az-genesis-1",
-          "cloud": "azure",
-          "region": "eastus",
-          "size": "Standard_DC4es_v6"
-        },
-        "data_disk": "az-genesis-1-persistent"
       }
     }
   },
@@ -410,6 +410,49 @@
           },
           "9": {
             "expected": "1bd03aa97aa57ea721f64ade4e5b7584cd04bccf05b512dba8fc95332bf8f553"
+          }
+        }
+      }
+    },
+    "seismic-dev-azure-20251218180028.vhd": {
+      "repos": {
+        "enclave": {
+          "branch": "seismic",
+          "commit": "d6c4badd0ee5639a432e96d3cced228cbf5fa3b3"
+        },
+        "sreth": {
+          "branch": "seismic",
+          "commit": "4141f746b6169f5afeb7a94b9bf087cc2fe35221"
+        },
+        "summit": {
+          "branch": "main",
+          "commit": "846ad5a2e1ccb5173f8fddd8e052acc270730171"
+        }
+      },
+      "image": {
+        "measurement_id": "seismic-dev-azure-20251218180028.vhd",
+        "attestation_type": "azure-tdx",
+        "measurements": {
+          "11": {
+            "expected": "49db36aaa08a63a4411fddf16f9f6672c7bd2158f81eb8f713f6a2e89f714e8d"
+          },
+          "12": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "13": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "15": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "4": {
+            "expected": "52bb10ddb368b56095ef0d196224676adbb6c46f26c1f8f38c2323de7cb0c16a"
+          },
+          "8": {
+            "expected": "0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          "9": {
+            "expected": "2c26abb4ec6645587e67243497ed824a968bc03fdae2c74e0bccbdd0bcbcc988"
           }
         }
       }
