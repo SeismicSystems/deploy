@@ -406,7 +406,7 @@ class GcpApi(CloudApi):
         disk.name = disk_name
         disk.source_image = f"projects/{project}/global/images/{image_name}"
         disk.type_ = f"projects/{project}/zones/{zone}/diskTypes/{disk_type}"
-        disk.enable_confidential_compute = True
+        disk.architecture = "X86_64"
 
         operation = disk_client.insert(
             project=project,
