@@ -98,10 +98,9 @@ Upon successful deployment, the script will:
 - `--logs` If flagged, print build and/or deploy logs as they run
 
 ### Build arguments
-- `--enclave-branch` Seismic Enclave git branch name. Defaults to 'main'
 - `--enclave-commit` Seismic Enclave git gommit hash. If not provided, does not change image
-- `--sreth-branch` Seismic Reth git branch name. Defaults to 'seismic'
 - `--sreth-commit` Seismic Reth git commit hash. If not provided, does not change image
+- `--summit-commit` Summit git commit hash. If not provided, does not change image
 
 ### Deploy arguments
 - `--artifact` Required when running --deploy without --build (e.g. '20241203182636')

@@ -239,11 +239,7 @@ class CloudApi(ABC):
         """Attach a data disk to a VM."""
         raise NotImplementedError
 
-    @classmethod
-    @abstractmethod
-    def create_user_data_file(cls, config: "DeployConfigs") -> str:
-        """Create temporary user data file."""
-        raise NotImplementedError
+
 
     @classmethod
     @abstractmethod

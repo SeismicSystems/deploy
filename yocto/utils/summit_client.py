@@ -1,10 +1,10 @@
 import logging
 import tomllib
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import requests
-from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class SummitClient:
         response = requests.get(f"{self.url}/{path}")
         response.raise_for_status()
         return response.text
-    
+
     def _get_json(self, path: str) -> str:
         response = requests.get(f"{self.url}/{path}")
         response.raise_for_status()

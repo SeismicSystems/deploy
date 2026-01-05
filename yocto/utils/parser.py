@@ -30,7 +30,10 @@ def parse_args() -> argparse.Namespace:
         "--cloud",
         type=str,
         choices=["azure", "gcp", "ovh"],
-        help="Cloud provider (azure, gcp, ovh). Required for deployment, optional for build.",
+        help=(
+            "Cloud provider (azure, gcp, ovh). "
+            "Required for deployment, optional for build."
+        ),
     )
     parser.add_argument(
         "--resource-group",
@@ -53,27 +56,10 @@ def parse_args() -> argparse.Namespace:
 
     # Git args
     parser.add_argument(
-        "--enclave-branch",
-        default="seismic",
-        help=(
-            "Seismic Enclave git branch name. Defaults to 'main'. "
-            "Only used if --enclave-commit is provided too"
-        ),
-    )
-    parser.add_argument(
         "--enclave-commit",
         help=(
             "Seismic Enclave git gommit hash. "
             "If not provided, does not change image"
-        ),
-    )
-
-    parser.add_argument(
-        "--sreth-branch",
-        default="seismic",
-        help=(
-            "Seismic Reth git branch name. Defaults to 'seismic'. "
-            "Only used if --sreth-commit is provided too"
         ),
     )
     parser.add_argument(
@@ -81,15 +67,6 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Seismic Reth git commit hash. "
             "If not provided, does not change image"
-        ),
-    )
-
-    parser.add_argument(
-        "--summit-branch",
-        default="main",
-        help=(
-            "Summit git branch name. Defaults to 'main'. "
-            "Only used if --summit-commit is provided too"
         ),
     )
     parser.add_argument(

@@ -40,6 +40,21 @@ class CloudProvider(str, Enum):
     GCP = "gcp"
     OVH = "ovh"
 
+    @staticmethod
+    def from_string(s: str) -> "CloudProvider":
+        if "-azure-" in s.lower():
+            return CloudProvider.AZURE
+        elif "-gcp-" in s.lower():
+            return CloudProvider.GCP
+        else:
+            return CloudProvider.OVH
+    
+    def is_gcp(self) -> bool:
+        return self == CloudProvider.GCP
+    
+    def is_azure(self) -> bool:
+        return self == CloudProvider.AZURE
+
 
 # Re-export for convenience
 __all__ = [

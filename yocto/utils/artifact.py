@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import re
+from pathlib import Path
 
 from yocto.utils.metadata import load_metadata, remove_artifact_from_metadata
 from yocto.utils.paths import BuildPaths
@@ -49,21 +50,25 @@ def _artifact_from_timestamp(
 ) -> str | None:
     """Find artifact file by timestamp.
 
-    Searches the artifacts directory for files matching the timestamp.
-    Returns the filename if found, or constructs a legacy name as fallback.
+    Searches the artifacts directory (including subdirectories) for files
+    matching the timestamp. Returns the filename if found, or constructs a
+    legacy name as fallback.
 
     Args:
         timestamp: 14-digit timestamp string
         home: Home directory path
-        dev: If True, prefer dev artifacts (seismic-dev-*), else prefer non-dev
+        dev: If True, prefer dev artifacts (seismic-dev-*), else prefer
+            non-dev
 
     Returns:
         Artifact filename
     """
     artifacts_path = BuildPaths(home).artifacts
 
-    # Search for any file with this timestamp
-    matches = list(glob.glob(f"{artifacts_path}/*{timestamp}*"))
+    # Search for any file with this timestamp in all subdirectories
+    matches = list(
+        glob.glob(f"{artifacts_path}/**/*{timestamp}*", recursive=True)
+    )
     if matches:
         # Filter by dev preference
         if dev:
@@ -77,7 +82,8 @@ def _artifact_from_timestamp(
             if non_dev_matches:
                 matches = non_dev_matches
 
-        # Return the basename of the first match (preferring .vhd, .tar.gz, or .efi)
+        # Return the basename of the first match
+        # (preferring .vhd, .tar.gz, or .efi)
         for ext in [".vhd", ".tar.gz", ".efi"]:
             for match in matches:
                 if match.endswith(ext):
@@ -98,11 +104,12 @@ def parse_artifact(
     if len(artifact_arg) == 14:
         if all(a.isdigit() for a in artifact_arg):
             if home is None:
-                raise ValueError("home parameter required when parsing timestamp")
+                msg = "home parameter required when parsing timestamp"
+                raise ValueError(msg)
             return _artifact_from_timestamp(artifact_arg, home, dev)
 
     # Validate that it's correctly named
-    timestamp = _extract_timestamp(artifact_arg)
+    _extract_timestamp(artifact_arg)
 
     # If full artifact name provided, just return it
     # (it already has the correct format - either old or new)
@@ -114,6 +121,42 @@ def expect_artifact(artifact_arg: str, home: str, dev: bool = False) -> str:
     if artifact is None:
         raise ValueError("Empty --artifact")
     return artifact
+
+
+def get_artifact_path(artifact: str, home: str) -> Path:
+    """Get the full path to an artifact file.
+
+    Args:
+        artifact: Artifact filename (e.g., "seismic-azure-20251121.vhd")
+        home: Home directory path
+
+    Returns:
+        Full path to the artifact file
+
+    Raises:
+        FileNotFoundError: If the artifact file doesn't exist
+    """
+    artifacts_base = BuildPaths(home).artifacts
+
+    # Determine subdirectory from artifact filename
+    if "-azure-" in artifact:
+        artifact_path = artifacts_base / "azure" / artifact
+    elif "-gcp-" in artifact:
+        artifact_path = artifacts_base / "gcp" / artifact
+    elif "-baremetal-" in artifact:
+        artifact_path = artifacts_base / "baremetal" / artifact
+    else:
+        msg = (
+            f"Cannot determine cloud provider from artifact name: "
+            f"{artifact}. Expected format: "
+            f"seismic-[azure|gcp|baremetal]-YYYYMMDDHHMMSS.<ext>"
+        )
+        raise ValueError(msg)
+
+    if not artifact_path.exists():
+        raise FileNotFoundError(f"Artifact not found: {artifact_path}")
+
+    return artifact_path
 
 
 def delete_artifact(artifact: str, home: str):
@@ -141,7 +184,10 @@ def delete_artifact(artifact: str, home: str):
     timestamp = _extract_timestamp(artifact)
     artifacts_path = BuildPaths(home).artifacts
     files_deleted = 0
-    for filepath in glob.glob(f"{artifacts_path}/*{timestamp}*"):
+    # Search in all subdirectories
+    for filepath in glob.glob(
+        f"{artifacts_path}/**/*{timestamp}*", recursive=True
+    ):
         os.remove(filepath)
         files_deleted += 1
 

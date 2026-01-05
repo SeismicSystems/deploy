@@ -49,7 +49,10 @@ def create_cloud_parser(description: str) -> argparse.ArgumentParser:
         type=str,
         choices=["azure", "gcp", "ovh"],
         required=False,
-        help="Cloud provider to use (azure, gcp, or ovh). Required for deployment, optional for build.",
+        help=(
+            "Cloud provider to use (azure, gcp, or ovh). "
+            "Required for deployment, optional for build."
+        ),
     )
 
     # Region/Zone (optional, defaults based on cloud)

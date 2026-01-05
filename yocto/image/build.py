@@ -4,6 +4,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from yocto.cloud.cloud_config import CloudProvider
 from yocto.config import BuildConfigs, Configs
 from yocto.image.git import GitConfigs, update_git_mkosi_batch
 from yocto.image.measurements import Measurements, generate_measurements
@@ -34,14 +35,15 @@ def build_image(
     Args:
         home: Home directory path
         image_name: Image name (default: "seismic")
-        profile: Build profile - "azure", "gcp", or None for baremetal/no profile
+        profile: Build profile - "azure", "gcp", or None for
+            baremetal/no profile
         dev: Whether to build dev version
         capture_output: Whether to capture build output
 
     Returns:
         Path to the built image
     """
-    flashbots_images_path = BuildPaths(home).flashbots_images
+    flashbots_images_path = BuildPaths(home).seismic_images
     if not flashbots_images_path.exists():
         raise FileNotFoundError(
             f"flashbots-images path not found: {flashbots_images_path}"
@@ -60,6 +62,7 @@ def build_image(
     build_cmd = " && ".join(
         [f"cd {flashbots_images_path}", f"{env_vars} make {make_target}"]
     )
+    print(build_cmd)
     build_result = subprocess.run(
         build_cmd,
         shell=True,
@@ -75,8 +78,6 @@ def build_image(
         raise RuntimeError(f"Image build failed: {err}")
 
     # Find the latest built image based on profile
-    from yocto.cloud.cloud_config import CloudProvider
-
     if profile == "azure":
         cloud = CloudProvider.AZURE
     elif profile == "gcp":
@@ -86,10 +87,14 @@ def build_image(
     else:
         cloud = None  # Bare metal
 
-    artifact_pattern = BuildPaths.artifact_pattern(cloud, dev) if cloud else f"{image_name}-*.efi"
+    artifact_pattern = (
+        BuildPaths.artifact_pattern(cloud, dev)
+        if cloud
+        else f"{image_name}-*.efi"
+    )
 
     find_cmd = f"""
-    find {BuildPaths(home).artifacts} \
+    find {BuildPaths(home).artifacts / cloud} \
     -name '{artifact_pattern}' \
     -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" "
     """
@@ -104,7 +109,9 @@ def build_image(
 
     image_path_str = find_result.stdout.strip()
     if not image_path_str:
-        raise FileNotFoundError(f"No image file found matching: {artifact_pattern}")
+        raise FileNotFoundError(
+            f"No image file found matching: {artifact_pattern}"
+        )
 
     ts = artifact_timestamp(image_path_str)
     if (

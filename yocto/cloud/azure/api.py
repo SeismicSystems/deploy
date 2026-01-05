@@ -18,12 +18,12 @@ from yocto.cloud.azure.defaults import (
 from yocto.cloud.cloud_api import CloudApi
 from yocto.cloud.cloud_config import CloudProvider
 from yocto.cloud.cloud_parser import confirm
-from yocto.config import DeployConfigs, VmConfigs
+from yocto.config import DeployConfigs
 
 logger = logging.getLogger(__name__)
 
 OPEN_PORTS = [
-    22, # ssh 
+    22, # ssh
     80, # http
     443, # https
     7878, # enclave
@@ -464,7 +464,7 @@ class AzureApi(CloudApi):
             source,
         ]
         cls.run_command(cmd, show_logs=config.show_logs)
-    
+
     @staticmethod
     def get_nsg_rules(config: DeployConfigs) -> list[str]:
         tcp_rules = [
@@ -645,43 +645,35 @@ class AzureApi(CloudApi):
         disk_name: str,
     ) -> None:
         """Create the virtual machine with user-data."""
-        user_data_file = cls.create_user_data_file(config)
-
-        try:
-            logger.info("Booting VM...")
-            cmd = [
-                "az",
-                "vm",
-                "create",
-                "--name",
-                config.vm.name,
-                "--size",
-                config.vm.size,
-                "--resource-group",
-                config.vm.resource_group,
-                "--attach-os-disk",
-                disk_name,
-                "--security-type",
-                "ConfidentialVM",
-                "--enable-vtpm",
-                "true",
-                "--enable-secure-boot",
-                "false",
-                "--os-disk-security-encryption-type",
-                "NonPersistedTPM",
-                "--os-type",
-                "Linux",
-                "--nsg",
-                config.vm.nsg_name,
-                "--public-ip-address",
-                ip_name,
-                "--user-data",
-                user_data_file,
-            ]
-            cls.run_command(cmd, show_logs=False)
-        finally:
-            os.unlink(user_data_file)
-            logger.info(f"Deleted temporary user-data file: {user_data_file}")
+        logger.info("Booting VM...")
+        cmd = [
+            "az",
+            "vm",
+            "create",
+            "--name",
+            config.vm.name,
+            "--size",
+            config.vm.size,
+            "--resource-group",
+            config.vm.resource_group,
+            "--attach-os-disk",
+            disk_name,
+            "--security-type",
+            "ConfidentialVM",
+            "--enable-vtpm",
+            "true",
+            "--enable-secure-boot",
+            "false",
+            "--os-disk-security-encryption-type",
+            "NonPersistedTPM",
+            "--os-type",
+            "Linux",
+            "--nsg",
+            config.vm.nsg_name,
+            "--public-ip-address",
+            ip_name,
+        ]
+        cls.run_command(cmd, show_logs=False)
 
     @classmethod
     def get_vm_ip(cls, vm_name: str, resource_group: str, location: str) -> str:
