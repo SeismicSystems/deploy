@@ -345,8 +345,12 @@ class GcpApi(CloudApi):
         # Set sourceType to RAW (required by gcloud flow)
         image.source_type = "RAW"
 
+        # Set architecture to X86_64 (required for TDX C3 VMs)
+        image.architecture = "X86_64"
+
         logger.info(f"Using Storage API URL: {storage_api_url}")
         logger.info("Source type: RAW")
+        logger.info("Architecture: X86_64")
 
         # Add all required guest OS features for TDX
         # These match the features from a working GCP TDX instance
@@ -402,6 +406,7 @@ class GcpApi(CloudApi):
         disk.name = disk_name
         disk.source_image = f"projects/{project}/global/images/{image_name}"
         disk.type_ = f"projects/{project}/zones/{zone}/diskTypes/{disk_type}"
+        disk.enable_confidential_compute = True
 
         operation = disk_client.insert(
             project=project,
@@ -770,7 +775,7 @@ class GcpApi(CloudApi):
         disk_name: str,
         location: str,
         size_gb: int,
-        sku: str = "pd-ssd",
+        sku: str = DEFAULT_DISK_TYPE,
         show_logs: bool = False,
     ) -> None:
         """Create a data disk for persistent storage.
@@ -886,6 +891,7 @@ class GcpApi(CloudApi):
 
         # Configure confidential instance config
         confidential_config = compute_v1.ConfidentialInstanceConfig()
+        confidential_config.enable_confidential_compute = True
         confidential_config.confidential_instance_type = "TDX"
 
         # Configure scheduling
