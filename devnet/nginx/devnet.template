@@ -1,9 +1,10 @@
 server {
+    listen 80;
+
     root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
 
-    index index.html index.htm index.nginx-debian.html;    
-
-    server_name $SERVER_NAME;
+    server_name DOMAIN_NAME_PLACEHOLDER;
 
     location / {
         # First attempt to serve request as file, then
@@ -11,9 +12,16 @@ server {
         try_files $uri $uri/ =404;
     }
 
+    # Staking UI
+    location /staking {
+        index index.html;
+        try_files $uri $uri/ /staking/index.html;
+    }
+
     # HTTPS RPC API
     location /rpc {
-        proxy_pass http://localhost:8545/;
+        rewrite ^/rpc/?(.*)$ /$1 break;
+        proxy_pass http://localhost:8545;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -26,7 +34,36 @@ server {
 
     # WS RPC API
     location /ws {
-        proxy_pass http://localhost:8546/;
+        rewrite ^/ws/?(.*)$ /$1 break;
+        proxy_pass http://localhost:8546;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Summit REST API
+    location /summit {
+        rewrite ^/summit/?(.*)$ /$1 break;
+        proxy_pass http://localhost:3030;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Enclave RPC API
+    location /enclave {
+        rewrite ^/enclave/?(.*)$ /$1 break;
+        proxy_pass http://localhost:7878;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
