@@ -1,25 +1,125 @@
+# =============================================================================
+# RATE LIMITING & CONNECTION CONTROL CONFIGURATION
+# =============================================================================
+# This configuration implements two key protections:
+# 1. Connection limits (per-IP and global)
+# 2. Request execution caps with queueing
+#
+# These directives MUST be placed at the http level (outside server blocks).
+# Typically in /etc/nginx/nginx.conf or at the top of your site config.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# CONNECTION LIMITS
+# Doc: http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html
+# -----------------------------------------------------------------------------
+# Limits the number of simultaneous TCP connections.
+# Prevents a single IP or the entire server from holding too many connections.
+
+# Per-IP connection limit zone
+# Tracks concurrent connections from each unique IP address
+# TWEAK: zone size (10m = ~160k IP addresses in memory)
+limit_conn_zone $binary_remote_addr zone=per_ip_conn:10m;
+
+# Global connection limit zone  
+# Tracks total concurrent connections to this server
+# TWEAK: zone size based on expected total connection count
+limit_conn_zone $server_name zone=global_conn:10m;
+
+# -----------------------------------------------------------------------------
+# REQUEST RATE LIMITS (WITH QUEUEING)
+# Doc: http://nginx.org/en/docs/http/ngx_http_limit_req_module.html
+# -----------------------------------------------------------------------------
+# Controls how many requests can be executed per second.
+# Requests exceeding the rate are queued (burst). Once queue is full, dropped.
+
+# Per-IP request rate limit
+# Prevents a single IP from flooding with requests
+# TWEAK: rate (10r/s = 10 requests per second per IP)
+limit_req_zone $binary_remote_addr zone=per_ip_req:10m rate=10r/s;
+
+# Global request execution cap
+# Sets maximum simultaneous request processing capacity
+# TWEAK: rate (100r/s = 100 requests per second globally)
+# This should match your backend's maximum throughput capacity
+limit_req_zone $server_name zone=global_req:10m rate=100r/s;
+
 server {
     listen 80;
-
     root /var/www/html;
     index index.html index.htm index.nginx-debian.html;
-
     server_name DOMAIN_NAME_PLACEHOLDER;
-
+    
+    # -------------------------------------------------------------------------
+    # APPLY CONNECTION LIMITS (Server-wide defaults)
+    # -------------------------------------------------------------------------
+    
+    # Maximum concurrent connections per IP
+    # TWEAK: Adjust based on legitimate user needs (default: 10)
+    # Doc: http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html#limit_conn
+    limit_conn per_ip_conn 10;
+    
+    # Maximum total concurrent connections to server
+    # TWEAK: Set based on server capacity (default: 1000)
+    limit_conn global_conn 1000;
+    
+    # -------------------------------------------------------------------------
+    # APPLY REQUEST RATE LIMITS & QUEUEING (Server-wide defaults)
+    # -------------------------------------------------------------------------
+    
+    # Global request execution cap with queue
+    # - rate: 100r/s (set in limit_req_zone above)
+    # - burst: 50 (TWEAK THIS - queue size before dropping requests)
+    # - nodelay: process queued requests immediately when capacity available
+    # Doc: http://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req
+    limit_req zone=global_req burst=50 nodelay;
+    
+    # Per-IP rate limit with queue
+    # - rate: 10r/s per IP (set in limit_req_zone above)  
+    # - burst: 20 (TWEAK THIS - per-IP queue size)
+    limit_req zone=per_ip_req burst=20 nodelay;
+    
+    # -------------------------------------------------------------------------
+    # HTTP STATUS CODES FOR LIMIT VIOLATIONS
+    # -------------------------------------------------------------------------
+    
+    # Return 503 Service Unavailable when request queue is full
+    # Doc: http://nginx.org/en/docs/http/ngx_http_limit_req_module.html#limit_req_status
+    limit_req_status 503;
+    
+    # Return 429 Too Many Requests when connection limit exceeded
+    # Doc: http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html#limit_conn_status
+    limit_conn_status 429;
+    
+    # -------------------------------------------------------------------------
+    # STATIC CONTENT LOCATIONS
+    # -------------------------------------------------------------------------
+    
     location / {
-        # First attempt to serve request as file, then
-        # as directory, then fall back to displaying a 404.
         try_files $uri $uri/ =404;
     }
-
+    
     # Staking UI
     location /staking {
         index index.html;
         try_files $uri $uri/ /staking/index.html;
     }
-
+    
+    # -------------------------------------------------------------------------
+    # API ENDPOINTS WITH STRICTER LIMITS
+    # -------------------------------------------------------------------------
+    # These blockchain/API endpoints have reduced limits to protect backends
+    
     # HTTPS RPC API
     location /rpc {
+        # TWEAK THESE VALUES for RPC endpoint:
+        # - per_ip_conn: 5 concurrent connections per IP (stricter than server default)
+        # - per_ip_req burst: 10 queued requests per IP
+        # - global_req burst: 20 total queued requests for this endpoint
+        limit_conn per_ip_conn 5;
+        limit_req zone=per_ip_req burst=10 nodelay;
+        limit_req zone=global_req burst=20 nodelay;
+        
         rewrite ^/rpc/?(.*)$ /$1 break;
         proxy_pass http://localhost:8545;
         proxy_http_version 1.1;
@@ -30,10 +130,20 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        
+        # Timeout for queued requests (TWEAK: adjust based on backend response time)
+        # Doc: http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 10s;
     }
-
+    
     # WS RPC API
     location /ws {
+        # TWEAK THESE VALUES for WebSocket RPC endpoint
+        limit_conn per_ip_conn 5;
+        limit_req zone=per_ip_req burst=10 nodelay;
+        limit_req zone=global_req burst=20 nodelay;
+        
         rewrite ^/ws/?(.*)$ /$1 break;
         proxy_pass http://localhost:8546;
         proxy_http_version 1.1;
@@ -44,10 +154,18 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 10s;
     }
-
+    
     # Summit REST API
     location /summit {
+        # TWEAK THESE VALUES for Summit API endpoint
+        limit_conn per_ip_conn 5;
+        limit_req zone=per_ip_req burst=10 nodelay;
+        limit_req zone=global_req burst=20 nodelay;
+        
         rewrite ^/summit/?(.*)$ /$1 break;
         proxy_pass http://localhost:3030;
         proxy_http_version 1.1;
@@ -58,10 +176,18 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 10s;
     }
-
+    
     # Enclave RPC API
     location /enclave {
+        # TWEAK THESE VALUES for Enclave RPC endpoint
+        limit_conn per_ip_conn 5;
+        limit_req zone=per_ip_req burst=10 nodelay;
+        limit_req zone=global_req burst=20 nodelay;
+        
         rewrite ^/enclave/?(.*)$ /$1 break;
         proxy_pass http://localhost:7878;
         proxy_http_version 1.1;
@@ -72,5 +198,38 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        
+        proxy_read_timeout 30s;
+        proxy_connect_timeout 10s;
     }
 }
+
+# =============================================================================
+# TUNING GUIDE - KEY PARAMETERS TO ADJUST
+# =============================================================================
+#
+# CONNECTION LIMITS:
+# ------------------
+# limit_conn per_ip_conn [N]     - Max concurrent connections per IP
+#                                  Start: 5-10, Increase if legitimate users hit limits
+#
+# limit_conn global_conn [N]     - Max total concurrent connections  
+#                                  Start: 1000, Adjust based on server capacity
+#
+# REQUEST RATE & QUEUE:
+# ---------------------
+# limit_req_zone rate=[N]r/s     - Max requests per second
+#                                  Set to your backend's max throughput
+#
+# limit_req burst=[N]            - Queue size (pending requests before drop)
+#                                  Start: 20-50, Increase for bursty traffic
+#                                  Decrease for faster rejection
+#
+# MONITORING:
+# -----------
+# Watch nginx error logs for limit violations:
+#   tail -f /var/log/nginx/error.log | grep limiting
+#
+# Adjust limits if you see frequent legitimate traffic being blocked.
+#
+# =============================================================================
