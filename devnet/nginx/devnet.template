@@ -1,43 +1,25 @@
-# Add this at the http level (outside server block, typically in /etc/nginx/nginx.conf)
-# Or at the top of your sites-available file before the server block
-
-# Define connection limit zones
-limit_conn_zone $binary_remote_addr zone=per_ip_conn:10m;
-limit_conn_zone $server_name zone=global_conn:10m;
-
-# Define request rate limit zones (optional but recommended)
-limit_req_zone $binary_remote_addr zone=per_ip_req:10m rate=10r/s;
-
 server {
     listen 80;
+
     root /var/www/html;
     index index.html index.htm index.nginx-debian.html;
+
     server_name DOMAIN_NAME_PLACEHOLDER;
-    
-    # Apply connection limits
-    limit_conn per_ip_conn 10;      # Max 10 concurrent connections per IP
-    limit_conn global_conn 1000;     # Max 1000 total concurrent connections
-    limit_req zone=per_ip_req burst=20 nodelay;  # Max 10 req/s per IP with burst of 20
-    
-    # Return 429 (Too Many Requests) when limits are exceeded
-    limit_conn_status 429;
-    limit_req_status 429;
-    
+
     location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
         try_files $uri $uri/ =404;
     }
-    
+
     # Staking UI
     location /staking {
         index index.html;
         try_files $uri $uri/ /staking/index.html;
     }
-    
-    # HTTPS RPC API - stricter limits for blockchain endpoints
+
+    # HTTPS RPC API
     location /rpc {
-        limit_conn per_ip_conn 5;    # Stricter for RPC
-        limit_req zone=per_ip_req burst=10 nodelay;
-        
         rewrite ^/rpc/?(.*)$ /$1 break;
         proxy_pass http://localhost:8545;
         proxy_http_version 1.1;
@@ -49,12 +31,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
     }
-    
-    # WS RPC API - stricter limits
+
+    # WS RPC API
     location /ws {
-        limit_conn per_ip_conn 5;
-        limit_req zone=per_ip_req burst=10 nodelay;
-        
         rewrite ^/ws/?(.*)$ /$1 break;
         proxy_pass http://localhost:8546;
         proxy_http_version 1.1;
@@ -66,12 +45,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
     }
-    
+
     # Summit REST API
     location /summit {
-        limit_conn per_ip_conn 5;
-        limit_req zone=per_ip_req burst=10 nodelay;
-        
         rewrite ^/summit/?(.*)$ /$1 break;
         proxy_pass http://localhost:3030;
         proxy_http_version 1.1;
@@ -83,12 +59,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
     }
-    
-    # Enclave RPC API - stricter limits
+
+    # Enclave RPC API
     location /enclave {
-        limit_conn per_ip_conn 5;
-        limit_req zone=per_ip_req burst=10 nodelay;
-        
         rewrite ^/enclave/?(.*)$ /$1 break;
         proxy_pass http://localhost:7878;
         proxy_http_version 1.1;
